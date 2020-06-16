@@ -48,6 +48,8 @@
 #include "Kokkos_View.hpp"
 
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+#include <pybind11/stl.h>
 
 #include <cstdio>
 #include <typeinfo>
@@ -113,14 +115,23 @@ namespace SpaceDim {
 
 template <typename Tp, size_t... Idx>
 auto get_extents(Tp &m, std::index_sequence<Idx...>) {
-  using return_t = std::initializer_list<size_t>;
+  using return_t = std::vector<size_t>;
   return return_t{m.extent(Idx)...};
 }
 
 template <typename Tp, size_t... Idx>
 auto get_strides(Tp &m, std::index_sequence<Idx...>) {
-  using return_t = std::initializer_list<size_t>;
+  using return_t = std::vector<size_t>;
   return return_t{m.stride(Idx)...};
+}
+
+template <typename Tp>
+auto get_init(py::class_<Tp> &_v) {
+  _v.def(py::init([]() {
+    std::cout << "bare" << std::endl;
+    exit(0);
+    return new Tp{};
+  }));
 }
 
 /// DataIdx --> data type, e.g. int
@@ -140,31 +151,30 @@ auto generate_buffers(py::module &_mod) {
 
   // generate a name for the class
   name << "KokkosView_" << space_spec_t::label() << "_" << data_spec_t::label()
-       << "_" << DimIdx;
+       << "_" << (DimIdx + 1);
 
+#if !defined(NDEBUG)
   // generate the description of the class
   desc << "Kokkos::View<" << demangle<Vp>() << ", " << demangle<Sp>() << ">";
   // Python struct-style format descriptor
-  // desc << "\n" << py::format_descriptor<Tp>::format();
-
-#if !defined(NDEBUG)
+  // desc << py::format_descriptor<Tp>::format();
   std::cout << "Registering " << desc.str() << " as python class '"
             << name.str() << "'..." << std::endl;
 #endif
 
-  auto fmt = desc.str();
   py::class_<View_t> _view(_mod, name.str().c_str(), py::buffer_protocol());
-  _view.def_buffer([fmt](View_t &m) -> py::buffer_info {
-    return py::buffer_info(
-        m.data(),     // Pointer to buffer
-        sizeof(Tp),   // Size of one scalar
-        fmt.c_str(),  // Descriptor
-        DimIdx,       // Number of dimensions
-        get_extents(m,
-                    std::make_index_sequence<DimIdx>{}),  // Buffer dimensions
-        get_strides(m,
-                    std::make_index_sequence<DimIdx>{})  // Strides (in bytes)
-                                                         // for each index
+
+  _view.def_buffer([](View_t &m) -> py::buffer_info {
+    std::vector<size_t> _extents =
+        get_extents(m, std::make_index_sequence<DimIdx + 1>{});
+    std::vector<size_t> _strides =
+        get_strides(m, std::make_index_sequence<DimIdx + 1>{});
+    return py::buffer_info(m.data(),    // Pointer to buffer
+                           sizeof(Tp),  // Size of one scalar
+                           py::format_descriptor<Tp>::format(),  // Descriptor
+                           DimIdx + 1,  // Number of dimensions
+                           _extents,    // Buffer dimensions
+                           _strides     // Strides (in bytes) for each index
     );
   });
 

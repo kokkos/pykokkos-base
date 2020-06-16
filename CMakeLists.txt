@@ -18,6 +18,7 @@ ADD_FEATURE(Kokkos_DIR "Kokkos installation")
 ADD_OPTION(ENABLE_INTERNAL_PYBIND11 "Build with pybind11 submodule" ON)
 ADD_OPTION(ENABLE_EXPERIMENTAL "Build the experimental code" OFF)
 ADD_OPTION(ENABLE_WERROR "Build with -Werror" OFF)
+ADD_OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 # don't build a static python module
 SET(BUILD_SHARED_LIBS ON)
 
@@ -57,7 +58,7 @@ ADD_LIBRARY(libpykokkos-build-options INTERFACE)
 TARGET_INCLUDE_DIRECTORIES(libpykokkos-build-options INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 TARGET_COMPILE_OPTIONS(libpykokkos-build-options INTERFACE
-    -W -Wall -Wextra)
+    -W -Wall -Wextra -fvisibility=default)
 
 TRY_COMPILE(ENABLE_DEMANGLE
     ${PROJECT_BINARY_DIR}
@@ -129,5 +130,10 @@ FOREACH(_FILE ${PYPACKAGE_FILES})
     # install to the correct folder structure
     INSTALL(FILES ${_OUT_FILE} DESTINATION ${Kokkos_INSTALL_PYTHONDIR}/${_OUT_PATH})
 ENDFOREACH()
+
+# build the examples, not designed to be built stand-alone
+IF(BUILD_EXAMPLES)
+    ADD_SUBDIRECTORY(examples)
+ENDIF()
 
 PRINT_FEATURES()
