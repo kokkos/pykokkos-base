@@ -113,33 +113,24 @@ struct polymorphic_type_hook<GenericView> {
 namespace Space {
 namespace SpaceDim {
 
-template <typename Tp, size_t... Idx>
-auto get_extents(Tp &m, std::index_sequence<Idx...>) {
-  using return_t = std::vector<size_t>;
-  return return_t{m.extent(Idx)...};
+template <typename Tp, size_t... Idx,
+          typename RetT = std::array<size_t, sizeof...(Idx)>>
+RetT get_extents(Tp &m, std::index_sequence<Idx...>) {
+  return RetT{m.extent(Idx)...};
 }
 
-template <typename Tp, size_t... Idx>
-auto get_strides(Tp &m, std::index_sequence<Idx...>) {
-  using return_t = std::vector<size_t>;
-  return return_t{m.stride(Idx)...};
-}
-
-template <typename Tp>
-auto get_init(py::class_<Tp> &_v) {
-  _v.def(py::init([]() {
-    std::cout << "bare" << std::endl;
-    exit(0);
-    return new Tp{};
-  }));
+template <typename Up, typename Tp, size_t... Idx,
+          typename RetT = std::array<size_t, sizeof...(Idx)>>
+RetT get_strides(Tp &m, std::index_sequence<Idx...>) {
+  return RetT{(sizeof(Up) * m.stride(Idx))...};
 }
 
 /// DataIdx --> data type, e.g. int
 /// SpaceIdx --> the space of the view
-/// DimIdx --> the dimensionality of the view, e.g. View<double*> is 1,
-///   View<double**> is 2
+/// DimIdx --> the dimensionality of the view, e.g. View<double*> is 0,
+///   View<double**> is 1
 template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx>
-auto generate_buffers(py::module &_mod) {
+void generate_buffers(py::module &_mod) {
   using data_spec_t  = ViewDataTypeSpecialization<DataIdx>;
   using space_spec_t = ViewSpaceSpecialization<SpaceIdx>;
   using Tp           = typename data_spec_t::type;
@@ -163,12 +154,10 @@ auto generate_buffers(py::module &_mod) {
 #endif
 
   py::class_<View_t> _view(_mod, name.str().c_str(), py::buffer_protocol());
-
+  _view.def(py::init([]() { return new View_t{}; }));
   _view.def_buffer([](View_t &m) -> py::buffer_info {
-    std::vector<size_t> _extents =
-        get_extents(m, std::make_index_sequence<DimIdx + 1>{});
-    std::vector<size_t> _strides =
-        get_strides(m, std::make_index_sequence<DimIdx + 1>{});
+    auto _extents = get_extents(m, std::make_index_sequence<DimIdx + 1>{});
+    auto _strides = get_strides<Tp>(m, std::make_index_sequence<DimIdx + 1>{});
     return py::buffer_info(m.data(),    // Pointer to buffer
                            sizeof(Tp),  // Size of one scalar
                            py::format_descriptor<Tp>::format(),  // Descriptor
@@ -196,19 +185,19 @@ auto generate_buffers(py::module &_mod) {
 // if the memory space is available, generate a class for it
 template <size_t DataIdx, size_t SpaceIdx, size_t... DimIdx,
           std::enable_if_t<(is_available<space_t<SpaceIdx>>::value), int> = 0>
-auto generate_buffers(py::module &_mod, std::index_sequence<DimIdx...>) {
+void generate_buffers(py::module &_mod, std::index_sequence<DimIdx...>) {
   FOLD_EXPRESSION(generate_buffers<DataIdx, SpaceIdx, DimIdx>(_mod));
 }
 
 // if the memory space is not available, do not generate a class for it
 template <size_t DataIdx, size_t SpaceIdx, size_t... DimIdx,
           std::enable_if_t<!(is_available<space_t<SpaceIdx>>::value), int> = 0>
-auto generate_buffers(py::module &, std::index_sequence<DimIdx...>) {}
+void generate_buffers(py::module &, std::index_sequence<DimIdx...>) {}
 }  // namespace SpaceDim
 
 // generate data-type, memory-space buffers for all the dimensions
 template <size_t DataIdx, size_t... SpaceIdx>
-auto generate_buffers(py::module &_mod, std::index_sequence<SpaceIdx...>) {
+void generate_buffers(py::module &_mod, std::index_sequence<SpaceIdx...>) {
   FOLD_EXPRESSION(SpaceDim::generate_buffers<DataIdx, SpaceIdx>(
       _mod, std::make_index_sequence<ViewDataMaxDimensions>{}));
 }
@@ -216,13 +205,13 @@ auto generate_buffers(py::module &_mod, std::index_sequence<SpaceIdx...>) {
 
 // generate data type buffers for each memory space
 template <size_t... DataIdx>
-auto generate_buffers(py::module &_mod, std::index_sequence<DataIdx...>) {
+void generate_buffers(py::module &_mod, std::index_sequence<DataIdx...>) {
   FOLD_EXPRESSION(Space::generate_buffers<DataIdx>(
       _mod, std::make_index_sequence<ViewSpacesEnd>{}));
 }
 
 template <template <size_t> class SpecT, typename Tp, size_t... Idx>
-auto generate_enumeration(py::enum_<Tp> &_enum, std::index_sequence<Idx...>) {
+void generate_enumeration(py::enum_<Tp> &_enum, std::index_sequence<Idx...>) {
   FOLD_EXPRESSION(
       _enum.value(SpecT<Idx>::label().c_str(), static_cast<Tp>(Idx)));
 }

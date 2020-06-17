@@ -60,6 +60,11 @@ namespace py = pybind11;
 //--------------------------------------------------------------------------------------//
 
 PYBIND11_MODULE(ex_generate, ex) {
+  ///
+  /// This is a python binding to the user-defined generate_view function
+  /// declared in user.hpp which returns a Kokkos::View. This function is called
+  /// from ex-numpy.py
+  ///
   ex.def("generate_view", &generate_view, "Generate a random view",
          py::arg("n") = 10);
 }

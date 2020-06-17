@@ -7,23 +7,16 @@
 #include <random>
 #include <chrono>
 
+///
+/// \fn generate_view
+/// \brief This is meant to emulate some function that exists in a user library
+/// which returns a Kokkos::View and will have a python binding
+///
 view_type generate_view(size_t n) {
-  // obtain a seed from the system clock:
-  auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-  std::default_random_engine generator(seed);
-  auto get_random = [&]() {
-    return std::generate_canonical<double, 12>(generator);
-  };
   view_type _v("random_view", n, 2);
   double sum = 0.0;
   for (size_t i = 0; i < n; ++i) {
-    _v(i, 0) = 0.0;
-    _v(i, 1) = 0.0;
-  }
-  for (size_t i = 0; i < n; ++i) _v(i, i % 2) = i;
-  for (size_t i = 0; i < n; ++i) {
-    sum += _v(i, 0) + _v(i, 1);
+    sum += (_v(i, i % 2) = i);
     std::cout << "    view(" << i << ") = " << std::setw(2) << _v(i, 0) << " "
               << std::setw(2) << _v(i, 1) << std::endl;
   }
