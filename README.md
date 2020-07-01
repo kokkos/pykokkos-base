@@ -74,3 +74,33 @@ cmake -DBUILD_EXAMPLES=ON ..
 make
 python ./ex-numpy.py
 ```
+
+### Expected Output
+
+```console
+    view(0) =  0  0
+    view(1) =  0  1
+    view(2) =  2  0
+    view(3) =  0  3
+    view(4) =  4  0
+    view(5) =  0  5
+    view(6) =  6  0
+    view(7) =  0  7
+    view(8) =  8  0
+    view(9) =  0  9
+Sum of view: 45
+extent(0): 10
+stride(0): 2
+Kokkos View : KokkosView_HostSpace_double_2
+Numpy Array : ndarray (shape=(10, 2))
+    view(0) = [0. 0.]
+    view(1) = [0. 1.]
+    view(2) = [2. 0.]
+    view(3) = [0. 3.]
+    view(4) = [4. 0.]
+    view(5) = [0. 5.]
+    view(6) = [6. 0.]
+    view(7) = [0. 7.]
+    view(8) = [8. 0.]
+    view(9) = [0. 9.]
+```
