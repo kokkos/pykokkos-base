@@ -6,6 +6,7 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+#include <iomanip>
 
 ///
 /// \fn generate_view
