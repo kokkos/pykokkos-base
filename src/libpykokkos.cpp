@@ -46,6 +46,8 @@
 
 #include "Kokkos_Core.hpp"
 #include "Kokkos_View.hpp"
+#include "Kokkos_DynamicView.hpp"
+#include "Kokkos_DynRankView.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -108,29 +110,43 @@ struct polymorphic_type_hook<GenericView> {
 }  // namespace pybind11
 
 #endif
+
+//--------------------------------------------------------------------------------------//
+
+template <typename Tp, typename Up, size_t... Idx>
+auto get_init(const std::string &lbl, const Up &arr,
+              std::index_sequence<Idx...>) {
+  return new Tp(lbl, static_cast<const size_t>(std::get<Idx>(arr))...);
+}
+
+template <typename Tp, size_t Idx>
+auto get_init() {
+  return [](std::string lbl, std::array<size_t, Idx> arr) {
+    return get_init<Tp>(lbl, arr, std::make_index_sequence<Idx>{});
+  };
+}
+
+template <typename Tp, size_t Idx, typename Up, typename Vp,
+          enable_if_t<!std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
+auto get_init(Vp &_view) {
+  _view.def(py::init(get_init<Tp, Idx>()));
+}
+
+template <typename Tp, size_t Idx, typename Up, typename Vp,
+          enable_if_t<std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
+auto get_init(Vp &) {}
+
 //--------------------------------------------------------------------------------------//
 
 namespace Space {
 namespace SpaceDim {
-
-template <typename Tp, size_t... Idx,
-          typename RetT = std::array<size_t, sizeof...(Idx)>>
-RetT get_extents(Tp &m, std::index_sequence<Idx...>) {
-  return RetT{m.extent(Idx)...};
-}
-
-template <typename Up, typename Tp, size_t... Idx,
-          typename RetT = std::array<size_t, sizeof...(Idx)>>
-RetT get_strides(Tp &m, std::index_sequence<Idx...>) {
-  return RetT{(sizeof(Up) * m.stride(Idx))...};
-}
 
 /// DataIdx --> data type, e.g. int
 /// SpaceIdx --> the space of the view
 /// DimIdx --> the dimensionality of the view, e.g. View<double*> is 0,
 ///   View<double**> is 1
 template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx>
-void generate_buffers(py::module &_mod) {
+void generate_concrete_view(py::module &_mod) {
   using data_spec_t  = ViewDataTypeSpecialization<DataIdx>;
   using space_spec_t = ViewSpaceSpecialization<SpaceIdx>;
   using Tp           = typename data_spec_t::type;
@@ -138,23 +154,23 @@ void generate_buffers(py::module &_mod) {
   using Sp           = typename space_spec_t::type;
   using View_t       = Kokkos::View<Vp, Sp>;
 
-  std::stringstream desc, name;
+  std::stringstream name;
 
   // generate a name for the class
   name << "KokkosView_" << space_spec_t::label() << "_" << data_spec_t::label()
        << "_" << (DimIdx + 1);
 
 #if !defined(NDEBUG)
+  std::stringstream desc;
   // generate the description of the class
   desc << "Kokkos::View<" << demangle<Vp>() << ", " << demangle<Sp>() << ">";
-  // Python struct-style format descriptor
-  // desc << py::format_descriptor<Tp>::format();
   std::cout << "Registering " << desc.str() << " as python class '"
             << name.str() << "'..." << std::endl;
 #endif
 
   py::class_<View_t> _view(_mod, name.str().c_str(), py::buffer_protocol());
   _view.def(py::init([]() { return new View_t{}; }));
+  get_init<View_t, DimIdx + 1, Sp>(_view);
   _view.def_buffer([](View_t &m) -> py::buffer_info {
     auto _extents = get_extents(m, std::make_index_sequence<DimIdx + 1>{});
     auto _strides = get_strides<Tp>(m, std::make_index_sequence<DimIdx + 1>{});
@@ -166,6 +182,14 @@ void generate_buffers(py::module &_mod) {
                            _strides     // Strides (in bytes) for each index
     );
   });
+  _view.def_property_readonly(
+      "shape",
+      [](View_t &m) {
+        return get_extents(m, std::make_index_sequence<DimIdx + 1>{});
+      },
+      "Get the shape of the array (extents)");
+  _view.def("__getitem__", get_item<View_t, DimIdx + 1>::get());
+  _view.def("__setitem__", get_item<View_t, DimIdx + 1>::template set<Tp>());
 
 #if defined(EXPERIMENTAL_GENERIC_VIEW)
   auto _espace = static_cast<KokkosViewSpace>(SpaceIdx);
@@ -185,28 +209,96 @@ void generate_buffers(py::module &_mod) {
 // if the memory space is available, generate a class for it
 template <size_t DataIdx, size_t SpaceIdx, size_t... DimIdx,
           std::enable_if_t<(is_available<space_t<SpaceIdx>>::value), int> = 0>
-void generate_buffers(py::module &_mod, std::index_sequence<DimIdx...>) {
-  FOLD_EXPRESSION(generate_buffers<DataIdx, SpaceIdx, DimIdx>(_mod));
+void generate_concrete_view(py::module &_mod, std::index_sequence<DimIdx...>) {
+  FOLD_EXPRESSION(generate_concrete_view<DataIdx, SpaceIdx, DimIdx>(_mod));
 }
 
 // if the memory space is not available, do not generate a class for it
 template <size_t DataIdx, size_t SpaceIdx, size_t... DimIdx,
           std::enable_if_t<!(is_available<space_t<SpaceIdx>>::value), int> = 0>
-void generate_buffers(py::module &, std::index_sequence<DimIdx...>) {}
+void generate_concrete_view(py::module &, std::index_sequence<DimIdx...>) {}
 }  // namespace SpaceDim
 
 // generate data-type, memory-space buffers for all the dimensions
 template <size_t DataIdx, size_t... SpaceIdx>
-void generate_buffers(py::module &_mod, std::index_sequence<SpaceIdx...>) {
-  FOLD_EXPRESSION(SpaceDim::generate_buffers<DataIdx, SpaceIdx>(
+void generate_concrete_view(py::module &_mod,
+                            std::index_sequence<SpaceIdx...>) {
+  FOLD_EXPRESSION(SpaceDim::generate_concrete_view<DataIdx, SpaceIdx>(
       _mod, std::make_index_sequence<ViewDataMaxDimensions>{}));
+}
+
+/// DataIdx --> data type, e.g. int
+/// SpaceIdx --> the space of the view
+template <size_t DataIdx, size_t SpaceIdx,
+          std::enable_if_t<is_available<space_t<SpaceIdx>>::value, int> = 0>
+void generate_dynamic_view(py::module &_mod) {
+  constexpr auto DimIdx = ViewDataMaxDimensions;
+  using data_spec_t     = ViewDataTypeSpecialization<DataIdx>;
+  using space_spec_t    = ViewSpaceSpecialization<SpaceIdx>;
+  using Tp              = typename data_spec_t::type;
+  using Vp              = Tp;
+  using Sp              = typename space_spec_t::type;
+  using View_t          = Kokkos::DynRankView<Vp, Sp>;
+
+  std::stringstream name;
+
+  // generate a name for the class
+  name << "KokkosDynRankView_" << space_spec_t::label() << "_"
+       << data_spec_t::label();
+
+#if !defined(NDEBUG)
+  std::stringstream desc;
+  // generate the description of the class
+  desc << "Kokkos::DynRankView<" << demangle<Vp>() << ", " << demangle<Sp>()
+       << ">";
+  std::cout << "Registering " << desc.str() << " as python class '"
+            << name.str() << "'..." << std::endl;
+#endif
+
+  py::class_<View_t> _view(_mod, name.str().c_str(), py::buffer_protocol());
+  _view.def(py::init([]() { return new View_t{}; }));
+  get_init<View_t, DimIdx, Sp>(_view);
+  _view.def_buffer([](View_t &m) -> py::buffer_info {
+    auto _extents = get_extents(m, std::make_index_sequence<DimIdx>{});
+    auto _strides = get_stride<Tp>(m, std::make_index_sequence<DimIdx>{});
+    return py::buffer_info(m.data(),    // Pointer to buffer
+                           sizeof(Tp),  // Size of one scalar
+                           py::format_descriptor<Tp>::format(),  // Descriptor
+                           DimIdx + 1,  // Number of dimensions
+                           _extents,    // Buffer dimensions
+                           _strides     // Strides (in bytes) for each index
+    );
+  });
+  _view.def_property_readonly(
+      "shape",
+      [](View_t &m) {
+        return get_extents(m, std::make_index_sequence<DimIdx>{});
+      },
+      "Get the shape of the array (extents)");
+}
+
+template <size_t DataIdx, size_t SpaceIdx,
+          std::enable_if_t<!is_available<space_t<SpaceIdx>>::value, int> = 0>
+void generate_dynamic_view(py::module &) {}
+
+// generate data-type, memory-space buffers for dynamic dimension
+template <size_t DataIdx, size_t... SpaceIdx>
+void generate_dynamic_view(py::module &_mod, std::index_sequence<SpaceIdx...>) {
+  FOLD_EXPRESSION(generate_dynamic_view<DataIdx, SpaceIdx>(_mod));
 }
 }  // namespace Space
 
 // generate data type buffers for each memory space
 template <size_t... DataIdx>
-void generate_buffers(py::module &_mod, std::index_sequence<DataIdx...>) {
-  FOLD_EXPRESSION(Space::generate_buffers<DataIdx>(
+void generate_concrete_view(py::module &_mod, std::index_sequence<DataIdx...>) {
+  FOLD_EXPRESSION(Space::generate_concrete_view<DataIdx>(
+      _mod, std::make_index_sequence<ViewSpacesEnd>{}));
+}
+
+// generate data type buffers for each memory space
+template <size_t... DataIdx>
+void generate_dynamic_view(py::module &_mod, std::index_sequence<DataIdx...>) {
+  FOLD_EXPRESSION(Space::generate_dynamic_view<DataIdx>(
       _mod, std::make_index_sequence<ViewSpacesEnd>{}));
 }
 
@@ -214,6 +306,49 @@ template <template <size_t> class SpecT, typename Tp, size_t... Idx>
 void generate_enumeration(py::enum_<Tp> &_enum, std::index_sequence<Idx...>) {
   FOLD_EXPRESSION(
       _enum.value(SpecT<Idx>::label().c_str(), static_cast<Tp>(Idx)));
+}
+
+//--------------------------------------------------------------------------------------//
+
+template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
+          enable_if_t<(sizeof...(Tail) == 0)> = 0>
+auto get_enumeration(size_t i, std::index_sequence<Idx, Tail...>) {
+  if (i == Idx) return SpecT<Idx>::label();
+  std::stringstream ss;
+  ss << "Error! Index " << i << " does not match any known enumeration type";
+  throw std::runtime_error(ss.str());
+}
+
+template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
+          enable_if_t<(sizeof...(Tail) > 0)> = 0>
+auto get_enumeration(size_t i, std::index_sequence<Idx, Tail...>) {
+  if (i == Idx)
+    return SpecT<Idx>::label();
+  else
+    return get_enumeration<SpecT>(i, std::index_sequence<Tail...>{});
+}
+
+//--------------------------------------------------------------------------------------//
+
+template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
+          enable_if_t<(sizeof...(Tail) == 0)> = 0>
+auto get_enumeration(const std::string &str,
+                     std::index_sequence<Idx, Tail...>) {
+  if (str == SpecT<Idx>::label()) return Idx;
+  std::stringstream ss;
+  ss << "Error! Identifier " << str
+     << " does not match any known enumeration type";
+  throw std::runtime_error(ss.str());
+}
+
+template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
+          enable_if_t<(sizeof...(Tail) > 0)> = 0>
+auto get_enumeration(const std::string &str,
+                     std::index_sequence<Idx, Tail...>) {
+  if (str == SpecT<Idx>::label())
+    return Idx;
+  else
+    return get_enumeration<SpecT>(str, std::index_sequence<Tail...>{});
 }
 
 //--------------------------------------------------------------------------------------//
@@ -239,20 +374,52 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
     delete[] _argv;
   };
 
-  kokkos.def("initialize", _initialize, "Initialize Kokkos");
-  kokkos.def("finalize", &Kokkos::finalize, "Finalize Kokkos");
+  // Finalize kokkos
+  auto _finalize = []() {
+    py::module gc = py::module::import("gc");
+    gc.attr("collect")();
+    Kokkos::finalize();
+  };
 
-  // generate buffers for all the data types
-  generate_buffers(kokkos, std::make_index_sequence<ViewDataTypesEnd>{});
+  kokkos.def("initialize", _initialize, "Initialize Kokkos");
+  kokkos.def("finalize", _finalize, "Finalize Kokkos");
 
   // an enumeration of the data types for views
   py::enum_<KokkosViewDataType> _dtype(kokkos, "type", "View data types");
   generate_enumeration<ViewDataTypeSpecialization>(
       _dtype, std::make_index_sequence<ViewDataTypesEnd>{});
+  _dtype.export_values();
+
+  auto _get_dtype_name = [](int idx) {
+    return get_enumeration<ViewDataTypeSpecialization>(
+        idx, std::make_index_sequence<ViewDataTypesEnd>{});
+  };
+  auto _get_dtype_idx = [](std::string str) {
+    return get_enumeration<ViewDataTypeSpecialization>(
+        str, std::make_index_sequence<ViewDataTypesEnd>{});
+  };
+  kokkos.def("get_dtype", _get_dtype_name, "Get the data type");
+  kokkos.def("get_dtype", _get_dtype_idx, "Get the data type");
 
   // an enumeration of the memory spaces for views
   py::enum_<KokkosViewSpace> _memspace(kokkos, "memory_space",
                                        "View memory spaces");
   generate_enumeration<ViewSpaceSpecialization>(
       _memspace, std::make_index_sequence<ViewSpacesEnd>{});
+  _memspace.export_values();
+
+  auto _get_memspace_name = [](int idx) {
+    return get_enumeration<ViewSpaceSpecialization>(
+        idx, std::make_index_sequence<ViewSpacesEnd>{});
+  };
+  auto _get_memspace_idx = [](std::string str) {
+    return get_enumeration<ViewSpaceSpecialization>(
+        str, std::make_index_sequence<ViewSpacesEnd>{});
+  };
+  kokkos.def("get_memory_space", _get_memspace_name, "Get the memory space");
+  kokkos.def("get_memory_space", _get_memspace_idx, "Get the memory space");
+
+  // generate buffers for all the data types
+  generate_concrete_view(kokkos, std::make_index_sequence<ViewDataTypesEnd>{});
+  generate_dynamic_view(kokkos, std::make_index_sequence<ViewDataTypesEnd>{});
 }

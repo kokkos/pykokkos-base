@@ -41,9 +41,7 @@
 #
 
 from __future__ import absolute_import
-import os
-import sys
-import traceback
+from . import libpykokkos as lib
 
 __author__ = "Jonathan R. Madsen"
 __copyright__ = "Copyright 2020, National Technology & Engineering Solutions of Sandia, LLC (NTESS)"
@@ -54,46 +52,16 @@ __maintainer__ = "Jonathan R. Madsen"
 __email__ = "jrmadsen@lbl.gov"
 __status__ = "Development"
 
-try:
-    from . import libpykokkos
-    from .libpykokkos import *
-    from .utility import *
 
-    __all__ = ['version_info',
-               'build_info',
-               'version',
-               'libpykokkos',
-               'array',
-               ]
+def array(label, shape, dtype=lib.double, space=lib.HostSpace, dynamic=False):
+    print("dtype = {}, space = {}".format(dtype, space))
+    _prefix = "KokkosView"
+    if dynamic:
+        _prefix = "KokkosDynView"
+    _space = lib.get_memory_space(space)
+    _dtype = lib.get_dtype(dtype)
+    _name = "{}_{}_{}".format(_prefix, _space, _dtype)
+    if not dynamic:
+        _name = "{}_{}".format(_name, len(shape))
+    return getattr(lib, _name)(label, shape)
 
-except Exception as e:
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    traceback.print_exception(exc_type, exc_value, exc_traceback)
-    sys.exit(1)
-
-sys.modules[__name__].__setattr__(
-    "version_info",
-    (@PROJECT_VERSION_MAJOR@,
-     @PROJECT_VERSION_MINOR@,
-     @PROJECT_VERSION_PATCH@))
-sys.modules[__name__].__setattr__(
-    "version",
-    "@PROJECT_VERSION@")
-sys.modules[__name__].__setattr__(
-    "build_info",
-    {"library_architecture": "@CMAKE_SYSTEM_PROCESSOR@",
-     "system_name": "@CMAKE_SYSTEM_NAME@",
-     "system_version": "@CMAKE_SYSTEM_VERSION@",
-     "build_type": "@CMAKE_BUILD_TYPE@",
-     "compiler": "@CMAKE_CXX_COMPILER@",
-     "compiler_id": "@CMAKE_CXX_COMPILER_ID@",
-     "compiler_version": "@CMAKE_CXX_COMPILER_VERSION@"})
-
-version_info = sys.modules[__name__].__getattribute__("version_info")
-'''Tuple of version fields'''
-
-build_info = sys.modules[__name__].__getattribute__("build_info")
-'''Build information'''
-
-version = sys.modules[__name__].__getattribute__("version")
-'''Version string'''

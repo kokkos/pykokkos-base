@@ -45,6 +45,8 @@
 #pragma once
 
 #include "Kokkos_Core_fwd.hpp"
+#include "Kokkos_Layout.hpp"
+#include "Kokkos_MemoryTraits.hpp"
 
 #include <string>
 #include <cstdint>
@@ -106,7 +108,7 @@ struct is_available : std::true_type {};
 
 //--------------------------------------------------------------------------------------//
 
-static constexpr size_t ViewDataMaxDimensions = 7;
+static constexpr size_t ViewDataMaxDimensions = 8;
 
 template <typename T, size_t Dim>
 struct ViewDataTypeRepr;
@@ -117,13 +119,14 @@ struct ViewDataTypeRepr;
     using type = __VA_ARGS__;           \
   };
 
-VIEW_DATA_DIMS(1, T*)
-VIEW_DATA_DIMS(2, T**)
-VIEW_DATA_DIMS(3, T***)
-VIEW_DATA_DIMS(4, T****)
-VIEW_DATA_DIMS(5, T*****)
-VIEW_DATA_DIMS(6, T******)
-VIEW_DATA_DIMS(7, T*******)
+VIEW_DATA_DIMS(1, T *)
+VIEW_DATA_DIMS(2, T **)
+VIEW_DATA_DIMS(3, T ***)
+VIEW_DATA_DIMS(4, T ****)
+VIEW_DATA_DIMS(5, T *****)
+VIEW_DATA_DIMS(6, T ******)
+VIEW_DATA_DIMS(7, T *******)
+VIEW_DATA_DIMS(8, T ********)
 
 //--------------------------------------------------------------------------------------//
 
@@ -157,6 +160,24 @@ VIEW_DATA_TYPE(Uint32, uint32_t, "uint32")
 VIEW_DATA_TYPE(Uint64, uint64_t, "uint64")
 VIEW_DATA_TYPE(Float, float, "float")
 VIEW_DATA_TYPE(Double, double, "double")
+
+//--------------------------------------------------------------------------------------//
+
+enum KokkosViewLayoutType { Left = 0, Right, Stride, ViewLayoutEnd };
+
+template <size_t DataT>
+struct ViewLayoutSpecialization;
+
+#define VIEW_LAYOUT_TYPE(ENUM_ID, DATA_TYPE, LABEL) \
+  template <>                                       \
+  struct ViewLayoutSpecialization<ENUM_ID> {        \
+    using type = DATA_TYPE;                         \
+    static std::string label() { return LABEL; }    \
+  };
+
+VIEW_LAYOUT_TYPE(Left, Kokkos::LayoutLeft, "LayoutLeft")
+VIEW_LAYOUT_TYPE(Right, Kokkos::LayoutRight, "LayoutRight")
+VIEW_LAYOUT_TYPE(Stride, Kokkos::LayoutStride, "LayoutStride")
 
 //--------------------------------------------------------------------------------------//
 //  declare any spaces that might not be available and mark them as unavailable
@@ -202,8 +223,10 @@ DISABLE_TYPE(Kokkos::Experimental::HIPSpace)
 #if !defined(KOKKOS_ENABLE_CUDA)
 namespace Kokkos {
 class CudaSpace;
+class CudaUVMSpace;
 }  // namespace Kokkos
 DISABLE_TYPE(Kokkos::CudaSpace)
+DISABLE_TYPE(Kokkos::CudaUVMSpace)
 #endif
 
 /// \enum KokkosViewSpace
@@ -216,6 +239,7 @@ enum KokkosViewSpace {
   ROCm,
   HIP,
   Cuda,
+  CudaUVM,
   ViewSpacesEnd
 };
 
@@ -239,8 +263,167 @@ VIEW_SPACE(OpenMPTarget, Kokkos::Experimental::OpenMPTargetSpace,
 VIEW_SPACE(ROCm, Kokkos::Experimental::ROCmSpace, "ROCmSpace")
 VIEW_SPACE(HIP, Kokkos::Experimental::HIPSpace, "HIPSpace")
 VIEW_SPACE(Cuda, Kokkos::CudaSpace, "CudaSpace")
+VIEW_SPACE(CudaUVM, Kokkos::CudaUVMSpace, "CudaUVMSpace")
 
 template <size_t Idx>
 using space_t = typename ViewSpaceSpecialization<Idx>::type;
+
+//--------------------------------------------------------------------------------------//
+
+template <bool B, typename T = char>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+template <typename Tp, size_t... Idx,
+          typename RetT = std::array<size_t, sizeof...(Idx)>>
+RetT get_extents(Tp &m, std::index_sequence<Idx...>) {
+  return RetT{m.extent(Idx)...};
+}
+
+template <typename Up, size_t Idx, typename Tp>
+constexpr auto get_stride(Tp &m);
+
+template <typename Up, typename Tp, size_t... Idx,
+          typename RetT = std::array<size_t, sizeof...(Idx)>>
+RetT get_strides(Tp &m, std::index_sequence<Idx...>) {
+  return RetT{(sizeof(Up) * m.stride(Idx))...};
+}
+
+#define GET_STRIDE(IDX_NUM)                                             \
+  template <size_t Idx, typename Tp, enable_if_t<(Idx == IDX_NUM)> = 0> \
+  constexpr auto get_stride(Tp &m) {                                    \
+    return m.stride_##IDX_NUM();                                        \
+  }
+
+GET_STRIDE(0)
+GET_STRIDE(1)
+GET_STRIDE(2)
+GET_STRIDE(3)
+GET_STRIDE(4)
+GET_STRIDE(5)
+GET_STRIDE(6)
+GET_STRIDE(7)
+
+template <typename Up, typename Tp, size_t... Idx,
+          typename RetT = std::array<size_t, sizeof...(Idx)>>
+RetT get_stride(Tp &m, std::index_sequence<Idx...>) {
+  return RetT{(sizeof(Up) * get_stride<Idx>(m))...};
+}
+
+//--------------------------------------------------------------------------------------//
+
+namespace impl {
+template <typename Tp, typename... Args>
+struct get_item {
+  static auto get() {
+    return [](Tp &_obj, Args... _args) { return _obj(_args...); };
+  }
+  template <typename Vp>
+  static auto set() {
+    return [](Tp &_obj, Args... _args, Vp _val) { _obj(_args...) = _val; };
+  }
+};
+}  // namespace impl
+
+template <typename Tp, size_t Idx>
+struct get_item;
+
+template <typename Tp>
+struct get_item<Tp, 1> {
+  using impl_type = impl::get_item<Tp, size_t>;
+
+  static auto get() { return impl_type::get(); }
+
+  template <typename Vp>
+  static auto set() {
+    return impl_type::template set<Vp>();
+  }
+};
+
+template <typename Tp>
+struct get_item<Tp, 2> {
+  using impl_type = impl::get_item<Tp, size_t, size_t>;
+
+  static auto get() { return impl_type::get(); }
+
+  template <typename Vp>
+  static auto set() {
+    return impl_type::template set<Vp>();
+  }
+};
+
+template <typename Tp>
+struct get_item<Tp, 3> {
+  using impl_type = impl::get_item<Tp, size_t, size_t, size_t>;
+
+  static auto get() { return impl_type::get(); }
+
+  template <typename Vp>
+  static auto set() {
+    return impl_type::template set<Vp>();
+  }
+};
+
+template <typename Tp>
+struct get_item<Tp, 4> {
+  using impl_type = impl::get_item<Tp, size_t, size_t, size_t, size_t>;
+
+  static auto get() { return impl_type::get(); }
+
+  template <typename Vp>
+  static auto set() {
+    return impl_type::template set<Vp>();
+  }
+};
+
+template <typename Tp>
+struct get_item<Tp, 5> {
+  using impl_type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t>;
+
+  static auto get() { return impl_type::get(); }
+
+  template <typename Vp>
+  static auto set() {
+    return impl_type::template set<Vp>();
+  }
+};
+
+template <typename Tp>
+struct get_item<Tp, 6> {
+  using impl_type =
+      impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t, size_t>;
+
+  static auto get() { return impl_type::get(); }
+
+  template <typename Vp>
+  static auto set() {
+    return impl_type::template set<Vp>();
+  }
+};
+
+template <typename Tp>
+struct get_item<Tp, 7> {
+  using impl_type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
+                                   size_t, size_t>;
+
+  static auto get() { return impl_type::get(); }
+
+  template <typename Vp>
+  static auto set() {
+    return impl_type::template set<Vp>();
+  }
+};
+
+template <typename Tp>
+struct get_item<Tp, 8> {
+  using impl_type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
+                                   size_t, size_t, size_t>;
+
+  static auto get() { return impl_type::get(); }
+
+  template <typename Vp>
+  static auto set() {
+    return impl_type::template set<Vp>();
+  }
+};
 
 //--------------------------------------------------------------------------------------//

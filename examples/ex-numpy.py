@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import gc
 import numpy as np
 
 #
@@ -23,7 +22,8 @@ def main(args):
     # get the kokkos view
     view = generate_view(args.ndim)
     # verify the type id
-    print("Kokkos View : {}".format(type(view).__name__))
+    print("Kokkos View : {} (shape={})".format(type(view).__name__,
+          view.shape))
     # wrap the buffer protocal as numpy array without copying the data
     arr = np.array(view, copy=False)
     # verify type id
@@ -32,13 +32,29 @@ def main(args):
     for i in range(arr.shape[0]):
         print("    view({}) = {}".format(i, arr[i]))
 
+
+def test(args):
+    # get the kokkos view
+    view = kokkos.array("python_allocated_view", [args.ndim],
+                        dtype=kokkos.double,
+                        space=kokkos.HostSpace)
+    for i in range(view.shape[0]):
+        view[i] = i % 2
+    # wrap the buffer protocal as numpy array without copying the data
+    arr = np.array(view, copy=False)
+    # verify type id
+    print("Numpy Array : {} (shape={})".format(type(arr).__name__, arr.shape))
+    # demonstrate the data is the same as what was printed by generate_view
+    for i in range(arr.shape[0]):
+        print("    view({}) = {}".format(i, arr[i]))
+
+
 if __name__ == "__main__":
     kokkos.initialize()
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--ndim", default=10,
                         help="X dimension", type=int)
-    args = parser.parse_args()
+    args, argv = parser.parse_known_args()
     main(args)
-    # make sure all views are garbage collected
-    gc.collect()
+    test(args)
     kokkos.finalize()
