@@ -5,7 +5,7 @@ PROJECT(Kokkos-python LANGUAGES C CXX VERSION 0.0.1)
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
 INCLUDE(KokkosPythonUtilities)
-INCLUDE(CheckCxxSourceCompiles)
+INCLUDE(CheckCXXSourceCompiles)
 
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
