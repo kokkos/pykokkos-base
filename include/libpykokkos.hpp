@@ -48,9 +48,10 @@
 #include "Kokkos_Layout.hpp"
 #include "Kokkos_MemoryTraits.hpp"
 
-#include <string>
+#include <array>
 #include <cstdint>
 #include <initializer_list>
+#include <string>
 #include <type_traits>
 
 #if defined(ENABLE_DEMANGLE)
