@@ -53,14 +53,22 @@ __email__ = "jrmadsen@lbl.gov"
 __status__ = "Development"
 
 
-def array(label, shape, dtype=lib.double, space=lib.HostSpace, dynamic=False):
-    print("dtype = {}, space = {}".format(dtype, space))
+def array(label, shape, dtype=lib.double, space=lib.HostSpace, layout=None,
+          dynamic=False):
+    # print("dtype = {}, space = {}".format(dtype, space))
     _prefix = "KokkosView"
     if dynamic:
         _prefix = "KokkosDynView"
     _space = lib.get_memory_space(space)
     _dtype = lib.get_dtype(dtype)
-    _name = "{}_{}_{}".format(_prefix, _space, _dtype)
+    _name = None
+    if layout is not None:
+        _layout = lib.get_layout(layout)
+        # LayoutRight is the default
+        if _layout != "LayoutRight":
+            _name = "{}_{}_{}_{}".format(_prefix, _dtype, _layout, _space)
+    if _name is None:
+        _name = "{}_{}_{}".format(_prefix, _dtype, _space)
     if not dynamic:
         _name = "{}_{}".format(_name, len(shape))
     return getattr(lib, _name)(label, shape)

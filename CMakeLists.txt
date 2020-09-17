@@ -17,6 +17,7 @@ ADD_FEATURE(Kokkos_CXX_STANDARD "Kokkos C++ Standard")
 ADD_FEATURE(Kokkos_DIR "Kokkos installation")
 ADD_OPTION(ENABLE_INTERNAL_PYBIND11 "Build with pybind11 submodule" ON)
 ADD_OPTION(ENABLE_EXPERIMENTAL "Build the experimental code" OFF)
+ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)" OFF)
 ADD_OPTION(ENABLE_WERROR "Build with -Werror" OFF)
 ADD_OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 # don't build a static python module
@@ -31,11 +32,7 @@ SET(CMAKE_CXX_EXTENSIONS OFF)
 IF(NOT Kokkos_CXX_STANDARD)
     SET(Kokkos_CXX_STANDARD ${CMAKE_CXX_STANDARD})
 ENDIF()
-IF(MSVC)
-    SET(PYBIND11_CPP_STANDARD /std:c++${Kokkos_CXX_STANDARD} CACHE STRING "C++ Language standard used by Pybind11" FORCE)
-ELSE()
-    SET(PYBIND11_CPP_STANDARD -std=c++${Kokkos_CXX_STANDARD} CACHE STRING "C++ Language standard used by Pybind11" FORCE)
-ENDIF()
+UNSET(PYBIND11_CPP_STANDARD CACHE)
 
 # basically just used to get Python3_SITEARCH for installation
 FIND_PACKAGE(Python3 REQUIRED COMPONENTS Interpreter Development)
@@ -73,9 +70,12 @@ IF(ENABLE_EXPERIMENTAL)
     TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_EXPERIMENTAL)
 ENDIF()
 
+IF(ENABLE_LAYOUTS)
+    TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_LAYOUTS)
+ENDIF()
+
 IF(ENABLE_WERROR)
-    TARGET_COMPILE_OPTIONS(libpykokkos-build-options INTERFACE
-        -Werror)
+    TARGET_COMPILE_OPTIONS(libpykokkos-build-options INTERFACE -Werror)
 ENDIF()
 
 # link to kokkos and the custom build properties

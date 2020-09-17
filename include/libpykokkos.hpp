@@ -51,7 +51,9 @@
 #include <array>
 #include <cstdint>
 #include <initializer_list>
+#include <sstream>
 #include <string>
+#include <tuple>
 #include <type_traits>
 
 #if defined(ENABLE_DEMANGLE)
@@ -66,17 +68,17 @@
 //--------------------------------------------------------------------------------------//
 
 template <typename... Args>
-void consume_parameters(Args&&...) {}
+void consume_parameters(Args &&...) {}
 
 //--------------------------------------------------------------------------------------//
 
-inline std::string demangle(const char* _cstr) {
+inline std::string demangle(const char *_cstr) {
 #if defined(ENABLE_DEMANGLE)
   // demangling a string when delimiting
   int _ret      = 0;
-  char* _demang = abi::__cxa_demangle(_cstr, 0, 0, &_ret);
+  char *_demang = abi::__cxa_demangle(_cstr, 0, 0, &_ret);
   if (_demang && _ret == 0)
-    return std::string(const_cast<const char*>(_demang));
+    return std::string(const_cast<const char *>(_demang));
   else
     return _cstr;
 #else
@@ -86,7 +88,7 @@ inline std::string demangle(const char* _cstr) {
 
 //--------------------------------------------------------------------------------------//
 
-inline std::string demangle(const std::string& _str) {
+inline std::string demangle(const std::string &_str) {
   return demangle(_str.c_str());
 }
 
@@ -224,9 +226,14 @@ DISABLE_TYPE(Kokkos::Experimental::HIPSpace)
 #if !defined(KOKKOS_ENABLE_CUDA)
 namespace Kokkos {
 class CudaSpace;
-class CudaUVMSpace;
 }  // namespace Kokkos
 DISABLE_TYPE(Kokkos::CudaSpace)
+#endif
+
+#if !defined(KOKKOS_ENABLE_CUDA_UVM)
+namespace Kokkos {
+class CudaUVMSpace;
+}  // namespace Kokkos
 DISABLE_TYPE(Kokkos::CudaUVMSpace)
 #endif
 
@@ -248,12 +255,18 @@ enum KokkosViewSpace {
 /// \brief Maps a \ref KokkosViewSpace enumeration to a type a label
 template <size_t SpaceT>
 struct ViewSpaceSpecialization;
+template <typename Tp>
+struct ViewSpaceIndex;
 
 #define VIEW_SPACE(ENUM_ID, VIEW_SPACE, LABEL)   \
   template <>                                    \
   struct ViewSpaceSpecialization<ENUM_ID> {      \
     using type = VIEW_SPACE;                     \
     static std::string label() { return LABEL; } \
+  };                                             \
+  template <>                                    \
+  struct ViewSpaceIndex<VIEW_SPACE> {            \
+    static constexpr auto value = ENUM_ID;       \
   };
 
 VIEW_SPACE(Host, Kokkos::HostSpace, "HostSpace")
@@ -315,34 +328,92 @@ RetT get_stride(Tp &m, std::index_sequence<Idx...>) {
 namespace impl {
 template <typename Tp, typename... Args>
 struct get_item {
+  static constexpr auto sequence = std::make_index_sequence<sizeof...(Args)>{};
+  using tuple_type               = std::tuple<Args...>;
+
+  template <size_t... Idx>
+  static decltype(auto) get(Tp &_obj, tuple_type &&_args,
+                            std::index_sequence<Idx...>) {
+    return _obj.access(std::get<Idx>(std::forward<tuple_type>(_args))...);
+  }
+
   static auto get() {
-    return [](Tp &_obj, Args... _args) { return _obj(_args...); };
+    return [](Tp &_obj, tuple_type _args) {
+      return get(_obj, std::move(_args), sequence);
+    };
   }
   template <typename Vp>
   static auto set() {
-    return [](Tp &_obj, Args... _args, Vp _val) { _obj(_args...) = _val; };
+    return [](Tp &_obj, tuple_type _args, Vp _val) {
+      get(_obj, std::move(_args), sequence) = _val;
+    };
   }
 };
+
+template <typename Tp>
+struct get_item<Tp, size_t> {
+  static auto get() {
+    return [](Tp &_obj, size_t _arg) { return _obj.access(_arg); };
+  }
+  template <typename Vp>
+  static auto set() {
+    return [](Tp &_obj, size_t _arg, Vp _val) { _obj.access(_arg) = _val; };
+  }
+};
+
+template <typename Tp, size_t Idx>
+struct get_type;
+
+template <typename Tp>
+struct get_type<Tp, 1> {
+  using type = impl::get_item<Tp, size_t>;
+};
+
+template <typename Tp>
+struct get_type<Tp, 2> {
+  using type = impl::get_item<Tp, size_t, size_t>;
+};
+
+template <typename Tp>
+struct get_type<Tp, 3> {
+  using type = impl::get_item<Tp, size_t, size_t, size_t>;
+};
+
+template <typename Tp>
+struct get_type<Tp, 4> {
+  using type = impl::get_item<Tp, size_t, size_t, size_t, size_t>;
+};
+
+template <typename Tp>
+struct get_type<Tp, 5> {
+  using type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t>;
+};
+
+template <typename Tp>
+struct get_type<Tp, 6> {
+  using type =
+      impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t, size_t>;
+};
+
+template <typename Tp>
+struct get_type<Tp, 7> {
+  using type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
+                              size_t, size_t>;
+};
+
+template <typename Tp>
+struct get_type<Tp, 8> {
+  using type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
+                              size_t, size_t, size_t>;
+};
+
 }  // namespace impl
 
 template <typename Tp, size_t Idx>
-struct get_item;
-
-template <typename Tp>
-struct get_item<Tp, 1> {
-  using impl_type = impl::get_item<Tp, size_t>;
-
-  static auto get() { return impl_type::get(); }
-
-  template <typename Vp>
-  static auto set() {
-    return impl_type::template set<Vp>();
-  }
-};
-
-template <typename Tp>
-struct get_item<Tp, 2> {
-  using impl_type = impl::get_item<Tp, size_t, size_t>;
+struct get_item {
+  using impl_type                = typename impl::get_type<Tp, Idx>::type;
+  using array_type               = std::array<Tp, Idx>;
+  static constexpr auto sequence = std::make_index_sequence<Idx>{};
 
   static auto get() { return impl_type::get(); }
 
@@ -350,81 +421,29 @@ struct get_item<Tp, 2> {
   static auto set() {
     return impl_type::template set<Vp>();
   }
-};
-
-template <typename Tp>
-struct get_item<Tp, 3> {
-  using impl_type = impl::get_item<Tp, size_t, size_t, size_t>;
-
-  static auto get() { return impl_type::get(); }
 
   template <typename Vp>
-  static auto set() {
+  static auto fill(Tp &_obj, Vp _val) {
+    auto arr = array_type{};
+    arr.fill(0);
+    for (size_t i = 0; i < Idx; ++i) {
+      for (auto &itr : get_extents(_obj, sequence)) {
+        for (size_t j = 0; j < itr; ++j) {
+          arr[i] = j;
+        }
+      }
+    }
     return impl_type::template set<Vp>();
   }
 };
 
-template <typename Tp>
-struct get_item<Tp, 4> {
-  using impl_type = impl::get_item<Tp, size_t, size_t, size_t, size_t>;
+//--------------------------------------------------------------------------------------//
 
-  static auto get() { return impl_type::get(); }
-
-  template <typename Vp>
-  static auto set() {
-    return impl_type::template set<Vp>();
-  }
-};
-
-template <typename Tp>
-struct get_item<Tp, 5> {
-  using impl_type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t>;
-
-  static auto get() { return impl_type::get(); }
-
-  template <typename Vp>
-  static auto set() {
-    return impl_type::template set<Vp>();
-  }
-};
-
-template <typename Tp>
-struct get_item<Tp, 6> {
-  using impl_type =
-      impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t, size_t>;
-
-  static auto get() { return impl_type::get(); }
-
-  template <typename Vp>
-  static auto set() {
-    return impl_type::template set<Vp>();
-  }
-};
-
-template <typename Tp>
-struct get_item<Tp, 7> {
-  using impl_type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
-                                   size_t, size_t>;
-
-  static auto get() { return impl_type::get(); }
-
-  template <typename Vp>
-  static auto set() {
-    return impl_type::template set<Vp>();
-  }
-};
-
-template <typename Tp>
-struct get_item<Tp, 8> {
-  using impl_type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
-                                   size_t, size_t, size_t>;
-
-  static auto get() { return impl_type::get(); }
-
-  template <typename Vp>
-  static auto set() {
-    return impl_type::template set<Vp>();
-  }
-};
+template <typename... Args>
+std::string construct_name(const std::string &delim, Args &&... args) {
+  std::stringstream ss;
+  FOLD_EXPRESSION(ss << delim << std::forward<Args>(args));
+  return ss.str().substr(delim.length());
+}
 
 //--------------------------------------------------------------------------------------//
