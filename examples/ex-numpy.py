@@ -24,13 +24,18 @@ def main(args):
     # verify the type id
     print("Kokkos View : {} (shape={})".format(type(view).__name__,
           view.shape))
+    # print data provided by generate_view
+    if view.memory_space != kokkos.CudaSpace:
+        for i in range(view.shape[0]):
+            print("    view({}) = [{:1.0f}., {:1.0f}.]".format(i, view[i, 0], view[i, 1]))
     # wrap the buffer protocal as numpy array without copying the data
     arr = np.array(view, copy=False)
     # verify type id
     print("Numpy Array : {} (shape={})".format(type(arr).__name__, arr.shape))
     # demonstrate the data is the same as what was printed by generate_view
-    for i in range(arr.shape[0]):
-        print("    view({}) = {}".format(i, arr[i]))
+    if view.memory_space != kokkos.CudaSpace:
+        for i in range(arr.shape[0]):
+            print("     arr({}) = {}".format(i, arr[i]))
 
 
 def test(args):
@@ -39,7 +44,7 @@ def test(args):
                         dtype=kokkos.double,
                         space=kokkos.HostSpace)
     for i in range(view.shape[0]):
-        view[i] = i % 2
+        view[i] = i * (i % 2)
     # wrap the buffer protocal as numpy array without copying the data
     arr = np.array(view, copy=False)
     # verify type id

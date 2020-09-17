@@ -55,61 +55,8 @@
 
 #include <cstdio>
 #include <typeinfo>
-#include <unordered_map>
 
 namespace py = pybind11;
-
-// this is intended for creating a generic View in Python, e.g.
-//
-//    view = kokkos.View(dtype=..., space=..., dims=...)
-//
-#if defined(EXPERIMENTAL_GENERIC_VIEW)
-
-template <typename KeyT, typename MappedT>
-using uomap_t = std::unordered_map<KeyT, MappedT>;
-
-struct GenericView;
-
-using caster_pair_t =
-    std::pair<std::function<void(const std::type_info *&)>,
-              std::function<const void *(const GenericView *)>>;
-
-using generic_view_map_t =
-    uomap_t<KokkosViewSpace,
-            uomap_t<KokkosViewDataType, uomap_t<size_t, caster_pair_t>>>;
-
-static auto &get_generic_view_map() {
-  static generic_view_map_t _instance;
-  return _instance;
-}
-
-// Not polymorphic: has no virtual methods
-struct GenericView {
-  const KokkosViewDataType dtype;
-  const KokkosViewSpace space;
-  const size_t dims;
-
- protected:
-  GenericView(KokkosViewDataType _dtype, KokkosViewSpace _space, size_t _dims)
-      : dtype(_dtype), space(_space), dims(_dims) {}
-};
-
-namespace pybind11 {
-template <>
-struct polymorphic_type_hook<GenericView> {
-  static const void *get(const GenericView *src, const std::type_info *&type) {
-    // note that src may be nullptr
-    if (src) {
-      auto &casters = get_generic_view_map()[src->space][src->dtype][src->dims];
-      casters.first(type);
-      return casters.second(src);
-    }
-    return src;
-  }
-};
-}  // namespace pybind11
-
-#endif
 
 //--------------------------------------------------------------------------------------//
 
@@ -138,8 +85,104 @@ auto get_init(Vp &) {}
 
 //--------------------------------------------------------------------------------------//
 
+namespace Common {
+// creates overloads for data access from python
+template <typename Tp, typename View_t, size_t... Idx>
+void generate_view_access(py::class_<View_t> &_view,
+                          std::index_sequence<Idx...>) {
+  FOLD_EXPRESSION(_view.def("__getitem__", get_item<View_t, Idx + 1>::get(),
+                            "Get the element"));
+  FOLD_EXPRESSION(_view.def("__setitem__",
+                            get_item<View_t, Idx + 1>::template set<Tp>(),
+                            "Set the element"));
+}
+
+// generic function to generate a view once the view type has been specified
+template <typename View_t, typename Sp, typename Tp, size_t DimIdx,
+          size_t... Idx>
+void generate_view(py::module &_mod, const std::string &_name,
+                   const std::string &_msg, size_t _ndim = DimIdx + 1) {
+  bool debug = false;
+#if !defined(NDEBUG)
+  debug = true;
+#endif
+
+  if (debug)
+    std::cout << "Registering " << _msg << " as python class '" << _name
+              << "'..." << std::endl;
+
+  // class decl
+  py::class_<View_t> _view(_mod, _name.c_str(), py::buffer_protocol());
+
+  // default initializer
+  _view.def(py::init([]() { return new View_t{}; }));
+
+  // initializer with extents
+  get_init<View_t, DimIdx + 1, Sp>(_view);
+
+  // conversion to/from numpy
+  _view.def_buffer([_ndim](View_t &m) -> py::buffer_info {
+    auto _extents = get_extents(m, std::make_index_sequence<DimIdx + 1>{});
+    auto _strides = get_stride<Tp>(m, std::make_index_sequence<DimIdx + 1>{});
+    return py::buffer_info(m.data(),    // Pointer to buffer
+                           sizeof(Tp),  // Size of one scalar
+                           py::format_descriptor<Tp>::format(),  // Descriptor
+                           _ndim,     // Number of dimensions
+                           _extents,  // Buffer dimensions
+                           _strides   // Strides (in bytes) for each index
+    );
+  });
+
+  // shape property
+  _view.def_property_readonly(
+      "shape",
+      [](View_t &m) {
+        return get_extents(m, std::make_index_sequence<DimIdx + 1>{});
+      },
+      "Get the shape of the array (extents)");
+
+  // memory space
+  _view.def_property_readonly(
+      "memory_space", [](View_t &) { return ViewSpaceIndex<Sp>::value; },
+      "Memory space of the view");
+
+  // support []
+  generate_view_access<Tp>(_view, std::index_sequence<Idx...>{});
+}
+
+template <typename View_t, typename Sp, typename Tp, size_t DimIdx,
+          size_t... Idx>
+void generate_view(py::module &_mod, const std::string &_name,
+                   const std::string &_msg, size_t _ndim,
+                   std::index_sequence<Idx...>) {
+  generate_view<View_t, Sp, Tp, DimIdx, Idx...>(_mod, _name, _msg, _ndim);
+}
+}  // namespace Common
+//
 namespace Space {
 namespace SpaceDim {
+
+#if defined(ENABLE_LAYOUTS)
+template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx>
+void generate_concrete_layout_view(py::module &_mod) {
+  using data_spec_t   = ViewDataTypeSpecialization<DataIdx>;
+  using space_spec_t  = ViewSpaceSpecialization<SpaceIdx>;
+  using layout_spec_t = ViewLayoutSpecialization<LayoutIdx>;
+  using Tp            = typename data_spec_t::type;
+  using Vp            = typename ViewDataTypeRepr<Tp, DimIdx>::type;
+  using Sp            = typename space_spec_t::type;
+  using Lp            = typename layout_spec_t::type;
+  using View_t        = Kokkos::View<Vp, Lp, Sp>;
+
+  auto name =
+      construct_name("_", "KokkosView", data_spec_t::label(),
+                     layout_spec_t::label(), space_spec_t::label(), DimIdx + 1);
+  auto desc = construct_name("", "Kokkos::View<", demangle<Vp>(), ", ",
+                             demangle<Lp>(), ", ", demangle<Sp>());
+
+  Common::generate_view<View_t, Sp, Tp, DimIdx, DimIdx>(_mod, name, desc);
+}
+#endif
 
 /// DataIdx --> data type, e.g. int
 /// SpaceIdx --> the space of the view
@@ -154,53 +197,17 @@ void generate_concrete_view(py::module &_mod) {
   using Sp           = typename space_spec_t::type;
   using View_t       = Kokkos::View<Vp, Sp>;
 
-  std::stringstream name;
+  auto name = construct_name("_", "KokkosView", data_spec_t::label(),
+                             space_spec_t::label(), DimIdx + 1);
+  auto desc =
+      construct_name("", "Kokkos::View<", demangle<Vp>(), ", ", demangle<Sp>());
 
-  // generate a name for the class
-  name << "KokkosView_" << space_spec_t::label() << "_" << data_spec_t::label()
-       << "_" << (DimIdx + 1);
+  Common::generate_view<View_t, Sp, Tp, DimIdx, DimIdx>(_mod, name, desc);
 
-#if !defined(NDEBUG)
-  std::stringstream desc;
-  // generate the description of the class
-  desc << "Kokkos::View<" << demangle<Vp>() << ", " << demangle<Sp>() << ">";
-  std::cout << "Registering " << desc.str() << " as python class '"
-            << name.str() << "'..." << std::endl;
-#endif
-
-  py::class_<View_t> _view(_mod, name.str().c_str(), py::buffer_protocol());
-  _view.def(py::init([]() { return new View_t{}; }));
-  get_init<View_t, DimIdx + 1, Sp>(_view);
-  _view.def_buffer([](View_t &m) -> py::buffer_info {
-    auto _extents = get_extents(m, std::make_index_sequence<DimIdx + 1>{});
-    auto _strides = get_strides<Tp>(m, std::make_index_sequence<DimIdx + 1>{});
-    return py::buffer_info(m.data(),    // Pointer to buffer
-                           sizeof(Tp),  // Size of one scalar
-                           py::format_descriptor<Tp>::format(),  // Descriptor
-                           DimIdx + 1,  // Number of dimensions
-                           _extents,    // Buffer dimensions
-                           _strides     // Strides (in bytes) for each index
-    );
-  });
-  _view.def_property_readonly(
-      "shape",
-      [](View_t &m) {
-        return get_extents(m, std::make_index_sequence<DimIdx + 1>{});
-      },
-      "Get the shape of the array (extents)");
-  _view.def("__getitem__", get_item<View_t, DimIdx + 1>::get());
-  _view.def("__setitem__", get_item<View_t, DimIdx + 1>::template set<Tp>());
-
-#if defined(EXPERIMENTAL_GENERIC_VIEW)
-  auto _espace = static_cast<KokkosViewSpace>(SpaceIdx);
-  auto _edata  = static_cast<KokkosViewDataType>(DataIdx);
-
-  auto _tcast = [](const std::type_info *&tinfo) { tinfo = &typeid(View_t); };
-  auto _gcast = [](const GenericView *ptr) -> const void * {
-    return reinterpret_cast<const View_t *>(ptr);
-  };
-  get_generic_view_map()[_espace][_edata][DimIdx] =
-      caster_pair_t{_tcast, _gcast};
+#if defined(ENABLE_LAYOUTS)
+  generate_concrete_layout_view<DataIdx, SpaceIdx, DimIdx, Left>(_mod);
+  // generate_concrete_layout_view<DataIdx, SpaceIdx, DimIdx, Right>(_mod);
+  // generate_concrete_layout_view<DataIdx, SpaceIdx, DimIdx, Stride>(_mod);
 #endif
 }
 
@@ -227,6 +234,30 @@ void generate_concrete_view(py::module &_mod,
       _mod, std::make_index_sequence<ViewDataMaxDimensions>{}));
 }
 
+#if defined(ENABLE_LAYOUTS)
+template <size_t DataIdx, size_t SpaceIdx, size_t LayoutIdx>
+void generate_dynamic_layout_view(py::module &_mod) {
+  constexpr auto DimIdx = ViewDataMaxDimensions;
+  using data_spec_t     = ViewDataTypeSpecialization<DataIdx>;
+  using space_spec_t    = ViewSpaceSpecialization<SpaceIdx>;
+  using layout_spec_t   = ViewLayoutSpecialization<LayoutIdx>;
+  using Tp              = typename data_spec_t::type;
+  using Vp              = Tp;
+  using Sp              = typename space_spec_t::type;
+  using Lp              = typename layout_spec_t::type;
+  using View_t          = Kokkos::DynRankView<Vp, Lp, Sp>;
+
+  auto name = construct_name("_", "KokkosDynRankView", data_spec_t::label(),
+                             layout_spec_t::label(), space_spec_t::label());
+  auto desc = construct_name("", "Kokkos::DynRankView<", demangle<Vp>(), ", ",
+                             demangle<Lp>(), ", ", demangle<Sp>());
+
+  constexpr auto nIdx = DimIdx - 1;
+  Common::generate_view<View_t, Sp, Tp, nIdx>(_mod, name, desc, DimIdx,
+                                              std::make_index_sequence<nIdx>{});
+}
+#endif
+
 /// DataIdx --> data type, e.g. int
 /// SpaceIdx --> the space of the view
 template <size_t DataIdx, size_t SpaceIdx,
@@ -240,41 +271,20 @@ void generate_dynamic_view(py::module &_mod) {
   using Sp              = typename space_spec_t::type;
   using View_t          = Kokkos::DynRankView<Vp, Sp>;
 
-  std::stringstream name;
+  auto name = construct_name("_", "KokkosDynRankView", data_spec_t::label(),
+                             space_spec_t::label());
+  auto desc = construct_name("", "Kokkos::DynRankView<", demangle<Vp>(), ", ",
+                             demangle<Sp>());
 
-  // generate a name for the class
-  name << "KokkosDynRankView_" << space_spec_t::label() << "_"
-       << data_spec_t::label();
+  constexpr auto nIdx = DimIdx - 1;
+  Common::generate_view<View_t, Sp, Tp, nIdx>(_mod, name, desc, DimIdx,
+                                              std::make_index_sequence<nIdx>{});
 
-#if !defined(NDEBUG)
-  std::stringstream desc;
-  // generate the description of the class
-  desc << "Kokkos::DynRankView<" << demangle<Vp>() << ", " << demangle<Sp>()
-       << ">";
-  std::cout << "Registering " << desc.str() << " as python class '"
-            << name.str() << "'..." << std::endl;
+#if defined(ENABLE_LAYOUTS)
+  generate_dynamic_layout_view<DataIdx, SpaceIdx, Left>(_mod);
+  // generate_dynamic_layout_view<DataIdx, SpaceIdx, Right>(_mod);
+  // generate_dynamic_layout_view<DataIdx, SpaceIdx, Stride>(_mod);
 #endif
-
-  py::class_<View_t> _view(_mod, name.str().c_str(), py::buffer_protocol());
-  _view.def(py::init([]() { return new View_t{}; }));
-  get_init<View_t, DimIdx, Sp>(_view);
-  _view.def_buffer([](View_t &m) -> py::buffer_info {
-    auto _extents = get_extents(m, std::make_index_sequence<DimIdx>{});
-    auto _strides = get_stride<Tp>(m, std::make_index_sequence<DimIdx>{});
-    return py::buffer_info(m.data(),    // Pointer to buffer
-                           sizeof(Tp),  // Size of one scalar
-                           py::format_descriptor<Tp>::format(),  // Descriptor
-                           DimIdx + 1,  // Number of dimensions
-                           _extents,    // Buffer dimensions
-                           _strides     // Strides (in bytes) for each index
-    );
-  });
-  _view.def_property_readonly(
-      "shape",
-      [](View_t &m) {
-        return get_extents(m, std::make_index_sequence<DimIdx>{});
-      },
-      "Get the shape of the array (extents)");
 }
 
 template <size_t DataIdx, size_t SpaceIdx,
@@ -366,7 +376,7 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
     py::object args = sys.attr("argv");
     auto argv       = args.cast<py::list>();
     int _argc       = argv.size();
-    char** _argv    = new char*[argv.size()];
+    char **_argv    = new char *[argv.size()];
     for (int i = 0; i < _argc; ++i)
       _argv[i] = strdup(argv[i].cast<std::string>().c_str());
     Kokkos::initialize(_argc, _argv);
@@ -385,7 +395,7 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
   kokkos.def("finalize", _finalize, "Finalize Kokkos");
 
   // an enumeration of the data types for views
-  py::enum_<KokkosViewDataType> _dtype(kokkos, "type", "View data types");
+  py::enum_<KokkosViewDataType> _dtype(kokkos, "dtype", "View data types");
   generate_enumeration<ViewDataTypeSpecialization>(
       _dtype, std::make_index_sequence<ViewDataTypesEnd>{});
   _dtype.export_values();
@@ -418,6 +428,23 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
   };
   kokkos.def("get_memory_space", _get_memspace_name, "Get the memory space");
   kokkos.def("get_memory_space", _get_memspace_idx, "Get the memory space");
+
+  // an enumeration of the layout types for views
+  py::enum_<KokkosViewLayoutType> _ltype(kokkos, "layout", "View layout types");
+  generate_enumeration<ViewLayoutSpecialization>(
+      _ltype, std::make_index_sequence<ViewLayoutEnd>{});
+  _ltype.export_values();
+
+  auto _get_ltype_name = [](int idx) {
+    return get_enumeration<ViewLayoutSpecialization>(
+        idx, std::make_index_sequence<ViewLayoutEnd>{});
+  };
+  auto _get_ltype_idx = [](std::string str) {
+    return get_enumeration<ViewLayoutSpecialization>(
+        str, std::make_index_sequence<ViewLayoutEnd>{});
+  };
+  kokkos.def("get_layout", _get_ltype_name, "Get the layout type");
+  kokkos.def("get_layout", _get_ltype_idx, "Get the layout type");
 
   // generate buffers for all the data types
   generate_concrete_view(kokkos, std::make_index_sequence<ViewDataTypesEnd>{});
