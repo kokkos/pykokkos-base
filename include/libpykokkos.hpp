@@ -183,6 +183,35 @@ VIEW_LAYOUT_TYPE(Right, Kokkos::LayoutRight, "LayoutRight")
 VIEW_LAYOUT_TYPE(Stride, Kokkos::LayoutStride, "LayoutStride")
 
 //--------------------------------------------------------------------------------------//
+
+enum KokkosViewMemoryTrait {
+  Managed = 0,
+  Unmanaged,
+  Atomic,
+  RandomAccess,
+  Restrict,
+  ViewMemoryTraitEnd
+};
+
+template <size_t DataT>
+struct ViewMemoryTraitSpecialization;
+
+#define VIEW_MEMORY_TRAIT(ENUM_ID, MEMORY_TRAIT, LABEL) \
+  template <>                                           \
+  struct ViewMemoryTraitSpecialization<ENUM_ID> {       \
+    using trait = MEMORY_TRAIT;                         \
+    static std::string label() { return LABEL; }        \
+  };
+
+VIEW_MEMORY_TRAIT(Managed, Kokkos::MemoryTraits<0>, "Managed")
+VIEW_MEMORY_TRAIT(Unmanaged, Kokkos::MemoryTraits<Kokkos::Unmanaged>,
+                  "Unmanaged")
+VIEW_MEMORY_TRAIT(Atomic, Kokkos::MemoryTraits<Kokkos::Atomic>, "Atomic")
+VIEW_MEMORY_TRAIT(RandomAccess, Kokkos::MemoryTraits<Kokkos::RandomAccess>,
+                  "RandomAccess")
+VIEW_MEMORY_TRAIT(Restrict, Kokkos::MemoryTraits<Kokkos::Restrict>, "Restrict")
+
+//--------------------------------------------------------------------------------------//
 //  declare any spaces that might not be available and mark them as unavailable
 //  we declare these so that we can map the enum value to the type along with a
 //  label

@@ -41,6 +41,7 @@
 #
 
 from __future__ import absolute_import
+import numpy as np
 from . import libpykokkos as lib
 
 __author__ = "Jonathan R. Madsen"
@@ -54,7 +55,7 @@ __status__ = "Development"
 
 
 def array(label, shape, dtype=lib.double, space=lib.HostSpace, layout=None,
-          dynamic=False):
+          trait=None, dynamic=False):
     # print("dtype = {}, space = {}".format(dtype, space))
     _prefix = "KokkosView"
     if dynamic:
@@ -67,9 +68,36 @@ def array(label, shape, dtype=lib.double, space=lib.HostSpace, layout=None,
         # LayoutRight is the default
         if _layout != "LayoutRight":
             _name = "{}_{}_{}_{}".format(_prefix, _dtype, _layout, _space)
+    if trait is not None:
+        _trait = lib.get_memory_trait(trait)
+        if _trait == "Unmanaged":
+            raise ValueError("Use unmanaged_array() for the unmanaged view memory trait")
+        _name = "{}_{}_{}_{}".format(_prefix, _dtype, _space, _trait)
     if _name is None:
         _name = "{}_{}_{}".format(_prefix, _dtype, _space)
     if not dynamic:
         _name = "{}_{}".format(_name, len(shape))
+
     return getattr(lib, _name)(label, shape)
 
+def get_np_dtype(dtype):
+    if dtype == np.int32:
+        return lib.get_dtype(lib.int32)
+    if dtype == np.int64:
+        return lib.get_dtype(lib.int64)
+    if dtype == np.float32:
+        return lib.get_dtype(lib.float)
+    if dtype == np.float64:
+        return lib.get_dtype(lib.double)
+
+
+def unmanaged_array(array, space=lib.HostSpace, dynamic=False):
+    _prefix = "KokkosView"
+    if dynamic:
+        _prefix = "KokkosDynView"
+    _dtype = get_np_dtype(array.dtype)
+    _space = lib.get_memory_space(space)
+    _unmanaged = lib.get_memory_trait(lib.Unmanaged)
+    _name = "{}_{}_{}_{}_{}".format(_prefix, _dtype, _space, _unmanaged, array.ndim)
+
+    return getattr(lib, _name)(array, array.shape)
