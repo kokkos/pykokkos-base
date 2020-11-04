@@ -60,57 +60,57 @@ namespace py = pybind11;
 
 //--------------------------------------------------------------------------------------//
 
-template <typename View_t, typename Up, size_t... Idx>
+template <typename ViewT, typename Up, size_t... Idx>
 auto get_init(const std::string &lbl, const Up &arr,
               std::index_sequence<Idx...>) {
-  return new View_t(lbl, static_cast<const size_t>(std::get<Idx>(arr))...);
+  return new ViewT(lbl, static_cast<const size_t>(std::get<Idx>(arr))...);
 }
 
-template <typename View_t, size_t Idx>
+template <typename ViewT, size_t Idx>
 auto get_init() {
   return [](std::string lbl, std::array<size_t, Idx> arr) {
-    return get_init<View_t>(lbl, arr, std::make_index_sequence<Idx>{});
+    return get_init<ViewT>(lbl, arr, std::make_index_sequence<Idx>{});
   };
 }
 
-template <typename View_t, typename Up, typename Tp, size_t... Idx>
+template <typename ViewT, typename Up, typename Tp, size_t... Idx>
 auto get_unmanaged_init(const Up &arr, const Tp data,
                         std::index_sequence<Idx...>) {
-  return new View_t(data, static_cast<const size_t>(std::get<Idx>(arr))...);
+  return new ViewT(data, static_cast<const size_t>(std::get<Idx>(arr))...);
 }
 
-template <typename View_t, size_t Idx, typename Tp>
+template <typename ViewT, size_t Idx, typename Tp>
 auto get_unmanaged_init() {
   return [](py::array np, std::array<size_t, Idx> arr) {
-    return get_unmanaged_init<View_t>(arr, static_cast<Tp *>(np.request().ptr),
-                                      std::make_index_sequence<Idx>{});
+    return get_unmanaged_init<ViewT>(arr, static_cast<Tp *>(np.request().ptr),
+                                     std::make_index_sequence<Idx>{});
   };
 }
 
 // define managed init
-template <typename View_t, size_t Idx, typename Tp, typename Mp, typename Vp,
+template <typename ViewT, size_t Idx, typename Tp, typename Mp, typename Vp,
           enable_if_t<!std::is_same<
               Mp, Kokkos::MemoryTraits<Kokkos::Unmanaged>>::value> = 0>
 auto get_init(Vp &_view) {
-  _view.def(py::init(get_init<View_t, Idx>()));
+  _view.def(py::init(get_init<ViewT, Idx>()));
 }
 
 // define unmanaged init
-template <typename View_t, size_t Idx, typename Tp, typename Mp, typename Vp,
+template <typename ViewT, size_t Idx, typename Tp, typename Mp, typename Vp,
           enable_if_t<std::is_same<
               Mp, Kokkos::MemoryTraits<Kokkos::Unmanaged>>::value> = 0>
 auto get_init(Vp &_view) {
-  _view.def(py::init(get_unmanaged_init<View_t, Idx, Tp>()));
+  _view.def(py::init(get_unmanaged_init<ViewT, Idx, Tp>()));
 }
 
-template <typename View_t, size_t Idx, typename Up, typename Tp, typename Mp,
+template <typename ViewT, size_t Idx, typename Up, typename Tp, typename Mp,
           typename Vp,
           enable_if_t<!std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
 auto get_init(Vp &_view) {
-  get_init<View_t, Idx, Tp, Mp>(_view);
+  get_init<ViewT, Idx, Tp, Mp>(_view);
 }
 
-template <typename View_t, size_t Idx, typename Up, typename Tp, typename Mp,
+template <typename ViewT, size_t Idx, typename Up, typename Tp, typename Mp,
           typename Vp,
           enable_if_t<std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
 auto get_init(Vp &) {}
