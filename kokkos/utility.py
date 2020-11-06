@@ -79,32 +79,13 @@ def array(label, shape, dtype=lib.double, space=lib.HostSpace, layout=None,
 
     return getattr(lib, _name)(label, shape)
 
-try:
-    import numpy as np
+def unmanaged_array(array, dtype=lib.double, space=lib.HostSpace, dynamic=False):
+    _prefix = "KokkosView"
+    if dynamic:
+        _prefix = "KokkosDynView"
+    _dtype = lib.get_dtype(dtype)
+    _space = lib.get_memory_space(space)
+    _unmanaged = lib.get_memory_trait(lib.Unmanaged)
+    _name = "{}_{}_{}_{}_{}".format(_prefix, _dtype, _space, _unmanaged, array.ndim)
 
-    def get_np_dtype(dtype):
-        if dtype == np.int32:
-            return lib.get_dtype(lib.int32)
-        if dtype == np.int64:
-            return lib.get_dtype(lib.int64)
-        if dtype == np.float32:
-            return lib.get_dtype(lib.float)
-        if dtype == np.float64:
-            return lib.get_dtype(lib.double)
-
-
-    def unmanaged_array(array, space=lib.HostSpace, dynamic=False):
-        _prefix = "KokkosView"
-        if dynamic:
-            _prefix = "KokkosDynView"
-        _dtype = get_np_dtype(array.dtype)
-        _space = lib.get_memory_space(space)
-        _unmanaged = lib.get_memory_trait(lib.Unmanaged)
-        _name = "{}_{}_{}_{}_{}".format(_prefix, _dtype, _space, _unmanaged, array.ndim)
-
-        return getattr(lib, _name)(array, array.shape)
-
-except Exception as e:
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    traceback.print_exception(exc_type, exc_value, exc_traceback)
-    print("Could not import numpy. Unmanaged views disabled.")
+    return getattr(lib, _name)(array, array.shape)

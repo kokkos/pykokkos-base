@@ -81,8 +81,8 @@ auto get_unmanaged_init(const Up &arr, const Tp data,
 
 template <typename ViewT, size_t Idx, typename Tp>
 auto get_unmanaged_init() {
-  return [](py::array np, std::array<size_t, Idx> arr) {
-    return get_unmanaged_init<ViewT>(arr, static_cast<Tp *>(np.request().ptr),
+  return [](py::buffer buf, std::array<size_t, Idx> arr) {
+    return get_unmanaged_init<ViewT>(arr, static_cast<Tp *>(buf.request().ptr),
                                      std::make_index_sequence<Idx>{});
   };
 }
