@@ -60,26 +60,58 @@ namespace py = pybind11;
 
 //--------------------------------------------------------------------------------------//
 
-template <typename Tp, typename Up, size_t... Idx>
+template <typename ViewT, typename Up, size_t... Idx>
 auto get_init(const std::string &lbl, const Up &arr,
               std::index_sequence<Idx...>) {
-  return new Tp(lbl, static_cast<const size_t>(std::get<Idx>(arr))...);
+  return new ViewT(lbl, static_cast<const size_t>(std::get<Idx>(arr))...);
 }
 
-template <typename Tp, size_t Idx>
+template <typename ViewT, size_t Idx>
 auto get_init() {
   return [](std::string lbl, std::array<size_t, Idx> arr) {
-    return get_init<Tp>(lbl, arr, std::make_index_sequence<Idx>{});
+    return get_init<ViewT>(lbl, arr, std::make_index_sequence<Idx>{});
   };
 }
 
-template <typename Tp, size_t Idx, typename Up, typename Vp,
-          enable_if_t<!std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
-auto get_init(Vp &_view) {
-  _view.def(py::init(get_init<Tp, Idx>()));
+template <typename ViewT, typename Up, typename Tp, size_t... Idx>
+auto get_unmanaged_init(const Up &arr, const Tp data,
+                        std::index_sequence<Idx...>) {
+  return new ViewT(data, static_cast<const size_t>(std::get<Idx>(arr))...);
 }
 
-template <typename Tp, size_t Idx, typename Up, typename Vp,
+template <typename ViewT, size_t Idx, typename Tp>
+auto get_unmanaged_init() {
+  return [](py::buffer buf, std::array<size_t, Idx> arr) {
+    return get_unmanaged_init<ViewT>(arr, static_cast<Tp *>(buf.request().ptr),
+                                     std::make_index_sequence<Idx>{});
+  };
+}
+
+// define managed init
+template <typename ViewT, size_t Idx, typename Tp, typename Mp, typename Vp,
+          enable_if_t<!std::is_same<
+              Mp, Kokkos::MemoryTraits<Kokkos::Unmanaged>>::value> = 0>
+auto get_init(Vp &_view) {
+  _view.def(py::init(get_init<ViewT, Idx>()));
+}
+
+// define unmanaged init
+template <typename ViewT, size_t Idx, typename Tp, typename Mp, typename Vp,
+          enable_if_t<std::is_same<
+              Mp, Kokkos::MemoryTraits<Kokkos::Unmanaged>>::value> = 0>
+auto get_init(Vp &_view) {
+  _view.def(py::init(get_unmanaged_init<ViewT, Idx, Tp>()));
+}
+
+template <typename ViewT, size_t Idx, typename Up, typename Tp, typename Mp,
+          typename Vp,
+          enable_if_t<!std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
+auto get_init(Vp &_view) {
+  get_init<ViewT, Idx, Tp, Mp>(_view);
+}
+
+template <typename ViewT, size_t Idx, typename Up, typename Tp, typename Mp,
+          typename Vp,
           enable_if_t<std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
 auto get_init(Vp &) {}
 
@@ -98,7 +130,7 @@ void generate_view_access(py::class_<View_t> &_view,
 }
 
 // generic function to generate a view once the view type has been specified
-template <typename View_t, typename Sp, typename Tp, size_t DimIdx,
+template <typename View_t, typename Sp, typename Tp, typename Mp, size_t DimIdx,
           size_t... Idx>
 void generate_view(py::module &_mod, const std::string &_name,
                    const std::string &_msg, size_t _ndim = DimIdx + 1) {
@@ -118,7 +150,7 @@ void generate_view(py::module &_mod, const std::string &_name,
   _view.def(py::init([]() { return new View_t{}; }));
 
   // initializer with extents
-  get_init<View_t, DimIdx + 1, Sp>(_view);
+  get_init<View_t, DimIdx + 1, Sp, Tp, Mp>(_view);
 
   // conversion to/from numpy
   _view.def_buffer([_ndim](View_t &m) -> py::buffer_info {
@@ -150,12 +182,12 @@ void generate_view(py::module &_mod, const std::string &_name,
   generate_view_access<Tp>(_view, std::index_sequence<Idx...>{});
 }
 
-template <typename View_t, typename Sp, typename Tp, size_t DimIdx,
+template <typename View_t, typename Sp, typename Tp, typename Mp, size_t DimIdx,
           size_t... Idx>
 void generate_view(py::module &_mod, const std::string &_name,
                    const std::string &_msg, size_t _ndim,
                    std::index_sequence<Idx...>) {
-  generate_view<View_t, Sp, Tp, DimIdx, Idx...>(_mod, _name, _msg, _ndim);
+  generate_view<View_t, Sp, Tp, Mp, DimIdx, Idx...>(_mod, _name, _msg, _ndim);
 }
 }  // namespace Common
 //
@@ -172,6 +204,7 @@ void generate_concrete_layout_view(py::module &_mod) {
   using Vp            = typename ViewDataTypeRepr<Tp, DimIdx>::type;
   using Sp            = typename space_spec_t::type;
   using Lp            = typename layout_spec_t::type;
+  using Mp            = Kokkos::MemoryTraits<0>;
   using View_t        = Kokkos::View<Vp, Lp, Sp>;
 
   auto name =
@@ -180,7 +213,29 @@ void generate_concrete_layout_view(py::module &_mod) {
   auto desc = construct_name("", "Kokkos::View<", demangle<Vp>(), ", ",
                              demangle<Lp>(), ", ", demangle<Sp>());
 
-  Common::generate_view<View_t, Sp, Tp, DimIdx, DimIdx>(_mod, name, desc);
+  Common::generate_view<View_t, Sp, Tp, Mp, DimIdx, DimIdx>(_mod, name, desc);
+}
+#endif
+
+#if defined(ENABLE_MEMORY_TRAITS)
+template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t TraitIdx>
+void generate_concrete_trait_view(py::module &_mod) {
+  using data_spec_t  = ViewDataTypeSpecialization<DataIdx>;
+  using space_spec_t = ViewSpaceSpecialization<SpaceIdx>;
+  using trait_spec_t = ViewMemoryTraitSpecialization<TraitIdx>;
+  using Tp           = typename data_spec_t::type;
+  using Vp           = typename ViewDataTypeRepr<Tp, DimIdx>::type;
+  using Sp           = typename space_spec_t::type;
+  using Mp           = typename trait_spec_t::trait;
+  using View_t       = Kokkos::View<Vp, Sp, Mp>;
+
+  auto name =
+      construct_name("_", "KokkosView", data_spec_t::label(),
+                     space_spec_t::label(), trait_spec_t::label(), DimIdx + 1);
+  auto desc = construct_name("", "Kokkos::View<", demangle<Vp>(), ", ",
+                             demangle<Sp>(), ", ", demangle<Mp>());
+
+  Common::generate_view<View_t, Sp, Tp, Mp, DimIdx, DimIdx>(_mod, name, desc);
 }
 #endif
 
@@ -195,6 +250,7 @@ void generate_concrete_view(py::module &_mod) {
   using Tp           = typename data_spec_t::type;
   using Vp           = typename ViewDataTypeRepr<Tp, DimIdx>::type;
   using Sp           = typename space_spec_t::type;
+  using Mp           = Kokkos::MemoryTraits<0>;
   using View_t       = Kokkos::View<Vp, Sp>;
 
   auto name = construct_name("_", "KokkosView", data_spec_t::label(),
@@ -202,12 +258,17 @@ void generate_concrete_view(py::module &_mod) {
   auto desc =
       construct_name("", "Kokkos::View<", demangle<Vp>(), ", ", demangle<Sp>());
 
-  Common::generate_view<View_t, Sp, Tp, DimIdx, DimIdx>(_mod, name, desc);
-
+  Common::generate_view<View_t, Sp, Tp, Mp, DimIdx, DimIdx>(_mod, name, desc);
 #if defined(ENABLE_LAYOUTS)
   generate_concrete_layout_view<DataIdx, SpaceIdx, DimIdx, Left>(_mod);
   // generate_concrete_layout_view<DataIdx, SpaceIdx, DimIdx, Right>(_mod);
   // generate_concrete_layout_view<DataIdx, SpaceIdx, DimIdx, Stride>(_mod);
+#endif
+#if defined(ENABLE_MEMORY_TRAITS)
+  generate_concrete_trait_view<DataIdx, SpaceIdx, DimIdx, Unmanaged>(_mod);
+  generate_concrete_trait_view<DataIdx, SpaceIdx, DimIdx, Atomic>(_mod);
+  generate_concrete_trait_view<DataIdx, SpaceIdx, DimIdx, RandomAccess>(_mod);
+  generate_concrete_trait_view<DataIdx, SpaceIdx, DimIdx, Restrict>(_mod);
 #endif
 }
 
@@ -245,6 +306,7 @@ void generate_dynamic_layout_view(py::module &_mod) {
   using Vp              = Tp;
   using Sp              = typename space_spec_t::type;
   using Lp              = typename layout_spec_t::type;
+  using Mp              = Kokkos::MemoryTraits<0>;
   using View_t          = Kokkos::DynRankView<Vp, Lp, Sp>;
 
   auto name = construct_name("_", "KokkosDynRankView", data_spec_t::label(),
@@ -253,8 +315,32 @@ void generate_dynamic_layout_view(py::module &_mod) {
                              demangle<Lp>(), ", ", demangle<Sp>());
 
   constexpr auto nIdx = DimIdx - 1;
-  Common::generate_view<View_t, Sp, Tp, nIdx>(_mod, name, desc, DimIdx,
-                                              std::make_index_sequence<nIdx>{});
+  Common::generate_view<View_t, Sp, Tp, Mp, nIdx>(
+      _mod, name, desc, DimIdx, std::make_index_sequence<nIdx>{});
+}
+#endif
+
+#if defined(ENABLE_MEMORY_TRAITS)
+template <size_t DataIdx, size_t SpaceIdx, size_t TraitIdx>
+void generate_dynamic_trait_view(py::module &_mod) {
+  constexpr auto DimIdx = ViewDataMaxDimensions;
+  using data_spec_t     = ViewDataTypeSpecialization<DataIdx>;
+  using space_spec_t    = ViewSpaceSpecialization<SpaceIdx>;
+  using trait_spec_t    = ViewMemoryTraitSpecialization<TraitIdx>;
+  using Tp              = typename data_spec_t::type;
+  using Vp              = Tp;
+  using Sp              = typename space_spec_t::type;
+  using Mp              = typename trait_spec_t::trait;
+  using View_t          = Kokkos::DynRankView<Vp, Sp, Mp>;
+
+  auto name = construct_name("_", "KokkosDynRankView", data_spec_t::label(),
+                             space_spec_t::label(), trait_spec_t::label());
+  auto desc = construct_name("", "Kokkos::DynRankView<", demangle<Vp>(), ", ",
+                             demangle<Sp>(), ", ", demangle<Mp>());
+
+  constexpr auto nIdx = DimIdx - 1;
+  Common::generate_view<View_t, Sp, Tp, Mp, nIdx>(
+      _mod, name, desc, DimIdx, std::make_index_sequence<nIdx>{});
 }
 #endif
 
@@ -269,6 +355,7 @@ void generate_dynamic_view(py::module &_mod) {
   using Tp              = typename data_spec_t::type;
   using Vp              = Tp;
   using Sp              = typename space_spec_t::type;
+  using Mp              = Kokkos::MemoryTraits<0>;
   using View_t          = Kokkos::DynRankView<Vp, Sp>;
 
   auto name = construct_name("_", "KokkosDynRankView", data_spec_t::label(),
@@ -277,13 +364,19 @@ void generate_dynamic_view(py::module &_mod) {
                              demangle<Sp>());
 
   constexpr auto nIdx = DimIdx - 1;
-  Common::generate_view<View_t, Sp, Tp, nIdx>(_mod, name, desc, DimIdx,
-                                              std::make_index_sequence<nIdx>{});
+  Common::generate_view<View_t, Sp, Tp, Mp, nIdx>(
+      _mod, name, desc, DimIdx, std::make_index_sequence<nIdx>{});
 
 #if defined(ENABLE_LAYOUTS)
   generate_dynamic_layout_view<DataIdx, SpaceIdx, Left>(_mod);
   // generate_dynamic_layout_view<DataIdx, SpaceIdx, Right>(_mod);
   // generate_dynamic_layout_view<DataIdx, SpaceIdx, Stride>(_mod);
+#endif
+#if defined(ENABLE_MEMORY_TRAITS)
+  generate_dynamic_trait_view<DataIdx, SpaceIdx, Unmanaged>(_mod);
+  generate_dynamic_trait_view<DataIdx, SpaceIdx, Atomic>(_mod);
+  generate_dynamic_trait_view<DataIdx, SpaceIdx, RandomAccess>(_mod);
+  generate_dynamic_trait_view<DataIdx, SpaceIdx, Restrict>(_mod);
 #endif
 }
 
@@ -445,6 +538,24 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
   };
   kokkos.def("get_layout", _get_ltype_name, "Get the layout type");
   kokkos.def("get_layout", _get_ltype_idx, "Get the layout type");
+
+  // an enumeration of the memory traits for views
+  py::enum_<KokkosViewMemoryTrait> _memtrait(kokkos, "memory_trait",
+                                             "View memory traits");
+  generate_enumeration<ViewMemoryTraitSpecialization>(
+      _memtrait, std::make_index_sequence<ViewMemoryTraitEnd>{});
+  _memtrait.export_values();
+
+  auto _get_memtrait_name = [](int idx) {
+    return get_enumeration<ViewMemoryTraitSpecialization>(
+        idx, std::make_index_sequence<ViewMemoryTraitEnd>{});
+  };
+  auto _get_memtype_idx = [](std::string str) {
+    return get_enumeration<ViewMemoryTraitSpecialization>(
+        str, std::make_index_sequence<ViewMemoryTraitEnd>{});
+  };
+  kokkos.def("get_memory_trait", _get_memtrait_name, "Get the memory trait");
+  kokkos.def("get_memory_trait", _get_memtype_idx, "Get the memory trait");
 
   // generate buffers for all the data types
   generate_concrete_view(kokkos, std::make_index_sequence<ViewDataTypesEnd>{});

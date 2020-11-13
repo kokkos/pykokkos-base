@@ -18,6 +18,7 @@ ADD_FEATURE(Kokkos_DIR "Kokkos installation")
 ADD_OPTION(ENABLE_INTERNAL_PYBIND11 "Build with pybind11 submodule" ON)
 ADD_OPTION(ENABLE_EXPERIMENTAL "Build the experimental code" OFF)
 ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)" OFF)
+ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)" OFF)
 ADD_OPTION(ENABLE_WERROR "Build with -Werror" OFF)
 ADD_OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 # don't build a static python module
@@ -72,6 +73,10 @@ ENDIF()
 
 IF(ENABLE_LAYOUTS)
     TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_LAYOUTS)
+ENDIF()
+
+IF(ENABLE_MEMORY_TRAITS)
+    TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_MEMORY_TRAITS)
 ENDIF()
 
 IF(ENABLE_WERROR)
