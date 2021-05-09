@@ -1,4 +1,4 @@
-# kokkos-python
+# pykokkos-base
 
 ## Example
 
