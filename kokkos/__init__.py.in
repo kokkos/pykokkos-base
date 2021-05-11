@@ -67,6 +67,7 @@ try:
         "version",
         "libpykokkos",
         "array",
+        "unmanaged_array",
     ]
 
 except Exception as e:
