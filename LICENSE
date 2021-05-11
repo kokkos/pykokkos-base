@@ -1,14 +1,15 @@
-/*
 //@HEADER
 // ************************************************************************
-//
+// 
 //                        Kokkos v. 3.0
 //       Copyright (2020) National Technology & Engineering
 //               Solutions of Sandia, LLC (NTESS).
-//
+// 
 // Under the terms of Contract DE-NA0003525 with NTESS,
 // the U.S. Government retains certain rights in this software.
 //
+// Kokkos is licensed under 3-clause BSD terms of use:
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -37,38 +38,6 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Questions? Contact Christian R. Trott (crtrott@sandia.gov)
-//
+// 
 // ************************************************************************
 //@HEADER
-*/
-
-#include "user.hpp"
-
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
-#include <pybind11/pybind11.h>
-
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
-namespace py = pybind11;
-
-//--------------------------------------------------------------------------------------//
-//
-//        The python module
-//
-//--------------------------------------------------------------------------------------//
-
-PYBIND11_MODULE(ex_generate, ex) {
-  ///
-  /// This is a python binding to the user-defined generate_view function
-  /// declared in user.hpp which returns a Kokkos::View. This function is called
-  /// from ex-numpy.py
-  ///
-  ex.def("generate_view", &generate_view, "Generate a random view",
-         py::arg("n") = 10);
-}

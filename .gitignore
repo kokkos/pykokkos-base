@@ -39,6 +39,7 @@ timing_report*
 /TiMemory-*
 /dist
 /.eggs
+/*.egg-info
 /MANIFEST
 
 # info files

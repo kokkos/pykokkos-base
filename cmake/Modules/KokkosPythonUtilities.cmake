@@ -1,8 +1,9 @@
+#
+# useful macros and functions for generic tasks
+#
+
 # include guard
 include_guard(DIRECTORY)
-
-# MacroUtilities - useful macros and functions for generic tasks
-#
 
 include(CMakeDependentOption)
 include(CMakeParseArguments)

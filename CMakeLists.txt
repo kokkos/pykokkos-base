@@ -1,62 +1,51 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
 
-PROJECT(Kokkos-python LANGUAGES C CXX VERSION 0.0.1)
-
-SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
-
-INCLUDE(KokkosPythonUtilities)
-INCLUDE(CheckCXXSourceCompiles)
-
-IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
-    SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+# set this to a known value to we can override the cache if user doesn't specify install dir
+IF(NOT SKBUILD)
+    SET(CMAKE_INSTALL_PREFIX "/kokkos-install-dir" CACHE PATH "Installation directory")
 ENDIF()
 
-ADD_FEATURE(CMAKE_BUILD_TYPE "Build type")
-ADD_FEATURE(CMAKE_INSTALL_PREFIX "Installation prefix")
-ADD_FEATURE(Kokkos_CXX_STANDARD "Kokkos C++ Standard")
-ADD_FEATURE(Kokkos_DIR "Kokkos installation")
-ADD_OPTION(ENABLE_INTERNAL_PYBIND11 "Build with pybind11 submodule" ON)
-ADD_OPTION(ENABLE_EXPERIMENTAL "Build the experimental code" OFF)
-ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)" OFF)
-ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)" OFF)
-ADD_OPTION(ENABLE_WERROR "Build with -Werror" OFF)
-ADD_OPTION(BUILD_EXAMPLES "Build the examples" OFF)
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
+
+INCLUDE(KokkosPythonSetup)
+
+PROJECT(
+    pykokkos-base
+    LANGUAGES   C CXX
+    VERSION     ${pykokkos-base_VERSION})
+
 # don't build a static python module
 SET(BUILD_SHARED_LIBS ON)
 
 FIND_PACKAGE(Kokkos REQUIRED)
 
-# pybind11 has not migrated to CMAKE_CXX_STANDARD and neither has kokkos
-SET(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-SET(CMAKE_CXX_EXTENSIONS OFF)
-IF(NOT Kokkos_CXX_STANDARD)
-    SET(Kokkos_CXX_STANDARD ${CMAKE_CXX_STANDARD})
-ENDIF()
-UNSET(PYBIND11_CPP_STANDARD CACHE)
+INCLUDE(CheckCXXSourceCompiles)
+INCLUDE(KokkosPythonCompilers)
+INCLUDE(KokkosPythonUtilities)
+INCLUDE(KokkosPythonOptions)
+INCLUDE(KokkosPythonPackages)   # Python Interp
 
-# basically just used to get Python3_SITEARCH for installation
-FIND_PACKAGE(Python3 REQUIRED COMPONENTS Interpreter Development)
-# python binding library
-IF(ENABLE_INTERNAL_PYBIND11)
-    CHECKOUT_GIT_SUBMODULE(RECURSIVE
-    RELATIVE_PATH pybind11
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-    ADD_SUBDIRECTORY(pybind11)
-ELSE()
-    FIND_PACKAGE(pybind11 REQUIRED)
+SET(PYBIND11_EXTRAS NO_EXTRAS)
+IF(ENABLE_THIN_LTO)
+    SET(PYBIND11_EXTRAS THIN_LTO)
 ENDIF()
 
-PYBIND11_ADD_MODULE(libpykokkos MODULE THIN_LTO
+PYBIND11_ADD_MODULE(libpykokkos MODULE ${PYBIND11_EXTRAS}
     ${CMAKE_CURRENT_LIST_DIR}/src/libpykokkos.cpp
     ${CMAKE_CURRENT_LIST_DIR}/include/libpykokkos.hpp)
 
 # add extra build properties to this target
 ADD_LIBRARY(libpykokkos-build-options INTERFACE)
+ADD_LIBRARY(libpykokkos::build-options ALIAS libpykokkos-build-options)
 TARGET_INCLUDE_DIRECTORIES(libpykokkos-build-options INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
-TARGET_COMPILE_OPTIONS(libpykokkos-build-options INTERFACE
-    -W -Wall -Wextra -fvisibility=default)
+
+PYKOKKOS_TARGET_FLAG(
+    libpykokkos-build-options
+    CHECK_FLAGS
+    MODE        INTERFACE
+    FLAGS       -W -Wall -Wextra /bigobj #-fvisibility=default
+    LANGUAGES   CXX)
 
 TRY_COMPILE(ENABLE_DEMANGLE
     ${PROJECT_BINARY_DIR}
@@ -79,8 +68,29 @@ IF(ENABLE_MEMORY_TRAITS)
     TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_MEMORY_TRAITS)
 ENDIF()
 
-IF(ENABLE_WERROR)
-    TARGET_COMPILE_OPTIONS(libpykokkos-build-options INTERFACE -Werror)
+PYKOKKOS_TARGET_FLAG(
+    libpykokkos-build-options
+    CHECK_FLAGS
+    MODE        INTERFACE
+    FLAGS       -Werror
+    LANGUAGES   CXX
+    OPTION_NAME ENABLE_WERROR)
+
+IF(ENABLE_TIMING AND CMAKE_CXX_COMPILER_IS_NVCC_WRAPPER)
+    PYKOKKOS_TARGET_FLAG(
+        libpykokkos-build-options
+        MODE        INTERFACE
+        FLAGS       -time=${PROJECT_BINARY_DIR}/nvcc-compile-time.csv
+        LANGUAGES   CXX)
+ELSE()
+    PYKOKKOS_TARGET_FLAG(
+        libpykokkos-build-options
+        CHECK_FLAGS
+        BREAK_ON_SUCCESS
+        MODE        INTERFACE
+        FLAGS       -ftime-trace -ftime-report
+        LANGUAGES   CXX
+        OPTION_NAME ENABLE_TIMING)
 ENDIF()
 
 # link to kokkos and the custom build properties
@@ -96,7 +106,13 @@ SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
     PDB_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos)
 
-SET(Kokkos_INSTALL_PYTHONDIR ${Python3_SITEARCH}/kokkos)
+IF(SKBUILD)
+    SET(Kokkos_INSTALL_PYTHONDIR ${CMAKE_INSTALL_PREFIX})
+    SET(Kokkos_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/kokkos)
+ELSE()
+    SET(Kokkos_INSTALL_PYTHONDIR ${Python3_SITEARCH}/kokkos)
+    SET(Kokkos_INSTALL_LIBDIR ${Kokkos_INSTALL_PYTHONDIR})
+ENDIF()
 
 # figure out if we can install to Python3_SITEARCH
 EXECUTE_PROCESS(
@@ -105,7 +121,7 @@ EXECUTE_PROCESS(
     ERROR_VARIABLE ERR_MSG
     RESULT_VARIABLE ERR_CODE)
 
-IF(ERR_CODE)
+IF(ERR_CODE AND NOT SKBUILD)
     # get the python directory name, e.g. 'python3.6' from
     # '/opt/local/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6'
     get_filename_component(PYDIR "${Python3_STDLIB}" NAME)
@@ -114,7 +130,7 @@ IF(ERR_CODE)
 ENDIF()
 
 INSTALL(TARGETS libpykokkos
-    DESTINATION ${Kokkos_INSTALL_PYTHONDIR})
+    DESTINATION ${Kokkos_INSTALL_LIBDIR})
 
 INSTALL(FILES ${PROJECT_BINARY_DIR}/kokkos/__init__.py
     DESTINATION ${Kokkos_INSTALL_PYTHONDIR})
@@ -141,4 +157,6 @@ IF(BUILD_EXAMPLES)
     ADD_SUBDIRECTORY(examples)
 ENDIF()
 
-PRINT_FEATURES()
+IF(NOT ENABLE_QUIET)
+    PRINT_FEATURES()
+ENDIF()
