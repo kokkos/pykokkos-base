@@ -149,7 +149,7 @@ if __name__ == "__main__":
 ```console
 mkdir build
 cd build
-cmake -DBUILD_EXAMPLES=ON ..
+cmake -DENABLE_EXAMPLES=ON ..
 make
 python ./ex-numpy.py
 ```
