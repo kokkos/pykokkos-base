@@ -14,15 +14,12 @@ PROJECT(
     LANGUAGES   C CXX
     VERSION     ${pykokkos-base_VERSION})
 
-# don't build a static python module
-SET(BUILD_SHARED_LIBS ON)
-
 FIND_PACKAGE(Kokkos REQUIRED)
 
-INCLUDE(CheckCXXSourceCompiles)
-INCLUDE(KokkosPythonCompilers)
-INCLUDE(KokkosPythonUtilities)
-INCLUDE(KokkosPythonOptions)
+INCLUDE(KokkosPythonFormat)     # format target
+INCLUDE(KokkosPythonCompilers)  # compiler identification
+INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
+INCLUDE(KokkosPythonOptions)    # cache options and various variable settings
 INCLUDE(KokkosPythonPackages)   # Python Interp
 
 SET(PYBIND11_EXTRAS NO_EXTRAS)
@@ -44,7 +41,7 @@ PYKOKKOS_TARGET_FLAG(
     libpykokkos-build-options
     CHECK_FLAGS
     MODE        INTERFACE
-    FLAGS       -W -Wall -Wextra /bigobj #-fvisibility=default
+    FLAGS       -W -Wall -Wextra /bigobj -fvisibility=default
     LANGUAGES   CXX)
 
 TRY_COMPILE(ENABLE_DEMANGLE

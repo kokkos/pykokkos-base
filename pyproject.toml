@@ -87,5 +87,8 @@ exclude = '''
   | dist
   | pybind11
   | scripts
+  | _skbuild
+  | __pycache__
+  | \.pyc
 )/
 '''

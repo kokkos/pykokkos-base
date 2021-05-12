@@ -3,6 +3,10 @@
 #
 INCLUDE(KokkosPythonUtilities)
 
+# don't build a static python module
+SET(BUILD_SHARED_LIBS ON)
+
+# force to release if not specified
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 ENDIF()

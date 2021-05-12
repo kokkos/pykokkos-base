@@ -67,7 +67,7 @@ def array(
     # print("dtype = {}, space = {}".format(dtype, space))
     _prefix = "KokkosView"
     if dynamic:
-        _prefix = "KokkosDynView"
+        _prefix = "KokkosDynRankView"
     _space = lib.get_memory_space(space)
     _dtype = lib.get_dtype(dtype)
     _name = None
@@ -94,10 +94,15 @@ def array(
 def unmanaged_array(array, dtype=lib.double, space=lib.HostSpace, dynamic=False):
     _prefix = "KokkosView"
     if dynamic:
-        _prefix = "KokkosDynView"
+        _prefix = "KokkosDynRankView"
     _dtype = lib.get_dtype(dtype)
     _space = lib.get_memory_space(space)
     _unmanaged = lib.get_memory_trait(lib.Unmanaged)
-    _name = "{}_{}_{}_{}_{}".format(_prefix, _dtype, _space, _unmanaged, array.ndim)
+    if dynamic is True:
+        _name = "{}_{}_{}_{}".format(_prefix, _dtype, _space, _unmanaged)
+    else:
+        if array.ndim < 1:
+            raise ValueError(array.ndim)
+        _name = "{}_{}_{}_{}_{}".format(_prefix, _dtype, _space, _unmanaged, array.ndim)
 
     return getattr(lib, _name)(array, array.shape)
