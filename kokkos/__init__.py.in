@@ -66,11 +66,11 @@ try:
         "build_info",
         "version",
         "libpykokkos",
-        "array",
+        "array",            # helper functions
         "unmanaged_array",
-        "initialize",
+        "initialize",       # bindings
         "finalize",
-        "int16",
+        "int16",            # data types
         "int32",
         "int64",
         "uint16",
@@ -78,7 +78,7 @@ try:
         "uint64",
         "float",
         "double",
-        "HostSpace",
+        "HostSpace",        # memory spaces
         "AnonymousSpace",
         "HBWSpace",
         "OpenMPTargetSpace",
@@ -86,10 +86,13 @@ try:
         "HIPSpace",
         "CudaSpace",
         "CudaUVMSpace",
-        "get_memory_space",
-        "get_dtype",
+        "get_dtype",        # get enumeration from string or vice-versa
         "get_layout",
+        "get_memory_space",
         "get_memory_trait",
+        "get_layout_available",         # query build support
+        "get_memory_space_available",
+        "get_memory_trait_available",
     ]
 
 except Exception as e:

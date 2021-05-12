@@ -42,43 +42,87 @@
 //@HEADER
 */
 
-#include "libpykokkos.hpp"
+#pragma once
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
+namespace py = pybind11;
+
+#include <array>
+#include <cstdint>
+#include <cstdio>
+#include <initializer_list>
+#include <sstream>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <typeinfo>
+
+#if defined(ENABLE_DEMANGLE)
+#include <cxxabi.h>
+#endif
 
 //--------------------------------------------------------------------------------------//
-//
-//        The python module
-//
+
+template <bool B, typename T = int>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
 //--------------------------------------------------------------------------------------//
 
-PYBIND11_MODULE(libpykokkos, kokkos) {
-  // Initialize kokkos
-  auto _initialize = [&]() {
-    // python system module
-    py::module sys = py::module::import("sys");
-    // get the arguments for python system module
-    py::object args = sys.attr("argv");
-    auto argv       = args.cast<py::list>();
-    int _argc       = argv.size();
-    char **_argv    = new char *[argv.size()];
-    for (int i = 0; i < _argc; ++i)
-      _argv[i] = strdup(argv[i].cast<std::string>().c_str());
-    Kokkos::initialize(_argc, _argv);
-    for (int i = 0; i < _argc; ++i) free(_argv[i]);
-    delete[] _argv;
-  };
+#define FOLD_EXPRESSION(...) \
+  ::consume_parameters(::std::initializer_list<int>{(__VA_ARGS__, 0)...})
 
-  // Finalize kokkos
-  auto _finalize = []() {
-    py::module gc = py::module::import("gc");
-    gc.attr("collect")();
-    Kokkos::finalize();
-  };
+//--------------------------------------------------------------------------------------//
 
-  kokkos.def("initialize", _initialize, "Initialize Kokkos");
-  kokkos.def("finalize", _finalize, "Finalize Kokkos");
+template <typename... Args>
+void consume_parameters(Args &&...) {}
 
-  generate_available(kokkos);
-  generate_enumeration(kokkos);
-  generate_dynamic_view(kokkos);
-  generate_concrete_view(kokkos);
+//--------------------------------------------------------------------------------------//
+
+inline std::string demangle(const char *_cstr) {
+#if defined(ENABLE_DEMANGLE)
+  // demangling a string when delimiting
+  int _ret      = 0;
+  char *_demang = abi::__cxa_demangle(_cstr, 0, 0, &_ret);
+  if (_demang && _ret == 0)
+    return std::string(const_cast<const char *>(_demang));
+  else
+    return _cstr;
+#else
+  return _cstr;
+#endif
 }
+
+//--------------------------------------------------------------------------------------//
+
+inline std::string demangle(const std::string &_str) {
+  return demangle(_str.c_str());
+}
+
+//--------------------------------------------------------------------------------------//
+
+template <typename Tp>
+inline std::string demangle() {
+  return demangle(typeid(Tp).name());
+}
+
+//--------------------------------------------------------------------------------------//
+//  this is used to mark memory spaces as unavailable
+//
+template <typename Tp>
+struct is_available : std::true_type {};
+
+#define DISABLE_TYPE(TYPE) \
+  template <>              \
+  struct is_available<TYPE> : std::false_type {};

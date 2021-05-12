@@ -27,9 +27,22 @@ IF(ENABLE_THIN_LTO)
     SET(PYBIND11_EXTRAS THIN_LTO)
 ENDIF()
 
-PYBIND11_ADD_MODULE(libpykokkos MODULE ${PYBIND11_EXTRAS}
+SET(libpykokkos_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/libpykokkos.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/libpykokkos.hpp)
+    ${CMAKE_CURRENT_LIST_DIR}/src/concrete_view.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/dynamic_view.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/enumeration.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/available.cpp)
+
+SET(libpykokkos_HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/include/libpykokkos.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/common.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/traits.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/views.hpp)
+
+PYBIND11_ADD_MODULE(libpykokkos MODULE ${PYBIND11_EXTRAS}
+    ${libpykokkos_SOURCES}
+    ${libpykokkos_HEADERS})
 
 # add extra build properties to this target
 ADD_LIBRARY(libpykokkos-build-options INTERFACE)
@@ -150,7 +163,7 @@ FOREACH(_FILE ${PYPACKAGE_FILES})
 ENDFOREACH()
 
 # build the examples, not designed to be built stand-alone
-IF(BUILD_EXAMPLES)
+IF(ENABLE_EXAMPLES)
     ADD_SUBDIRECTORY(examples)
 ENDIF()
 
