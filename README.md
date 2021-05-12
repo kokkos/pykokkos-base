@@ -1,5 +1,84 @@
 # pykokkos-base
 
+This package contains the minimal set of bindings for [Kokkos](https://github.com/kokkos/kokkos)
+interoperability with Python:
+
+- `Kokkos::initialize(...)`
+- `Kokkos::finalize()`
+- `Kokkos::View<...>`
+- `Kokkos::DynRankView<...>`
+
+By importing this package in Python, you can pass the supported Kokkos Views and DynRankViews
+from C++ to Python and vice-versa. Furthermore, in Python, these bindings provide interoperability
+with numpy and cupy arrays:
+
+```python
+import kokkos
+import numpy as np
+
+view = kokkos.view([2, 2], dtype=kokkos.double, space=kokkos.CudaUVMSpace,
+                   layout=Kokkos.LayoutRight, trait=kokkos.RandomAccess,
+                   dynamic=False)
+
+arr = np.array(view, copy=False)
+```
+
+> This package depends on a pre-existing installation of Kokkos
+
+## Writing Kokkos in Python
+
+In order to write native Kokkos in Python, see [pykokkos](https://github.com/kokkos/pykokkos).
+
+## Installation
+
+You can install this package via CMake or Python's `setup.py`. There are two important cmake options:
+
+- `ENABLE_LAYOUTS`
+- `ENABLE_MEMORY_TRAITS`
+
+By default, CMake will enable these options if the Kokkos installation was not built with CUDA support.
+If Kokkos was built with CUDA support, these options will be disabled by default due to unreasonable
+compilation times (> 1 hour).
+
+### Configuring Options via CMake
+
+```console
+cmake -DENABLE_LAYOUTS=ON -DENABLE_MEMORY_TRAITS=OFF /path/to/source`
+```
+
+### Configuring Options via `setup.py`
+
+There are three ways to configure the options:
+
+1. Via the Python argparse options `--enable-<option>` and `--disable-<option>`
+2. Setting the `PYKOKKOS_BASE_SETUP_ARGS` environment variable to the CMake options
+3. Passing in the CMake options after a `--`
+
+All three lines below are equivalent:
+
+```console
+python setup.py install --enable-layouts --disable-memory-traits
+PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_LAYOUTS=ON -DENABLE_MEMORY_TRAITS=OFF" python setup.py install
+python setup.py install -- -DENABLE_LAYOUTS=ON -DENABLE_MEMORY_TRAITS=OFF
+```
+
+### Configuring Options via `pip`
+
+Pip does not handle build options well. Thus, it is recommended to use the `PYKOKKOS_BASE_SETUP_ARGS`
+environment variable noted above. However, using the `--install-option` for pip is possible but
+each "space" must have it's own `--install-option`, e.g. all of the following are equivalent:
+All three lines below are equivalent:
+
+```console
+pip install pykokkos-base --install-option=--enable-layouts --install-option=--disable-memory-traits
+pip install pykokkos-base --install-option=-- --install-option=-DENABLE_LAYOUTS=ON --install-option=-DENABLE_MEMORY_TRAITS=OFF
+pip install pykokkos-base --install-option={--enable-layouts,--disable-memory-traits}
+pip install pykokkos-base --install-option={--,-DENABLE_LAYOUTS=ON,-DENABLE_MEMORY_TRAITS=OFF}
+```
+
+> `pip install pykokkos-base` will build against the latest release in the PyPi repository.
+> In order to pip install from this repository, use `pip install --user -e .`
+
 ## Example
 
 ### Overview
@@ -17,7 +96,7 @@ This example is designed to emulate a work-flow where the user has code using Ko
   - This is the implementation of the user's code which returns a `Kokkos::View<double**, Kokkos::HostSpace>`
 - [ex-numpy.py](https://github.com/kokkos/kokkos-python/blob/main/examples/ex-numpy.py)
   - This is the "main"
-  
+
 #### ex-numpy.py
 
 ```python
