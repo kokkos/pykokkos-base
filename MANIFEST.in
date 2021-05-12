@@ -27,6 +27,8 @@ recursive-include .requirements *
 global-exclude *.pyc
 global-exclude *.git*
 global-exclude *__pycache__*
+global-exclude kokkos/libpykokkos.*
+global-exclude kokkos/__init__.py
 
 # recursive excludes
 
@@ -34,3 +36,4 @@ recursive-exclude kokkos.egg-info *
 recursive-exclude _skbuild *
 recursive-exclude build *
 recursive-exclude dist *
+recursive-exclude kokkos/__pycache__ *
