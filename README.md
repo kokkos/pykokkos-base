@@ -16,9 +16,9 @@ with numpy and cupy arrays:
 import kokkos
 import numpy as np
 
-view = kokkos.view([2, 2], dtype=kokkos.double, space=kokkos.CudaUVMSpace,
-                   layout=Kokkos.LayoutRight, trait=kokkos.RandomAccess,
-                   dynamic=False)
+view = kokkos.array([2, 2], dtype=kokkos.double, space=kokkos.CudaUVMSpace,
+                    layout=Kokkos.LayoutRight, trait=kokkos.RandomAccess,
+                    dynamic=False)
 
 arr = np.array(view, copy=False)
 ```
