@@ -251,4 +251,5 @@ with warnings.catch_warnings():
         long_description=get_long_description(),
         long_description_content_type="text/markdown",
         install_requires=parse_requirements("requirements.txt"),
+        project_urls={"kokkos": "https://github.com/kokkos/kokkos"},
     )
