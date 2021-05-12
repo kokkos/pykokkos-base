@@ -1,0 +1,36 @@
+
+# direct includes
+
+include CMakeLists.txt
+include VERSION
+include LICENSE
+include README.md
+include CHANGES.md
+include CONTRIBUTING.md
+include CODE_OF_CONDUCT.md
+include requirements.txt
+
+# recursive includes
+
+recursive-include cmake *
+recursive-include kokkos *
+recursive-include examples *
+recursive-include include *
+recursive-include src *
+recursive-include pybind11 *
+recursive-include tests *
+recursive-include scripts *
+recursive-include .requirements *
+
+# global exclude
+
+global-exclude *.pyc
+global-exclude *.git*
+global-exclude *__pycache__*
+
+# recursive excludes
+
+recursive-exclude kokkos.egg-info *
+recursive-exclude _skbuild *
+recursive-exclude build *
+recursive-exclude dist *

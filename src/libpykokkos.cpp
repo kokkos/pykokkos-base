@@ -49,9 +49,18 @@
 #include "Kokkos_DynamicView.hpp"
 #include "Kokkos_DynRankView.hpp"
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #include <cstdio>
 #include <typeinfo>

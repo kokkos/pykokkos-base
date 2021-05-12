@@ -450,20 +450,6 @@ struct get_item {
   static auto set() {
     return impl_type::template set<Vp>();
   }
-
-  template <typename Vp>
-  static auto fill(Tp &_obj, Vp _val) {
-    auto arr = array_type{};
-    arr.fill(0);
-    for (size_t i = 0; i < Idx; ++i) {
-      for (auto &itr : get_extents(_obj, sequence)) {
-        for (size_t j = 0; j < itr; ++j) {
-          arr[i] = j;
-        }
-      }
-    }
-    return impl_type::template set<Vp>();
-  }
 };
 
 //--------------------------------------------------------------------------------------//

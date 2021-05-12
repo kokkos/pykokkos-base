@@ -20,10 +20,15 @@ settings.json
 
 # setup.py files
 /dist*
-/TiMemory.*
-/timemory.*
 __pycache__
 *.pyc
+/kokkos-*
+/dist
+/.eggs
+/*.egg-info
+/MANIFEST
+/kokkos/libpykokkos.*
+/kokkos/__init__.py
 
 # miscellaneous
 timing_report*
@@ -34,18 +39,6 @@ timing_report*
 
 # macOS Finder files
 .DS_Store
-
-# setup.py
-/TiMemory-*
-/dist
-/.eggs
-/MANIFEST
-
-# info files
-/timemory/mpi_support/*.txt
-
-# unused examples
-/examples/ex4
 
 # documentation
 /html
@@ -63,5 +56,3 @@ timing_report*
 
 # stashed source tree
 /.stash
-/source/tests/timemory-*output
-/examples/ex-pmpi/mfdn-*
