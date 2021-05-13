@@ -35,7 +35,7 @@ jobs:
       run:
         python -m pip install 'cmake==3.18.4' &&
         git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
-        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source &&
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON -DBUILD_SHARED_LIBS=ON /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
         sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
@@ -85,20 +85,26 @@ jobs:
       run:
         python -m pip install 'cmake==3.18.4' &&
         git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
-        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON -DCMAKE_CXX_STANDARD=17 /tmp/kokkos-source &&
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
         sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
     - name: Build
       run:
-        python -m pip install -r requirements.txt
-        python setup.py install --enable-layouts --disable-memory-traits --enable-examples
+        python -m pip install -r requirements.txt &&
+        python setup.py install --enable-layouts --disable-memory-traits -- -DENABLE_EXAMPLES=ON
 
     - name: Import Test
       run:
         mkdir scratch &&
         cd scratch &&
         python -c "import kokkos; print(kokkos.__file__)"
+
+    - name: Test
+      working-directory: ${{github.workspace}}/_skbuild
+      run:
+        cd ./*/cmake-build
+        python ./ex-numpy.py
 
   pip-build:
     runs-on: ubuntu-latest
@@ -124,7 +130,7 @@ jobs:
       run:
         python -m pip install 'cmake==3.18.4' &&
         git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
-        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_PTHREAD=ON -DCMAKE_CXX_STANDARD=17 /tmp/kokkos-source &&
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_PTHREAD=ON -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
         sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
