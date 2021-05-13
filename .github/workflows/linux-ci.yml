@@ -164,7 +164,7 @@ jobs:
       # Build your program with the given configuration
       run:
         PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_EXAMPLES=ON -DENABLE_WERROR=ON" python -m
-          pip install -v --user --no-build-isolation .
+          pip install -v --user -e .
 
     - name: Import Test
       run:

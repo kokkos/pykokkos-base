@@ -3,6 +3,13 @@
 #
 INCLUDE(KokkosPythonUtilities)
 
+# synchronize Python3_EXECUTABLE and PYTHON_EXECUTABLE
+if(Python3_EXECUTABLE)
+    set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+elseif(PYTHON_EXECUTABLE)
+    set(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
+endif()
+
 # basically just used to get Python3_SITEARCH for installation
 FIND_PACKAGE(Python3 REQUIRED COMPONENTS Interpreter Development)
 IF(NOT PYTHON_VERSION_STRING)
