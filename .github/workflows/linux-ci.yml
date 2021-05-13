@@ -163,8 +163,10 @@ jobs:
     - name: Build
       # Build your program with the given configuration
       run:
-        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_EXAMPLES=ON -DENABLE_WERROR=ON" python -m
+        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON" python -m
           pip install -v --user -e .
+          --install-option=--disable-memory-traits
+          --install-option=--cxx-standard=17
 
     - name: Import Test
       run:
