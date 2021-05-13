@@ -37,7 +37,7 @@ jobs:
         git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
-        cmake --build /tmp/kokkos-build --target install --parallel 2
+        sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
     - name: Configure CMake
       run:
@@ -86,7 +86,7 @@ jobs:
         git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
-        cmake --build /tmp/kokkos-build --target install --parallel 2
+        sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
     - name: Build
       run:
@@ -124,7 +124,7 @@ jobs:
         git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
-        cmake --build /tmp/kokkos-build --target install --parallel 2
+        sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
     - name: Build
       # Build your program with the given configuration
