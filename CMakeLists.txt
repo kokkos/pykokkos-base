@@ -126,7 +126,7 @@ ENDIF()
 
 # figure out if we can install to Python3_SITEARCH
 EXECUTE_PROCESS(
-    COMMAND ${CMAKE_COMMAND} -E touch ${Python3_SITEARCH}/kokkos/__init__.py
+    COMMAND ${CMAKE_COMMAND} -E touch ${Python3_SITEARCH}/.__kokkos__init__.py
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     ERROR_VARIABLE ERR_MSG
     RESULT_VARIABLE ERR_CODE)
@@ -141,6 +141,10 @@ IF(ERR_CODE AND NOT SKBUILD)
     set(Kokkos_INSTALL_PYTHONDIR lib/${PYDIR}/site-packages/kokkos)
     set(Kokkos_INSTALL_LIBDIR    lib/${PYDIR}/site-packages/kokkos)
 ENDIF()
+
+EXECUTE_PROCESS(
+    COMMAND ${CMAKE_COMMAND} -E rm ${Python3_SITEARCH}/.__kokkos__init__.py
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
 INSTALL(TARGETS libpykokkos
     DESTINATION ${Kokkos_INSTALL_LIBDIR})
