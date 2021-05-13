@@ -161,11 +161,10 @@ jobs:
         sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
     - name: Build
-      # Build your program with the given configuration
       run:
         python -m pip install -r requirements.txt &&
         PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON" python -m
-          pip install -v --user --no-deps -e build
+          pip install -v --user --no-deps -e .
           --install-option=--disable-memory-traits
           --install-option=--cxx-standard=17
 
