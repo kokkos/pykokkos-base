@@ -165,6 +165,8 @@ FOREACH(_FILE ${PYPACKAGE_FILES})
     SET(_OUT_FILE ${PROJECT_BINARY_DIR}/${_OUT_PATH}/${_OUT_NAME}.py)
     # put version, python interpreter, etc. in the file for reference
     CONFIGURE_FILE(${_FILE} ${_OUT_FILE} @ONLY)
+    # patch duplicated subfolder
+    STRING(REPLACE "kokkos/kokkos" "kokkos" _OUT_PATH "${Kokkos_INSTALL_PYTHONDIR}/${_OUT_PATH}")
     # install to the correct folder structure
     INSTALL(FILES ${_OUT_FILE} DESTINATION ${Kokkos_INSTALL_PYTHONDIR}/${_OUT_PATH})
 ENDFOREACH()
