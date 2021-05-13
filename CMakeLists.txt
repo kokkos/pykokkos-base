@@ -118,10 +118,10 @@ SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
 
 IF(SKBUILD)
     SET(Kokkos_INSTALL_PYTHONDIR ${CMAKE_INSTALL_PREFIX})
-    SET(Kokkos_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/kokkos)
+    SET(Kokkos_INSTALL_LIBDIR    ${CMAKE_INSTALL_PREFIX}/kokkos)
 ELSE()
     SET(Kokkos_INSTALL_PYTHONDIR ${Python3_SITEARCH}/kokkos)
-    SET(Kokkos_INSTALL_LIBDIR ${Kokkos_INSTALL_PYTHONDIR})
+    SET(Kokkos_INSTALL_LIBDIR    ${Python3_SITEARCH}/kokkos)
 ENDIF()
 
 # figure out if we can install to Python3_SITEARCH
@@ -137,6 +137,7 @@ IF(ERR_CODE AND NOT SKBUILD)
     get_filename_component(PYDIR "${Python3_STDLIB}" NAME)
     # Should not be CMAKE_INSTALL_LIBDIR! Python won't look in a lib64 folder
     set(Kokkos_INSTALL_PYTHONDIR lib/${PYDIR}/site-packages/kokkos)
+    set(Kokkos_INSTALL_LIBDIR    lib/${PYDIR}/site-packages/kokkos)
 ENDIF()
 
 INSTALL(TARGETS libpykokkos
