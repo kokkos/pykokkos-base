@@ -62,13 +62,15 @@ jobs:
       run:
         mkdir scratch &&
         cd scratch &&
+        export PYTHONPATH=/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         python -c "import kokkos; print(kokkos.__file__)"
 
     - name: Test
       working-directory: ${{github.workspace}}/build
       run:
+        export PYTHONPATH=${PWD}:/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         ls &&
-        PYTHONPATH=${PWD}:${PYTHONPATH} python ./ex-numpy.py
+        python ./ex-numpy.py
 
   python-build:
     runs-on: ubuntu-latest

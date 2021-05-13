@@ -131,6 +131,8 @@ EXECUTE_PROCESS(
     ERROR_VARIABLE ERR_MSG
     RESULT_VARIABLE ERR_CODE)
 
+ADD_FEATURE(Python3_SITEARCH "Python site-packages directory")
+
 IF(ERR_CODE AND NOT SKBUILD)
     # get the python directory name, e.g. 'python3.6' from
     # '/opt/local/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6'
