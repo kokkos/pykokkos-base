@@ -11,28 +11,101 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  cmake-build:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
 
+    - name: Update container
+      run:
+        apt-get update
+        apt-get install -y build-essential python3 python3-pip g++
+
+    - name: Install Kokkos
+      run:
+        python3 -m pip install 'cmake==3.18.4'
+        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source
+        cmake --build /tmp/kokkos-build --target all --parallel 2
+        cmake --build /tmp/kokkos-build --target install --parallel 2
+
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run:
+        python3 -m pip install -r requirements.txt
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DENABLE_ALL=OFF -DENABLE_EXAMPLES=ON
 
     - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run:
+        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Import Test
+      working-directory: ${{github.workspace}}/build
+      run:
+        mkdir scratch
+        cd scratch
+        python3 -c "import kokkos; print(kokkos.__file__)"
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
-      
+      run:
+        python3 ./ex-numpy.py
+
+  python-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Update container
+      run:
+        apt-get update
+        apt-get install -y build-essential python3 python3-pip
+
+    - name: Install Kokkos
+      run:
+        python3 -m pip install 'cmake==3.18.4'
+        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source
+        cmake --build /tmp/kokkos-build --target all --parallel 2
+        cmake --build /tmp/kokkos-build --target install --parallel 2
+
+    - name: Build
+      run:
+        python3 setup.py install --enable-layouts --disable-memory-traits --enable-examples
+
+    - name: Import Test
+      run:
+        mkdir scratch
+        cd scratch
+        python3 -c "import kokkos; print(kokkos.__file__)"
+
+  pip-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Update container
+      run:
+        apt-get update
+        apt-get install -y build-essential python3 python3-pip
+
+    - name: Install Kokkos
+      run:
+        python3 -m pip install 'cmake==3.18.4'
+        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source
+        cmake --build /tmp/kokkos-build --target all --parallel 2
+        cmake --build /tmp/kokkos-build --target install --parallel 2
+
+    - name: Build
+      # Build your program with the given configuration
+      run:
+        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_EXAMPLES=ON" python3 -m pip install -v -v -v --user -e .
+
+    - name: Import Test
+      run:
+        mkdir scratch
+        cd scratch
+        python3 -c "import kokkos; print(kokkos.__file__)"
