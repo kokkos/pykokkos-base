@@ -46,7 +46,8 @@ jobs:
 
     - name: Build
       run:
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        cmake --build ${{github.workspace}}/build --target all --parallel 2 &&
+        cmake --build ${{github.workspace}}/build --target install --parallel 2
 
     - name: Import Test
       working-directory: ${{github.workspace}}/build
