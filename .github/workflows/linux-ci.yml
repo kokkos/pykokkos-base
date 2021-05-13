@@ -103,7 +103,7 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/_skbuild
       run:
-        cd ./*/cmake-build
+        cd ./*/cmake-build &&
         python ./ex-numpy.py
 
   pip-build:
