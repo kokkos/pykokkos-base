@@ -2,9 +2,9 @@ name: linux-ci
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -13,26 +13,35 @@ env:
 jobs:
   cmake-build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
     - name: Update container
       run:
-        apt-get update
-        apt-get install -y build-essential python3 python3-pip g++
+        apt-get update &&
+        apt-get install -y build-essential gcc g++ &&
+        python -m pip install --upgrade pip
 
     - name: Install Kokkos
       run:
-        python3 -m pip install 'cmake==3.18.4'
-        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source
-        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source
-        cmake --build /tmp/kokkos-build --target all --parallel 2
+        python -m pip install 'cmake==3.18.4' &&
+        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source &&
+        cmake --build /tmp/kokkos-build --target all --parallel 2 &&
         cmake --build /tmp/kokkos-build --target install --parallel 2
 
     - name: Configure CMake
       run:
-        python3 -m pip install -r requirements.txt
+        python -m pip install -r requirements.txt &&
         cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DENABLE_ALL=OFF -DENABLE_EXAMPLES=ON
 
     - name: Build
@@ -42,70 +51,88 @@ jobs:
     - name: Import Test
       working-directory: ${{github.workspace}}/build
       run:
-        mkdir scratch
-        cd scratch
-        python3 -c "import kokkos; print(kokkos.__file__)"
+        mkdir scratch &&
+        cd scratch &&
+        python -c "import kokkos; print(kokkos.__file__)"
 
     - name: Test
       working-directory: ${{github.workspace}}/build
       run:
-        python3 ./ex-numpy.py
+        python ./ex-numpy.py
 
   python-build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
     - name: Update container
       run:
-        apt-get update
-        apt-get install -y build-essential python3 python3-pip
+        apt-get update &&
+        apt-get install -y build-essential gcc g++ &&
+        python -m pip install --upgrade pip
 
     - name: Install Kokkos
       run:
-        python3 -m pip install 'cmake==3.18.4'
-        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source
-        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source
-        cmake --build /tmp/kokkos-build --target all --parallel 2
+        python -m pip install 'cmake==3.18.4' &&
+        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source &&
+        cmake --build /tmp/kokkos-build --target all --parallel 2 &&
         cmake --build /tmp/kokkos-build --target install --parallel 2
 
     - name: Build
       run:
-        python3 setup.py install --enable-layouts --disable-memory-traits --enable-examples
+        python setup.py install --enable-layouts --disable-memory-traits --enable-examples
 
     - name: Import Test
       run:
-        mkdir scratch
-        cd scratch
-        python3 -c "import kokkos; print(kokkos.__file__)"
+        mkdir scratch &&
+        cd scratch &&
+        python -c "import kokkos; print(kokkos.__file__)"
 
   pip-build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
 
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
     - name: Update container
       run:
-        apt-get update
-        apt-get install -y build-essential python3 python3-pip
+        apt-get update &&
+        apt-get install -y build-essential gcc g++ &&
+        python -m pip install --upgrade pip
 
     - name: Install Kokkos
       run:
-        python3 -m pip install 'cmake==3.18.4'
-        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source
-        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source
-        cmake --build /tmp/kokkos-build --target all --parallel 2
+        python -m pip install 'cmake==3.18.4' &&
+        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON /tmp/kokkos-source &&
+        cmake --build /tmp/kokkos-build --target all --parallel 2 &&
         cmake --build /tmp/kokkos-build --target install --parallel 2
 
     - name: Build
       # Build your program with the given configuration
       run:
-        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_EXAMPLES=ON" python3 -m pip install -v -v -v --user -e .
+        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_EXAMPLES=ON" python -m pip install -v -v -v --user -e .
 
     - name: Import Test
       run:
-        mkdir scratch
-        cd scratch
-        python3 -c "import kokkos; print(kokkos.__file__)"
+        mkdir scratch &&
+        cd scratch &&
+        python -c "import kokkos; print(kokkos.__file__)"
