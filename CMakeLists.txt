@@ -168,7 +168,7 @@ FOREACH(_FILE ${PYPACKAGE_FILES})
     # patch duplicated subfolder
     STRING(REPLACE "kokkos/kokkos" "kokkos" _OUT_PATH "${Kokkos_INSTALL_PYTHONDIR}/${_OUT_PATH}")
     # install to the correct folder structure
-    INSTALL(FILES ${_OUT_FILE} DESTINATION ${Kokkos_INSTALL_PYTHONDIR}/${_OUT_PATH})
+    INSTALL(FILES ${_OUT_FILE} DESTINATION ${_OUT_PATH})
 ENDFOREACH()
 
 # build the examples, not designed to be built stand-alone
