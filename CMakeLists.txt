@@ -118,18 +118,20 @@ SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
 
 IF(SKBUILD)
     SET(Kokkos_INSTALL_PYTHONDIR ${CMAKE_INSTALL_PREFIX})
-    SET(Kokkos_INSTALL_LIBDIR ${CMAKE_INSTALL_PREFIX}/kokkos)
+    SET(Kokkos_INSTALL_LIBDIR    ${CMAKE_INSTALL_PREFIX}/kokkos)
 ELSE()
     SET(Kokkos_INSTALL_PYTHONDIR ${Python3_SITEARCH}/kokkos)
-    SET(Kokkos_INSTALL_LIBDIR ${Kokkos_INSTALL_PYTHONDIR})
+    SET(Kokkos_INSTALL_LIBDIR    ${Python3_SITEARCH}/kokkos)
 ENDIF()
 
 # figure out if we can install to Python3_SITEARCH
 EXECUTE_PROCESS(
-    COMMAND ${CMAKE_COMMAND} -E touch ${Python3_SITEARCH}/kokkos/__init__.py
+    COMMAND ${CMAKE_COMMAND} -E touch ${Python3_SITEARCH}/.__kokkos__init__.py
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     ERROR_VARIABLE ERR_MSG
     RESULT_VARIABLE ERR_CODE)
+
+ADD_FEATURE(Python3_SITEARCH "Python site-packages directory")
 
 IF(ERR_CODE AND NOT SKBUILD)
     # get the python directory name, e.g. 'python3.6' from
@@ -137,7 +139,12 @@ IF(ERR_CODE AND NOT SKBUILD)
     get_filename_component(PYDIR "${Python3_STDLIB}" NAME)
     # Should not be CMAKE_INSTALL_LIBDIR! Python won't look in a lib64 folder
     set(Kokkos_INSTALL_PYTHONDIR lib/${PYDIR}/site-packages/kokkos)
+    set(Kokkos_INSTALL_LIBDIR    lib/${PYDIR}/site-packages/kokkos)
 ENDIF()
+
+EXECUTE_PROCESS(
+    COMMAND ${CMAKE_COMMAND} -E rm ${Python3_SITEARCH}/.__kokkos__init__.py
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
 INSTALL(TARGETS libpykokkos
     DESTINATION ${Kokkos_INSTALL_LIBDIR})
@@ -158,8 +165,10 @@ FOREACH(_FILE ${PYPACKAGE_FILES})
     SET(_OUT_FILE ${PROJECT_BINARY_DIR}/${_OUT_PATH}/${_OUT_NAME}.py)
     # put version, python interpreter, etc. in the file for reference
     CONFIGURE_FILE(${_FILE} ${_OUT_FILE} @ONLY)
+    # patch duplicated subfolder
+    STRING(REPLACE "kokkos/kokkos" "kokkos" _OUT_PATH "${Kokkos_INSTALL_PYTHONDIR}/${_OUT_PATH}")
     # install to the correct folder structure
-    INSTALL(FILES ${_OUT_FILE} DESTINATION ${Kokkos_INSTALL_PYTHONDIR}/${_OUT_PATH})
+    INSTALL(FILES ${_OUT_FILE} DESTINATION ${_OUT_PATH})
 ENDFOREACH()
 
 # build the examples, not designed to be built stand-alone
