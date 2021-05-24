@@ -13,8 +13,9 @@ jobs:
   cmake-build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7', 'pypy-3.8']
+        python-version: [3.6, 3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7']
 
     steps:
     - uses: actions/checkout@v2
@@ -75,6 +76,7 @@ jobs:
   python-build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7', 'pypy-3.8']
 
@@ -130,6 +132,7 @@ jobs:
   pip-build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
 
