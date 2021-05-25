@@ -1,0 +1,9 @@
+// clang-format off
+
+#include "libpykokkos.hpp"
+
+@PROTOTYPES@
+
+void generate_view_variants(py::module &kokkos) {
+@INVOCATIONS@
+}

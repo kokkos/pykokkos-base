@@ -45,6 +45,7 @@ jobs:
     - name: Configure CMake
       run:
         python -m pip install -r requirements.txt &&
+        python -m pip install pytest &&
         cmake -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -DENABLE_LAYOUTS=OFF
@@ -70,6 +71,7 @@ jobs:
       run:
         export PYTHONPATH=${PWD}:/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         ls &&
+        pytest . &&
         python ./ex-numpy.py
 
   python-build:
@@ -108,6 +110,7 @@ jobs:
     - name: Build
       run:
         python -m pip install -r requirements.txt &&
+        python -m pip install pytest &&
         python setup.py install
           --enable-layouts
           --disable-memory-traits
@@ -118,13 +121,15 @@ jobs:
       run:
         mkdir scratch &&
         cd scratch &&
-        python -c "import kokkos; print(kokkos.__file__)"
+        python -c "import kokkos; print(kokkos.__file__)" &&
+        pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))
 
     - name: Test
       working-directory: ${{github.workspace}}/_skbuild
       run:
         cd ./*/cmake-build &&
         ls &&
+        pytest . &&
         python ./ex-numpy.py
 
   pip-build:
@@ -163,6 +168,7 @@ jobs:
     - name: Build
       run:
         python -m pip install -r requirements.txt &&
+        python -m pip install pytest &&
         PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=OFF -DCMAKE_CXX_STANDARD=17"
           python -m pip install -v --user --no-deps -e .
 
@@ -170,4 +176,5 @@ jobs:
       run:
         mkdir scratch &&
         cd scratch &&
-        python -c "import kokkos; print(kokkos.__file__)"
+        python -c "import kokkos; print(kokkos.__file__)" &&
+        pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))

@@ -50,5 +50,4 @@
 
 void generate_available(py::module& kokkos);
 void generate_enumeration(py::module& kokkos);
-void generate_dynamic_view(py::module& kokkos);
-void generate_concrete_view(py::module& kokkos);
+void generate_view_variants(py::module& kokkos);

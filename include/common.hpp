@@ -75,6 +75,41 @@ namespace py = pybind11;
 
 //--------------------------------------------------------------------------------------//
 
+template <typename...>
+struct type_list
+{};
+
+//--------------------------------------------------------------------------------------//
+
+// default definition
+template <typename... T>
+struct concat {
+  using type = type_list<T...>;
+};
+
+// append to type_list
+template <typename... T, typename... Tail>
+struct concat<type_list<T...>, Tail...> : concat<T..., Tail...> {};
+
+// combine consecutive type_lists
+template <typename... T, typename... U, typename... Tail>
+struct concat<type_list<T...>, type_list<U...>, Tail...>
+    : concat<type_list<T..., U...>, Tail...> {};
+
+template <typename... T>
+using concat_t = typename concat<T...>::type;
+
+template <template <typename> class PredicateT, bool ValueT, typename... T>
+struct gather {
+  using type = concat_t<
+      std::conditional_t<PredicateT<T>::value == ValueT, concat_t<T>, type_list<>>...>;
+};
+
+template <template <typename> class PredicateT, bool ValueT, typename... T>
+using gather_t = typename gather<PredicateT, ValueT, T...>::type;
+
+//--------------------------------------------------------------------------------------//
+
 template <bool B, typename T = int>
 using enable_if_t = typename std::enable_if<B, T>::type;
 
@@ -82,6 +117,14 @@ using enable_if_t = typename std::enable_if<B, T>::type;
 
 #define FOLD_EXPRESSION(...) \
   ::consume_parameters(::std::initializer_list<int>{(__VA_ARGS__, 0)...})
+
+//--------------------------------------------------------------------------------------//
+
+#if !defined(NDEBUG)
+#define DEBUG_OUTPUT true
+#else
+#define DEBUG_OUTPUT false
+#endif
 
 //--------------------------------------------------------------------------------------//
 
@@ -114,7 +157,22 @@ inline std::string demangle(const std::string &_str) {
 
 template <typename Tp>
 inline std::string demangle() {
-  return demangle(typeid(Tp).name());
+  // static because a type demangle will always be the same
+  static auto _val = []() {
+    // wrap the type in type_list and then extract ... from type_list<...>
+    auto _tmp = demangle(typeid(type_list<Tp>).name());
+    auto _key = std::string{"type_list"};
+    auto _idx = _tmp.find(_key);
+    _idx      = _tmp.find("<", _idx);
+    _tmp      = _tmp.substr(_idx + 1);
+    _idx      = _tmp.find_last_of(">");
+    _tmp      = _tmp.substr(0, _idx);
+    // strip trailing whitespaces
+    while ((_idx = _tmp.find_last_of(" ")) == _tmp.length() - 1)
+      _tmp = _tmp.substr(0, _idx);
+    return _tmp;
+  }();
+  return _val;
 }
 
 //--------------------------------------------------------------------------------------//
@@ -126,3 +184,30 @@ struct is_available : std::true_type {};
 #define DISABLE_TYPE(TYPE) \
   template <>              \
   struct is_available<TYPE> : std::false_type {};
+
+//--------------------------------------------------------------------------------------//
+//  this is used to mark template parameters as implicit
+//
+template <typename Tp>
+struct is_implicit : std::false_type {};
+
+#define ENABLE_IMPLICIT(TYPE) \
+  template <>                 \
+  struct is_implicit<TYPE> : std::true_type {};
+
+//--------------------------------------------------------------------------------------//
+//  this is used to get the view type
+//
+template <typename, typename...>
+struct view_type;
+
+template <template <typename...> class ViewT, typename ValueT,
+          typename... Types>
+struct view_type<ViewT<ValueT>, type_list<Types...>> {
+  using type = ViewT<ValueT, Types...>;
+};
+
+template <template <typename...> class ViewT, typename ValueT,
+          typename... Types>
+struct view_type<ViewT<ValueT>, Types...>
+    : view_type<ViewT<ValueT>, gather_t<is_implicit, false, Types...>> {};

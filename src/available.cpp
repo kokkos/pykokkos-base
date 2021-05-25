@@ -86,7 +86,16 @@ auto get_available(const std::string &str, std::index_sequence<Idx, Tail...>) {
     return get_available<SpecT>(str, std::index_sequence<Tail...>{});
 }
 
+//--------------------------------------------------------------------------------------//
+
 void generate_available(py::module &kokkos) {
+  kokkos.attr("max_concrete_rank") = ViewDataMaxDimensions;
+
+  //----------------------------------------------------------------------------//
+  //
+  //                                memory spaces
+  //
+  //----------------------------------------------------------------------------//
   auto _get_memspace_idx = [](int idx) {
     return get_available<ViewSpaceSpecialization>(
         idx, std::make_index_sequence<ViewSpacesEnd>{});
@@ -100,6 +109,11 @@ void generate_available(py::module &kokkos) {
   kokkos.def("get_memory_space_available", _get_memspace_idx,
              "Get whether the memory space is available");
 
+  //----------------------------------------------------------------------------//
+  //
+  //                                  layouts
+  //
+  //----------------------------------------------------------------------------//
   auto _get_ltype_name = [](int idx) {
     return get_available<ViewLayoutSpecialization>(
         idx, std::make_index_sequence<ViewLayoutEnd>{});
@@ -113,6 +127,11 @@ void generate_available(py::module &kokkos) {
   kokkos.def("get_layout_available", _get_ltype_idx,
              "Get whether the layout type is available");
 
+  //----------------------------------------------------------------------------//
+  //
+  //                                memory traits
+  //
+  //----------------------------------------------------------------------------//
   auto _get_memtrait_name = [](int idx) {
     return get_available<ViewMemoryTraitSpecialization>(
         idx, std::make_index_sequence<ViewMemoryTraitEnd>{});

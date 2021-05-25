@@ -41,6 +41,7 @@
 #
 
 from __future__ import absolute_import
+
 import os
 import sys
 import traceback
@@ -55,50 +56,6 @@ __version__ = "@PROJECT_VERSION@"
 __maintainer__ = "Jonathan R. Madsen"
 __email__ = "jrmadsen@lbl.gov"
 __status__ = "Development"
-
-try:
-    from . import libpykokkos
-    from .libpykokkos import *
-    from .utility import *
-
-    __all__ = [
-        "version_info",
-        "build_info",
-        "version",
-        "libpykokkos",
-        "array",            # helper functions
-        "unmanaged_array",
-        "initialize",       # bindings
-        "finalize",
-        "int16",            # data types
-        "int32",
-        "int64",
-        "uint16",
-        "uint32",
-        "uint64",
-        "float",
-        "double",
-        "HostSpace",        # memory spaces
-        "AnonymousSpace",
-        "HBWSpace",
-        "OpenMPTargetSpace",
-        "ROCmSpace",
-        "HIPSpace",
-        "CudaSpace",
-        "CudaUVMSpace",
-        "get_dtype",        # get enumeration from string or vice-versa
-        "get_layout",
-        "get_memory_space",
-        "get_memory_trait",
-        "get_layout_available",         # query build support
-        "get_memory_space_available",
-        "get_memory_trait_available",
-    ]
-
-except Exception as e:
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    traceback.print_exception(exc_type, exc_value, exc_traceback)
-    sys.exit(1)
 
 sys.modules[__name__].__setattr__(
     "version_info",
@@ -130,3 +87,59 @@ build_info = sys.modules[__name__].__getattribute__("build_info")
 
 version = sys.modules[__name__].__getattribute__("version")
 """Version string"""
+
+try:
+    from . import libpykokkos
+    from .libpykokkos import *
+    from .utility import *
+
+    __all__ = [
+        "version_info",
+        "build_info",
+        "version",
+        "libpykokkos",
+        "array",  # helper functions
+        "unmanaged_array",
+        "initialize",  # bindings
+        "finalize",
+        "int16",  # data types
+        "int32",
+        "int64",
+        "uint16",
+        "uint32",
+        "uint64",
+        "float32",
+        "float64",
+        "short",
+        "int",
+        "long",
+        "unsigned_short",
+        "unsigned",
+        "unsigned_int",
+        "unsigned_long",
+        "float",
+        "double",
+        "HostSpace",  # memory spaces
+        "AnonymousSpace",
+        "HBWSpace",
+        "OpenMPTargetSpace",
+        "HIPSpace",
+        "CudaSpace",
+        "CudaUVMSpace",
+        "get_dtype",  # get enumeration from string or vice-versa
+        "get_layout",
+        "get_memory_space",
+        "get_memory_trait",
+        "get_layout_available",  # query build support
+        "get_memory_space_available",
+        "get_memory_trait_available",
+    ]
+
+    os.environ.setdefault("OMP_PROC_BIND", "spread")
+    os.environ.setdefault("OMP_PLACES", "threads")
+
+
+except Exception as e:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback.print_exception(exc_type, exc_value, exc_traceback)
+    sys.exit(1)

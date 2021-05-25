@@ -79,6 +79,5 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
 
   generate_available(kokkos);
   generate_enumeration(kokkos);
-  generate_dynamic_view(kokkos);
-  generate_concrete_view(kokkos);
+  generate_view_variants(kokkos);
 }

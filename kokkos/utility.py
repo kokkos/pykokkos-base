@@ -56,14 +56,22 @@ __status__ = "Development"
 
 
 def array(
-    label,
-    shape,
+    shape_or_label,
+    shape=None,
+    label=None,
     dtype=lib.double,
     space=lib.HostSpace,
-    layout=None,
-    trait=None,
+    layout=lib.LayoutRight,
+    trait=lib.Managed,
     dynamic=False,
+    order=None,
 ):
+    # support non-labeled variant
+    if not isinstance(shape_or_label, str) and shape is None:
+        shape = list(shape_or_label)[:]
+    elif isinstance(shape_or_label, str) and label is None:
+        label = f"{shape_or_label}"
+
     # print("dtype = {}, space = {}".format(dtype, space))
     _prefix = "KokkosView"
     if dynamic:
@@ -71,38 +79,95 @@ def array(
     _space = lib.get_memory_space(space)
     _dtype = lib.get_dtype(dtype)
     _name = None
+    _label = None
+    _ndim = len(shape)
+
+    if dynamic:
+        _dtype_str = "{}".format(_dtype)
+    else:
+        _dtype_str = "{}{}".format(_dtype, "*" * _ndim)
+
+    _name = f"{_prefix}_{_dtype}_{_space}"
+    _label = f"{_prefix}<{_dtype_str}, {_space}"
+
+    # layout was specified via numpy "order" field
+    if order is not None and layout == lib.LayoutRight and isinstance(order, str):
+        if order.upper() == "C":
+            layout = lib.LayoutRight
+        elif order.upper() == "F":
+            layout = lib.LayoutLeft
+
+    # handle the layout argument
     if layout is not None:
         _layout = lib.get_layout(layout)
         # LayoutRight is the default
         if _layout != "LayoutRight":
-            _name = "{}_{}_{}_{}".format(_prefix, _dtype, _layout, _space)
+            _name = f"{_name}_{_layout}"
+            _label = f"{_label}, {_layout}"
+
+    # handle the trait argument
     if trait is not None:
         _trait = lib.get_memory_trait(trait)
         if _trait == "Unmanaged":
             raise ValueError(
                 "Use unmanaged_array() for the unmanaged view memory trait"
             )
-        _name = "{}_{}_{}_{}".format(_prefix, _dtype, _space, _trait)
-    if _name is None:
-        _name = "{}_{}_{}".format(_prefix, _dtype, _space)
+        else:
+            if _trait != "Managed":
+                _name = f"{_name}_{_trait}"
+                _label = f"{_label}, {_trait}"
+
+    # if fixed view
     if not dynamic:
-        _name = "{}_{}".format(_name, len(shape))
+        _name = f"{_name}_{_ndim}"
 
-    return getattr(lib, _name)(label, shape)
+    # if a label was not provided
+    if label is None:
+        label = f"{_label}>"
+
+    return getattr(lib, _name)(str(label), shape)
 
 
-def unmanaged_array(array, dtype=lib.double, space=lib.HostSpace, dynamic=False):
+def unmanaged_array(
+    array, dtype=lib.double, space=lib.HostSpace, layout=None, trait=None, dynamic=False
+):
     _prefix = "KokkosView"
     if dynamic:
         _prefix = "KokkosDynRankView"
     _dtype = lib.get_dtype(dtype)
+    if layout is None:
+        layout = lib.LayoutRight
+        try:
+            _order = array.order
+            if _order == "F":
+                layout = lib.LayoutLeft
+        except AttributeError:
+            pass
+    _layout = lib.get_layout(layout)
     _space = lib.get_memory_space(space)
-    _unmanaged = lib.get_memory_trait(lib.Unmanaged)
-    if dynamic is True:
-        _name = "{}_{}_{}_{}".format(_prefix, _dtype, _space, _unmanaged)
-    else:
-        if array.ndim < 1:
-            raise ValueError(array.ndim)
-        _name = "{}_{}_{}_{}_{}".format(_prefix, _dtype, _space, _unmanaged, array.ndim)
+    _trait = lib.get_memory_trait(lib.Unmanaged)
+    _shape = array.shape
+    if array.ndim < 1:
+        raise ValueError(array.ndim)
+    _ndim = array.ndim
 
-    return getattr(lib, _name)(array, array.shape)
+    _name = f"{_prefix}_{_dtype}_{_space}"
+    if layout == lib.LayoutLeft:
+        _name = f"{_name}_{_layout}"
+    _name = f"{_name}_{_trait}"
+    if dynamic is False:
+        _name = f"{_name}_{_ndim}"
+
+    return getattr(lib, _name)(array, _shape)
+
+
+def convert_dtype(_dtype, _module=None):
+    if isinstance(_dtype, (str, int)):
+        _true_dtype = lib.get_dtype(_dtype)
+    else:
+        _true_dtype = lib.get_dtype(int(_dtype))
+    if _module is None:
+        import numpy as np
+
+        _module = np
+    return getattr(_module, _true_dtype)
