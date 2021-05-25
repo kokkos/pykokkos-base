@@ -53,5 +53,7 @@ void generate_atomic_variants(py::module &kokkos) {
   generate_atomic_variant<Left>(kokkos,
                                 std::make_index_sequence<ViewDataTypesEnd>{});
 #  endif
+#else
+  consume_parameters(kokkos);
 #endif
 }
