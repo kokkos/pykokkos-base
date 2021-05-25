@@ -1,0 +1,200 @@
+/*
+//@HEADER
+// ************************************************************************
+//
+//                        Kokkos v. 3.0
+//       Copyright (2020) National Technology & Engineering
+//               Solutions of Sandia, LLC (NTESS).
+//
+// Under the terms of Contract DE-NA0003525 with NTESS,
+// the U.S. Government retains certain rights in this software.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// 1. Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright
+// notice, this list of conditions and the following disclaimer in the
+// documentation and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the Corporation nor the names of the
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY NTESS "AS IS" AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+// PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NTESS OR THE
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Questions? Contact Christian R. Trott (crtrott@sandia.gov)
+//
+// ************************************************************************
+//@HEADER
+*/
+
+#pragma once
+
+#include "libpykokkos.hpp"
+
+#include <pybind11/operators.h>
+
+#include <type_traits>
+
+namespace Space {
+namespace SpaceDim {
+
+template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx>
+void generate_atomic_variant(py::module &_mod) {
+  using data_spec_t   = ViewDataTypeSpecialization<DataIdx>;
+  using space_spec_t  = ViewSpaceSpecialization<SpaceIdx>;
+  using layout_spec_t = ViewLayoutSpecialization<LayoutIdx>;
+  using trait_spec_t  = ViewMemoryTraitSpecialization<Atomic>;
+  using Tp            = typename data_spec_t::type;
+  using Vp            = typename ViewDataTypeRepr<Tp, DimIdx>::type;
+  using Sp            = typename space_spec_t::type;
+  using Lp            = typename layout_spec_t::type;
+  using Mp            = typename trait_spec_t::type;
+  using View_t        = typename view_type<Kokkos::View<Vp>, Lp, Sp, Mp>::type;
+  using atomic_type   = typename View_t::reference_type;
+  using value_type    = typename atomic_type::value_type;
+
+  constexpr bool explicit_layout = !is_implicit<Lp>::value;
+
+  auto name =
+      construct_name("_", "KokkosAtomicDataElement", data_spec_t::label(),
+                     space_spec_t::label(),
+                     (explicit_layout) ? layout_spec_t::label() : std::string{},
+                     trait_spec_t::label(), DimIdx + 1);
+
+  auto desc =
+      std::string{"Kokkos::Impl::AtomicDataElement<Kokkos::ViewTraits<"} +
+      construct_name(", ", demangle<Vp>(),
+                     (explicit_layout) ? demangle<Lp>() : std::string{},
+                     demangle<Sp>(), demangle<Mp>()) +
+      ">>";
+
+  // class decl
+  py::class_<atomic_type> _atomic{_mod, name.c_str()};
+  _atomic.def(py::init([](value_type *_v) {
+    return new atomic_type{_v, Kokkos::Impl::AtomicViewConstTag{}};
+  }));
+
+  _atomic.def(
+      "inc", [](atomic_type &_obj) { return _obj.inc(); },
+      "Increment the atomic");
+  _atomic.def(
+      "dec", [](atomic_type &_obj) { return _obj.dec(); },
+      "Decrement the atomic");
+  _atomic.def(
+      "__str__",
+      [](atomic_type &_obj) {
+        return std::to_string(static_cast<value_type>(_obj));
+      },
+      "String repr");
+
+  _atomic.def(
+      "__eq__", [](atomic_type &_obj, value_type _v) { return (_obj == _v); },
+      py::is_operator());
+  _atomic.def(
+      "__ne__", [](atomic_type &_obj, value_type _v) { return (_obj != _v); },
+      py::is_operator());
+  _atomic.def(
+      "__lt__", [](atomic_type &_obj, value_type _v) { return (_obj < _v); },
+      py::is_operator());
+  _atomic.def(
+      "__gt__", [](atomic_type &_obj, value_type _v) { return (_obj > _v); },
+      py::is_operator());
+  _atomic.def(
+      "__le__", [](atomic_type &_obj, value_type _v) { return (_obj <= _v); },
+      py::is_operator());
+  _atomic.def(
+      "__ge__", [](atomic_type &_obj, value_type _v) { return (_obj >= _v); },
+      py::is_operator());
+
+  // self type
+  _atomic.def(py::self + py::self);
+  _atomic.def(py::self - py::self);
+  _atomic.def(py::self += py::self);
+  _atomic.def(
+      "__isub__",
+      [](atomic_type &lhs, const atomic_type &rhs) { return (lhs -= rhs); },
+      py::is_operator());
+
+  // value type
+  _atomic.def(
+      "__add__", [](atomic_type _obj, value_type _v) { return (_obj += _v); },
+      py::is_operator());
+  _atomic.def(
+      "__sub__", [](atomic_type _obj, value_type _v) { return (_obj -= _v); },
+      py::is_operator());
+  _atomic.def(
+      "__mul__", [](atomic_type _obj, value_type _v) { return (_obj * _v); },
+      py::is_operator());
+  _atomic.def(
+      "__truediv__",
+      [](atomic_type _obj, value_type _v) { return (_obj / _v); },
+      py::is_operator());
+
+  _atomic.def(
+      "__iadd__", [](atomic_type &_obj, value_type _v) { return (_obj += _v); },
+      py::is_operator());
+  _atomic.def(
+      "__isub__", [](atomic_type &_obj, value_type _v) { return (_obj -= _v); },
+      py::is_operator());
+  _atomic.def(
+      "__imul__",
+      [](atomic_type &_obj, value_type _v) { return _obj = (_obj * _v); },
+      py::is_operator());
+  _atomic.def(
+      "__itruediv__",
+      [](atomic_type &_obj, value_type _v) { return _obj = (_obj / _v); },
+      py::is_operator());
+}
+}  // namespace SpaceDim
+
+template <size_t LayoutIdx, size_t DataIdx, size_t SpaceIdx, size_t... DimIdx>
+void generate_atomic_variant(
+    py::module &, std::index_sequence<DimIdx...>,
+    std::enable_if_t<!is_available<space_t<SpaceIdx>>::value, int> = 0) {}
+
+template <size_t LayoutIdx, size_t DataIdx, size_t SpaceIdx, size_t... DimIdx>
+void generate_atomic_variant(
+    py::module &_mod, std::index_sequence<DimIdx...>,
+    std::enable_if_t<is_available<space_t<SpaceIdx>>::value, int> = 0) {
+  FOLD_EXPRESSION(
+      SpaceDim::generate_atomic_variant<DataIdx, SpaceIdx, DimIdx, LayoutIdx>(
+          _mod));
+}
+}  // namespace Space
+
+namespace variants {
+
+// generate data-type, memory-space buffers for atomic_concrete dimension
+template <size_t LayoutIdx, size_t DataIdx, size_t... SpaceIdx>
+void generate_atomic_variant(py::module &_mod,
+                             std::index_sequence<SpaceIdx...>) {
+  FOLD_EXPRESSION(Space::generate_atomic_variant<LayoutIdx, DataIdx, SpaceIdx>(
+      _mod, std::make_index_sequence<ViewDataMaxDimensions>{}));
+}
+
+}  // namespace variants
+
+namespace {
+// generate data type buffers for each memory space
+template <size_t LayoutIdx, size_t... DataIdx>
+void generate_atomic_variant(py::module &_mod,
+                             std::index_sequence<DataIdx...>) {
+  FOLD_EXPRESSION(variants::generate_atomic_variant<LayoutIdx, DataIdx>(
+      _mod, std::make_index_sequence<ViewSpacesEnd>{}));
+}
+}  // namespace

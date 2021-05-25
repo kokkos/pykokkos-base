@@ -45,8 +45,8 @@
 #pragma once
 
 #if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 #include <pybind11/numpy.h>
@@ -54,7 +54,7 @@
 #include <pybind11/stl.h>
 
 #if defined(__GNUC__)
-#pragma GCC diagnostic pop
+#  pragma GCC diagnostic pop
 #endif
 
 namespace py = pybind11;
@@ -70,14 +70,13 @@ namespace py = pybind11;
 #include <typeinfo>
 
 #if defined(ENABLE_DEMANGLE)
-#include <cxxabi.h>
+#  include <cxxabi.h>
 #endif
 
 //--------------------------------------------------------------------------------------//
 
 template <typename...>
-struct type_list
-{};
+struct type_list {};
 
 //--------------------------------------------------------------------------------------//
 
@@ -101,8 +100,8 @@ using concat_t = typename concat<T...>::type;
 
 template <template <typename> class PredicateT, bool ValueT, typename... T>
 struct gather {
-  using type = concat_t<
-      std::conditional_t<PredicateT<T>::value == ValueT, concat_t<T>, type_list<>>...>;
+  using type = concat_t<std::conditional_t<PredicateT<T>::value == ValueT,
+                                           concat_t<T>, type_list<>>...>;
 };
 
 template <template <typename> class PredicateT, bool ValueT, typename... T>
@@ -121,9 +120,9 @@ using enable_if_t = typename std::enable_if<B, T>::type;
 //--------------------------------------------------------------------------------------//
 
 #if !defined(NDEBUG)
-#define DEBUG_OUTPUT true
+#  define DEBUG_OUTPUT true
 #else
-#define DEBUG_OUTPUT false
+#  define DEBUG_OUTPUT false
 #endif
 
 //--------------------------------------------------------------------------------------//

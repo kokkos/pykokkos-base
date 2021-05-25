@@ -15,6 +15,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7']
+        kokkos-branch: ['master', 'develop']
 
     steps:
     - uses: actions/checkout@v2
@@ -33,7 +34,7 @@ jobs:
     - name: Install Kokkos
       run:
         python -m pip install 'cmake==3.18.4' &&
-        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
+        git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_OPENMP=ON
@@ -61,7 +62,7 @@ jobs:
     - name: Import Test
       working-directory: ${{github.workspace}}/build
       run:
-        mkdir scratch &&
+        mkdir -p scratch &&
         cd scratch &&
         export PYTHONPATH=/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         python -c "import kokkos; print(kokkos.__file__)"
@@ -79,6 +80,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7']
+        kokkos-branch: ['master']
 
     steps:
     - uses: actions/checkout@v2
@@ -97,7 +99,7 @@ jobs:
     - name: Install Kokkos
       run:
         python -m pip install 'cmake==3.18.4' &&
-        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
+        git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_OPENMP=ON
@@ -119,7 +121,7 @@ jobs:
 
     - name: Import Test
       run:
-        mkdir scratch &&
+        mkdir -p scratch &&
         cd scratch &&
         python -c "import kokkos; print(kokkos.__file__)" &&
         pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))
@@ -137,6 +139,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
+        kokkos-branch: ['develop']
 
     steps:
     - uses: actions/checkout@v2
@@ -155,7 +158,7 @@ jobs:
     - name: Install Kokkos
       run:
         python -m pip install 'cmake==3.18.4' &&
-        git clone https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
+        git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_PTHREAD=ON
@@ -174,12 +177,11 @@ jobs:
 
     - name: Import Test
       run:
-        mkdir scratch &&
+        mkdir -p scratch &&
         cd scratch &&
         python -c "import kokkos; print(kokkos.__file__)"
 
     - name: Test
+      working-directory: ${{github.workspace}}/scratch
       run:
-        mkdir scratch &&
-        cd scratch &&
         pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))

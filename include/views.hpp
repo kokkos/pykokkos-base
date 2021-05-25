@@ -193,13 +193,11 @@ struct get_item {
 
 template <typename... Args>
 std::string construct_name(const std::string &delim, Args &&... args) {
-  auto _construct = [&](auto&& _arg)
-  {
-      std::ostringstream _ss;
-      _ss << std::forward<decltype(_arg)>(_arg);
-      if(_ss.str().length() > 0)
-        return delim + _ss.str();
-      return std::string{};
+  auto _construct = [&](auto &&_arg) {
+    std::ostringstream _ss;
+    _ss << std::forward<decltype(_arg)>(_arg);
+    if (_ss.str().length() > 0) return delim + _ss.str();
+    return std::string{};
   };
   std::ostringstream ss;
   FOLD_EXPRESSION(ss << _construct(std::forward<Args>(args)));
@@ -211,7 +209,7 @@ std::string construct_name(const std::string &delim, Args &&... args) {
 template <typename ViewT, typename Up, size_t... Idx>
 auto get_init(const std::string &lbl, const Up &arr,
               std::index_sequence<Idx...>) {
-  return new ViewT{ lbl, static_cast<const size_t>(std::get<Idx>(arr))... };
+  return new ViewT{lbl, static_cast<const size_t>(std::get<Idx>(arr))...};
 }
 
 template <typename ViewT, size_t Idx>
@@ -224,7 +222,7 @@ auto get_init() {
 template <typename ViewT, typename Up, typename Tp, size_t... Idx>
 auto get_unmanaged_init(const Up &arr, const Tp data,
                         std::index_sequence<Idx...>) {
-  return new ViewT{ data, static_cast<const size_t>(std::get<Idx>(arr))... };
+  return new ViewT{data, static_cast<const size_t>(std::get<Idx>(arr))...};
 }
 
 template <typename ViewT, size_t Idx, typename Tp>
@@ -283,16 +281,18 @@ void generate_view_access(py::class_<View_t> &_view, std::index_sequence<0>) {
   _view.def("__getitem__", get_item<View_t, 1>::get(), "Get the element");
   _view.def("__setitem__", get_item<View_t, 1>::template set<Tp>(),
             "Set the element");
-  _view.def("__getitem__",
-            [](View_t &_obj, std::tuple<size_t> _arg) {
-              return _obj.access(std::get<0>(_arg));
-            },
-            "Get the element");
-  _view.def("__setitem__",
-            [](View_t &_obj, std::tuple<size_t> _arg, Tp _val) {
-              _obj.access(std::get<0>(_arg)) = _val;
-            },
-            "Set the element");
+  _view.def(
+      "__getitem__",
+      [](View_t &_obj, std::tuple<size_t> _arg) {
+        return _obj.access(std::get<0>(_arg));
+      },
+      "Get the element");
+  _view.def(
+      "__setitem__",
+      [](View_t &_obj, std::tuple<size_t> _arg, Tp _val) {
+        _obj.access(std::get<0>(_arg)) = _val;
+      },
+      "Set the element");
 }
 
 template <typename Tp, typename View_t, size_t... Idx>
@@ -304,16 +304,18 @@ void generate_view_access(py::class_<View_t> &_view,
   FOLD_EXPRESSION(_view.def("__setitem__",
                             get_item<View_t, Idx + 1>::template set<Tp>(),
                             "Set the element"));
-  _view.def("__getitem__",
-            [](View_t &_obj, std::tuple<size_t> _arg) {
-              return _obj.access(std::get<0>(_arg));
-            },
-            "Get the element");
-  _view.def("__setitem__",
-            [](View_t &_obj, std::tuple<size_t> _arg, Tp _val) {
-              _obj.access(std::get<0>(_arg)) = _val;
-            },
-            "Set the element");
+  _view.def(
+      "__getitem__",
+      [](View_t &_obj, std::tuple<size_t> _arg) {
+        return _obj.access(std::get<0>(_arg));
+      },
+      "Get the element");
+  _view.def(
+      "__setitem__",
+      [](View_t &_obj, std::tuple<size_t> _arg, Tp _val) {
+        _obj.access(std::get<0>(_arg)) = _val;
+      },
+      "Set the element");
 }
 
 // generic function to generate a view once the view type has been specified
@@ -377,8 +379,9 @@ void generate_view(py::module &_mod, const std::string &_name,
 
   static bool _is_dynamic = (sizeof...(Idx) > 1);
 
-  _view.def_property_readonly("dynamic", [](View_t &) { return _is_dynamic; },
-                              "Whether the rank is dynamic");
+  _view.def_property_readonly(
+      "dynamic", [](View_t &) { return _is_dynamic; },
+      "Whether the rank is dynamic");
 
   // support []
   generate_view_access<Tp>(_view, std::index_sequence<Idx...>{});

@@ -49,7 +49,8 @@
 namespace Space {
 namespace SpaceDim {
 
-template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx, size_t TraitIdx>
+template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx,
+          size_t TraitIdx>
 void generate_concrete_view_variant(py::module &_mod) {
   using data_spec_t   = ViewDataTypeSpecialization<DataIdx>;
   using space_spec_t  = ViewSpaceSpecialization<SpaceIdx>;
@@ -63,7 +64,7 @@ void generate_concrete_view_variant(py::module &_mod) {
   using View_t        = typename view_type<Kokkos::View<Vp>, Lp, Sp, Mp>::type;
 
   constexpr bool explicit_layout = !is_implicit<Lp>::value;
-  constexpr bool explicit_trait = !is_implicit<Mp>::value;
+  constexpr bool explicit_trait  = !is_implicit<Mp>::value;
 
   auto name = construct_name(
       "_", "KokkosView", data_spec_t::label(), space_spec_t::label(),
@@ -78,7 +79,8 @@ void generate_concrete_view_variant(py::module &_mod) {
                      (explicit_trait) ? demangle<Mp>() : std::string{}) +
       ">";
 
-  Common::generate_view<View_t, Sp, Tp, Lp, Mp, DimIdx, DimIdx>(_mod, name, desc);
+  Common::generate_view<View_t, Sp, Tp, Lp, Mp, DimIdx, DimIdx>(_mod, name,
+                                                                desc);
 }
 }  // namespace SpaceDim
 
@@ -95,7 +97,7 @@ void generate_concrete_view_variant(
     std::enable_if_t<is_available<space_t<SpaceIdx>>::value, int> = 0) {
   FOLD_EXPRESSION(
       SpaceDim::generate_concrete_view_variant<DataIdx, SpaceIdx, DimIdx,
-                                              LayoutIdx, TraitIdx>(_mod));
+                                               LayoutIdx, TraitIdx>(_mod));
 }
 }  // namespace Space
 
@@ -117,7 +119,8 @@ namespace {
 template <size_t LayoutIdx, size_t TraitIdx, size_t... DataIdx>
 void generate_concrete_view_variant(py::module &_mod,
                                     std::index_sequence<DataIdx...>) {
-  FOLD_EXPRESSION(variants::generate_concrete_view_variant<LayoutIdx, TraitIdx, DataIdx>(
-      _mod, std::make_index_sequence<ViewSpacesEnd>{}));
+  FOLD_EXPRESSION(
+      variants::generate_concrete_view_variant<LayoutIdx, TraitIdx, DataIdx>(
+          _mod, std::make_index_sequence<ViewSpacesEnd>{}));
 }
 }  // namespace

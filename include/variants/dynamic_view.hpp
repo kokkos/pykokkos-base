@@ -56,8 +56,7 @@ void generate_dynamic_view_variant(
 template <size_t DataIdx, size_t SpaceIdx, size_t LayoutIdx, size_t TraitIdx>
 void generate_dynamic_view_variant(
     py::module &_mod,
-    std::enable_if_t<is_available<space_t<SpaceIdx>>::value,
-                     int> = 0) {
+    std::enable_if_t<is_available<space_t<SpaceIdx>>::value, int> = 0) {
   constexpr auto DimIdx = ViewDataMaxDimensions;
   using data_spec_t     = ViewDataTypeSpecialization<DataIdx>;
   using space_spec_t    = ViewSpaceSpecialization<SpaceIdx>;
@@ -91,23 +90,24 @@ void generate_dynamic_view_variant(
 }
 }  // namespace Space
 
-namespace variants
-{
+namespace variants {
 // generate data-type, memory-space buffers for dynamic dimension
 template <size_t LayoutIdx, size_t TraitIdx, size_t DataIdx, size_t... SpaceIdx>
 void generate_dynamic_view_variant(py::module &_mod,
                                    std::index_sequence<SpaceIdx...>) {
   FOLD_EXPRESSION(
-      Space::generate_dynamic_view_variant<DataIdx, SpaceIdx, LayoutIdx, TraitIdx>(_mod));
+      Space::generate_dynamic_view_variant<DataIdx, SpaceIdx, LayoutIdx,
+                                           TraitIdx>(_mod));
 }
-}
+}  // namespace variants
 
 namespace {
 // generate data type buffers for each memory space
 template <size_t LayoutIdx, size_t TraitIdx, size_t... DataIdx>
 void generate_dynamic_view_variant(py::module &_mod,
                                    std::index_sequence<DataIdx...>) {
-  FOLD_EXPRESSION(variants::generate_dynamic_view_variant<LayoutIdx, TraitIdx, DataIdx>(
-      _mod, std::make_index_sequence<ViewSpacesEnd>{}));
+  FOLD_EXPRESSION(
+      variants::generate_dynamic_view_variant<LayoutIdx, TraitIdx, DataIdx>(
+          _mod, std::make_index_sequence<ViewSpacesEnd>{}));
 }
 }  // namespace

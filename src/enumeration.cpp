@@ -52,17 +52,15 @@
 
 template <template <size_t> class SpecT, typename Tp, size_t... Idx>
 auto generate_enumeration(py::enum_<Tp> &_enum, std::index_sequence<Idx...>) {
-  auto _generate = [&_enum](const auto& _labels, Tp _idx)
-  {
-      for(const auto& itr : _labels)
-      {
-        if (DEBUG_OUTPUT)
-          std::cerr << "Registering " << demangle<Tp>() << " enumeration entry "
-                    << itr << " to index " << _idx << "..." << std::endl;
+  auto _generate = [&_enum](const auto &_labels, Tp _idx) {
+    for (const auto &itr : _labels) {
+      if (DEBUG_OUTPUT)
+        std::cerr << "Registering " << demangle<Tp>() << " enumeration entry "
+                  << itr << " to index " << _idx << "..." << std::endl;
 
-        assert(!itr.empty());
-        _enum.value(itr.c_str(), _idx);
-      }
+      assert(!itr.empty());
+      _enum.value(itr.c_str(), _idx);
+    }
   };
   FOLD_EXPRESSION(_generate(SpecT<Idx>::labels(), static_cast<Tp>(Idx)));
 }
