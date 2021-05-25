@@ -87,14 +87,20 @@ class PyKokkosBaseViewTests(unittest.TestCase):
         import kokkos
 
         def _generate(*_args, **_kwargs):
+            con_arr = None
+            dyn_arr = None
             if _kwargs["trait"] == kokkos.Unmanaged:
                 arr = np.zeros(_args[0], dtype=kokkos.convert_dtype(_kwargs["dtype"]))
-                con_view = kokkos.unmanaged_array(arr[:], **_kwargs, dynamic=False)
-                dyn_view = kokkos.unmanaged_array(arr[:], **_kwargs, dynamic=True)
+                arr.fill(0)
+                con_arr = arr[:]
+                dyn_arr = arr[:]
+                con_view = kokkos.unmanaged_array(con_arr, **_kwargs, dynamic=False)
+                dyn_view = kokkos.unmanaged_array(dyn_arr, **_kwargs, dynamic=True)
             else:
                 con_view = kokkos.array(*_args, **_kwargs, dynamic=False)
                 dyn_view = kokkos.array(*_args, **_kwargs, dynamic=True)
-            return [con_view, dyn_view]
+            # retain con_arr and dyn_arr since python might run GC and delete them
+            return [con_view, dyn_view, con_arr, dyn_arr]
 
         for _dims in range(1, conf.get_max_concrete_dims()):
             _shape = []
