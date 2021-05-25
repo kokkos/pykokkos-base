@@ -357,7 +357,7 @@ void generate_view(py::module &_mod, const std::string &_name,
 
   _view.def_property_readonly(
       "space", [](View_t &) { return ViewSpaceIndex<Sp>::value; },
-      "Memory space of the view");
+      "Memory space of the view (alias for 'memory_space')");
 
   _view.def_property_readonly(
       "layout", [](View_t &) { return ViewLayoutIndex<Lp>::value; },
@@ -365,7 +365,15 @@ void generate_view(py::module &_mod, const std::string &_name,
 
   _view.def_property_readonly(
       "trait", [](View_t &) { return ViewMemoryTraitIndex<Mp>::value; },
-      "Memory trait of the view");
+      "Memory trait of the view (alias for 'memory_trait')");
+
+  _view.def_property_readonly(
+      "memory_space", [](View_t &) { return ViewSpaceIndex<Sp>::value; },
+      "Memory space of the view (alias for 'space')");
+
+  _view.def_property_readonly(
+      "memory_trait", [](View_t &) { return ViewMemoryTraitIndex<Mp>::value; },
+      "Memory trait of the view (alias for 'trait')");
 
   static bool _is_dynamic = (sizeof...(Idx) > 1);
 
