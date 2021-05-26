@@ -129,7 +129,12 @@ def array(
 
 
 def unmanaged_array(
-    array, dtype=lib.double, space=lib.HostSpace, layout=None, trait=None, dynamic=False
+    array,
+    dtype=lib.double,
+    space=lib.HostSpace,
+    layout=None,
+    trait=None,
+    dynamic=False,
 ):
     _prefix = "KokkosView"
     if dynamic:

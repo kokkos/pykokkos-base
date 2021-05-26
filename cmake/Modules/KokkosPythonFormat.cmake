@@ -54,7 +54,8 @@ if(CLANG_FORMATTER OR BLACK_FORMATTER)
 
         file(GLOB_RECURSE sources
             ${PROJECT_SOURCE_DIR}/src/*.cpp
-            ${PROJECT_SOURCE_DIR}/examples/*.hpp)
+            ${PROJECT_SOURCE_DIR}/src/*.cpp.in
+            ${PROJECT_SOURCE_DIR}/examples/*.cpp)
 
         set(_COMMAND
             COMMAND ${CLANG_FORMATTER} -i ${headers}

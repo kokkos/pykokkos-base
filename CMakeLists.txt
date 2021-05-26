@@ -29,6 +29,7 @@ ENDIF()
 
 SET(libpykokkos_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/libpykokkos.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/backend_version.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/enumeration.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/available.cpp)
 
@@ -144,7 +145,7 @@ IF(ERR_CODE AND NOT SKBUILD)
 ENDIF()
 
 EXECUTE_PROCESS(
-    COMMAND ${CMAKE_COMMAND} -E rm ${Python3_SITEARCH}/.__kokkos__init__.py
+    COMMAND ${CMAKE_COMMAND} -E rm -f ${Python3_SITEARCH}/.__kokkos__init__.py
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/pytest.ini

@@ -26,14 +26,26 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
+        pip install flake8 black
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        DISTRIB_CODENAME=$(cat /etc/lsb-release | grep DISTRIB_CODENAME | awk -F '=' '{print $NF}')
+        sudo apt-get update
+        sudo apt-get install -y software-properties-common wget curl
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        echo "deb http://apt.llvm.org/${DISTRIB_CODENAME}/ llvm-toolchain-${DISTRIB_CODENAME}-8 main" | sudo tee -a /etc/apt/sources.list.d/llvm-toolchain.list
+        echo "deb-src http://apt.llvm.org/${DISTRIB_CODENAME}/ llvm-toolchain-${DISTRIB_CODENAME}-8 main" | sudo tee -a /etc/apt/sources.list.d/llvm-toolchain.list
+        sudo apt-get update
+        sudo apt-get install -y clang-format-8
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=90 --statistics
-    #- name: Test with pytest
-    #  run: |
-    #    pytest
+        # flake8 options are defined in setup.cfg
+        flake8 . --count --statistics
+    - name: black format
+      run: |
+        black --diff --check .
+    - name: clang-format
+      run: |
+        RET=$(clang-format-8 -output-replacements-xml $(find include src examples -type f | egrep '\.hpp$|\.cpp$|\.cpp\.in') | grep -c '<replacement ')
+        if [ "${RET}" -ne 0 ]; then exit "${RET}"; fi

@@ -52,3 +52,4 @@ void generate_available(py::module& kokkos);
 void generate_enumeration(py::module& kokkos);
 void generate_view_variants(py::module& kokkos);
 void generate_atomic_variants(py::module& kokkos);
+void generate_backend_versions(py::module& kokkos);

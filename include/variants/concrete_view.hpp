@@ -53,9 +53,9 @@ template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx,
           size_t TraitIdx>
 void generate_concrete_view_variant(py::module &_mod) {
   using data_spec_t   = ViewDataTypeSpecialization<DataIdx>;
-  using space_spec_t  = ViewSpaceSpecialization<SpaceIdx>;
-  using layout_spec_t = ViewLayoutSpecialization<LayoutIdx>;
-  using trait_spec_t  = ViewMemoryTraitSpecialization<TraitIdx>;
+  using space_spec_t  = MemorySpaceSpecialization<SpaceIdx>;
+  using layout_spec_t = MemoryLayoutSpecialization<LayoutIdx>;
+  using trait_spec_t  = MemoryTraitSpecialization<TraitIdx>;
   using Tp            = typename data_spec_t::type;
   using Vp            = typename ViewDataTypeRepr<Tp, DimIdx>::type;
   using Sp            = typename space_spec_t::type;
@@ -88,13 +88,14 @@ template <size_t LayoutIdx, size_t TraitIdx, size_t DataIdx, size_t SpaceIdx,
           size_t... DimIdx>
 void generate_concrete_view_variant(
     py::module &, std::index_sequence<DimIdx...>,
-    std::enable_if_t<!is_available<space_t<SpaceIdx>>::value, int> = 0) {}
+    std::enable_if_t<!is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
+}
 
 template <size_t LayoutIdx, size_t TraitIdx, size_t DataIdx, size_t SpaceIdx,
           size_t... DimIdx>
 void generate_concrete_view_variant(
     py::module &_mod, std::index_sequence<DimIdx...>,
-    std::enable_if_t<is_available<space_t<SpaceIdx>>::value, int> = 0) {
+    std::enable_if_t<is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
   FOLD_EXPRESSION(
       SpaceDim::generate_concrete_view_variant<DataIdx, SpaceIdx, DimIdx,
                                                LayoutIdx, TraitIdx>(_mod));
@@ -121,6 +122,6 @@ void generate_concrete_view_variant(py::module &_mod,
                                     std::index_sequence<DataIdx...>) {
   FOLD_EXPRESSION(
       variants::generate_concrete_view_variant<LayoutIdx, TraitIdx, DataIdx>(
-          _mod, std::make_index_sequence<ViewSpacesEnd>{}));
+          _mod, std::make_index_sequence<MemorySpacesEnd>{}));
 }
 }  // namespace

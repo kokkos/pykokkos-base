@@ -98,8 +98,10 @@ try:
         "build_info",
         "version",
         "libpykokkos",
+        "backend_version",  # submodule
         "array",  # helper functions
         "unmanaged_array",
+        "convert_dtype",
         "initialize",  # bindings
         "finalize",
         "int16",  # data types
@@ -130,16 +132,22 @@ try:
         "get_layout",
         "get_memory_space",
         "get_memory_trait",
-        "get_layout_available",  # query build support
+        "get_device_available",  # query build support
+        "get_layout_available",
         "get_memory_space_available",
         "get_memory_trait_available",
+        "get_execution_space_available",
     ]
 
-    os.environ.setdefault("OMP_PROC_BIND", "spread")
-    os.environ.setdefault("OMP_PLACES", "threads")
-
+    if libpykokkos.get_device_available("OpenMP"):
+        if libpykokkos.backend_version.openmp >= 201307:
+            os.environ.setdefault("OMP_PROC_BIND", "spread")
+            os.environ.setdefault("OMP_PLACES", "threads")
+        elif libpykokkos.backend_version.openmp >= 201107:
+            os.environ.setdefault("OMP_PROC_BIND", "true")
 
 except Exception as e:
+    print(f"{e}")
     exc_type, exc_value, exc_traceback = sys.exc_info()
     traceback.print_exception(exc_type, exc_value, exc_traceback)
-    sys.exit(1)
+    raise

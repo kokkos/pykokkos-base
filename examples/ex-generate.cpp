@@ -45,14 +45,14 @@
 #include "user.hpp"
 
 #if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 #include <pybind11/pybind11.h>
 
 #if defined(__GNUC__)
-#pragma GCC diagnostic pop
+#  pragma GCC diagnostic pop
 #endif
 
 namespace py = pybind11;
