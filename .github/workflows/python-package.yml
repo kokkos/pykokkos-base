@@ -10,8 +10,7 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  build:
-
+  linting:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -26,7 +25,31 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 black
+        pip install flake8
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # flake8 options are defined in setup.cfg
+        flake8 . --count --statistics
+
+  formatting:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         DISTRIB_CODENAME=$(cat /etc/lsb-release | grep DISTRIB_CODENAME | awk -F '=' '{print $NF}')
         sudo apt-get update
@@ -36,12 +59,6 @@ jobs:
         echo "deb-src http://apt.llvm.org/${DISTRIB_CODENAME}/ llvm-toolchain-${DISTRIB_CODENAME}-8 main" | sudo tee -a /etc/apt/sources.list.d/llvm-toolchain.list
         sudo apt-get update
         sudo apt-get install -y clang-format-8
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # flake8 options are defined in setup.cfg
-        flake8 . --count --statistics
     - name: black format
       run: |
         black --diff --check .
