@@ -49,19 +49,9 @@
 #include "Kokkos_MemoryTraits.hpp"
 
 #include "common.hpp"
+#include "fwd.hpp"
 
 //--------------------------------------------------------------------------------------//
-
-static constexpr size_t ViewDataMaxDimensions = 8;
-
-template <typename T, size_t Dim>
-struct ViewDataTypeRepr;
-
-#define VIEW_DATA_DIMS(NUM, ...)        \
-  template <typename T>                 \
-  struct ViewDataTypeRepr<T, NUM - 1> { \
-    using type = __VA_ARGS__;           \
-  };
 
 VIEW_DATA_DIMS(1, T *)
 VIEW_DATA_DIMS(2, T **)
@@ -74,75 +64,35 @@ VIEW_DATA_DIMS(8, T ********)
 
 //--------------------------------------------------------------------------------------//
 
-enum KokkosViewDataType {
-  Int16 = 0,
-  Int32,
-  Int64,
-  Uint16,
-  Uint32,
-  Uint64,
-  Float,
-  Double,
-  ViewDataTypesEnd
-};
-
-template <size_t DataT>
-struct ViewDataTypeSpecialization;
-
-#define VIEW_DATA_TYPE(ENUM_ID, DATA_TYPE, LABEL) \
-  template <>                                     \
-  struct ViewDataTypeSpecialization<ENUM_ID> {    \
-    using type = DATA_TYPE;                       \
-    static std::string label() { return LABEL; }  \
-  };
-
-VIEW_DATA_TYPE(Int16, int16_t, "int16")
-VIEW_DATA_TYPE(Int32, int32_t, "int32")
-VIEW_DATA_TYPE(Int64, int64_t, "int64")
-VIEW_DATA_TYPE(Uint16, uint16_t, "uint16")
-VIEW_DATA_TYPE(Uint32, uint32_t, "uint32")
-VIEW_DATA_TYPE(Uint64, uint64_t, "uint64")
-VIEW_DATA_TYPE(Float, float, "float")
-VIEW_DATA_TYPE(Double, double, "double")
+VIEW_DATA_TYPE(Int16, int16_t, "int16", "short")
+VIEW_DATA_TYPE(Int32, int32_t, "int32", "int")
+VIEW_DATA_TYPE(Int64, int64_t, "int64", "long")
+VIEW_DATA_TYPE(Uint16, uint16_t, "uint16", "unsigned_short")
+VIEW_DATA_TYPE(Uint32, uint32_t, "uint32", "unsigned", "unsigned_int")
+VIEW_DATA_TYPE(Uint64, uint64_t, "uint64", "unsigned_long")
+VIEW_DATA_TYPE(Float32, float, "float32", "float")
+VIEW_DATA_TYPE(Float64, double, "float64", "double")
 
 //--------------------------------------------------------------------------------------//
 
-enum KokkosViewLayoutType { Left = 0, Right, Stride, ViewLayoutEnd };
-
-template <size_t DataT>
-struct ViewLayoutSpecialization;
-
-#define VIEW_LAYOUT_TYPE(ENUM_ID, DATA_TYPE, LABEL) \
-  template <>                                       \
-  struct ViewLayoutSpecialization<ENUM_ID> {        \
-    using type = DATA_TYPE;                         \
-    static std::string label() { return LABEL; }    \
-  };
+#if !defined(ENABLE_LAYOUTS)
+DISABLE_TYPE(Kokkos::LayoutLeft)
+#endif
+DISABLE_TYPE(Kokkos::LayoutStride)
 
 VIEW_LAYOUT_TYPE(Left, Kokkos::LayoutLeft, "LayoutLeft")
 VIEW_LAYOUT_TYPE(Right, Kokkos::LayoutRight, "LayoutRight")
 VIEW_LAYOUT_TYPE(Stride, Kokkos::LayoutStride, "LayoutStride")
 
+ENABLE_IMPLICIT(Kokkos::LayoutRight)
+
 //--------------------------------------------------------------------------------------//
 
-enum KokkosViewMemoryTrait {
-  Managed = 0,
-  Unmanaged,
-  Atomic,
-  RandomAccess,
-  Restrict,
-  ViewMemoryTraitEnd
-};
-
-template <size_t DataT>
-struct ViewMemoryTraitSpecialization;
-
-#define VIEW_MEMORY_TRAIT(ENUM_ID, MEMORY_TRAIT, LABEL) \
-  template <>                                           \
-  struct ViewMemoryTraitSpecialization<ENUM_ID> {       \
-    using type = MEMORY_TRAIT;                          \
-    static std::string label() { return LABEL; }        \
-  };
+#if !defined(ENABLE_MEMORY_TRAITS)
+DISABLE_TYPE(Kokkos::MemoryTraits<Kokkos::Atomic>)
+DISABLE_TYPE(Kokkos::MemoryTraits<Kokkos::RandomAccess>)
+DISABLE_TYPE(Kokkos::MemoryTraits<Kokkos::Restrict>)
+#endif
 
 VIEW_MEMORY_TRAIT(Managed, Kokkos::MemoryTraits<0>, "Managed")
 VIEW_MEMORY_TRAIT(Unmanaged, Kokkos::MemoryTraits<Kokkos::Unmanaged>,
@@ -152,102 +102,99 @@ VIEW_MEMORY_TRAIT(RandomAccess, Kokkos::MemoryTraits<Kokkos::RandomAccess>,
                   "RandomAccess")
 VIEW_MEMORY_TRAIT(Restrict, Kokkos::MemoryTraits<Kokkos::Restrict>, "Restrict")
 
+ENABLE_IMPLICIT(Kokkos::MemoryTraits<0>)
+
+//--------------------------------------------------------------------------------------//
+
+#if !defined(KOKKOS_ENABLE_SERIAL)
+DISABLE_TYPE(Kokkos::Serial)
+#endif
+
+#if !defined(KOKKOS_ENABLE_THREADS)
+DISABLE_TYPE(Kokkos::Threads)
+#endif
+
+#if !defined(KOKKOS_ENABLE_OPENMP)
+DISABLE_TYPE(Kokkos::OpenMP)
+#endif
+
+#if !defined(KOKKOS_ENABLE_CUDA)
+DISABLE_TYPE(Kokkos::Cuda)
+#endif
+
+#if !defined(KOKKOS_ENABLE_OPENMPTARGET)
+DISABLE_TYPE(Kokkos::Experimental::OpenMPTarget)
+#endif
+
+#if !defined(KOKKOS_ENABLE_HIP)
+DISABLE_TYPE(Kokkos::Experimental::HIP)
+#endif
+
+#if !defined(KOKKOS_ENABLE_SYCL)
+DISABLE_TYPE(Kokkos::Experimental::SYCL)
+#endif
+
+VIEW_SPACE_IDX(Kokkos::Serial, HostSpace)
+VIEW_SPACE_IDX(Kokkos::Threads, HostSpace)
+VIEW_SPACE_IDX(Kokkos::OpenMP, HostSpace)
+VIEW_SPACE_IDX(Kokkos::Cuda, CudaSpace)
+VIEW_SPACE_IDX(Kokkos::Experimental::HPX, HostSpace)
+VIEW_SPACE_IDX(Kokkos::Experimental::HIP, HIPSpace)
+VIEW_SPACE_IDX(Kokkos::Experimental::SYCL, SYCLSharedUSMSpace)
+VIEW_SPACE_IDX(Kokkos::Experimental::OpenMPTarget, OpenMPTargetSpace)
+
 //--------------------------------------------------------------------------------------//
 //  declare any spaces that might not be available and mark them as unavailable
 //  we declare these so that we can map the enum value to the type along with a
 //  label
 //
-#ifndef KOKKOS_ENABLE_HBWSPACE
-namespace Kokkos {
-namespace Experimental {
-class HBWSpace;
-}  // namespace Experimental
-}  // namespace Kokkos
-DISABLE_TYPE(Kokkos::Experimental::HBWSpace)
-#endif
-
-#if !defined(KOKKOS_ENABLE_OPENMPTARGET)
-namespace Kokkos {
-namespace Experimental {
-class OpenMPTargetSpace;
-}  // namespace Experimental
-}  // namespace Kokkos
-DISABLE_TYPE(Kokkos::Experimental::OpenMPTargetSpace)
-#endif
-
-#if !defined(KOKKOS_ENABLE_ROCM)
-namespace Kokkos {
-namespace Experimental {
-class ROCmSpace;
-}  // namespace Experimental
-}  // namespace Kokkos
-DISABLE_TYPE(Kokkos::Experimental::ROCmSpace)
-#endif
-
-#if !defined(KOKKOS_ENABLE_HIP)
-namespace Kokkos {
-namespace Experimental {
-class HIPSpace;
-}  // namespace Experimental
-}  // namespace Kokkos
-DISABLE_TYPE(Kokkos::Experimental::HIPSpace)
-#endif
+DISABLE_TYPE(Kokkos::AnonymousSpace)
 
 #if !defined(KOKKOS_ENABLE_CUDA)
-namespace Kokkos {
-class CudaSpace;
-}  // namespace Kokkos
 DISABLE_TYPE(Kokkos::CudaSpace)
+DISABLE_TYPE(Kokkos::CudaHostPinnedSpace)
 #endif
 
 #if !defined(KOKKOS_ENABLE_CUDA_UVM)
-namespace Kokkos {
-class CudaUVMSpace;
-}  // namespace Kokkos
 DISABLE_TYPE(Kokkos::CudaUVMSpace)
 #endif
 
-/// \enum KokkosViewSpace
-/// \brief An enumeration identifying all the memory spaces for a view
-enum KokkosViewSpace {
-  Host = 0,
-  Anonymous,
-  HBW,
-  OpenMPTarget,
-  ROCm,
-  HIP,
-  Cuda,
-  CudaUVM,
-  ViewSpacesEnd
-};
+#if !defined(KOKKOS_ENABLE_HBWSPACE)
+DISABLE_TYPE(Kokkos::Experimental::HBWSpace)
+#endif
 
-/// \class ViewSpaceSpecialization
-/// \brief Maps a \ref KokkosViewSpace enumeration to a type a label
-template <size_t SpaceT>
-struct ViewSpaceSpecialization;
-template <typename Tp>
-struct ViewSpaceIndex;
+#if !defined(KOKKOS_ENABLE_HIP)
+DISABLE_TYPE(Kokkos::Experimental::HIPSpace)
+DISABLE_TYPE(Kokkos::Experimental::HIPHostPinnedSpace)
+#endif
 
-#define VIEW_SPACE(ENUM_ID, VIEW_SPACE, LABEL)   \
-  template <>                                    \
-  struct ViewSpaceSpecialization<ENUM_ID> {      \
-    using type = VIEW_SPACE;                     \
-    static std::string label() { return LABEL; } \
-  };                                             \
-  template <>                                    \
-  struct ViewSpaceIndex<VIEW_SPACE> {            \
-    static constexpr auto value = ENUM_ID;       \
-  };
+#if !defined(KOKKOS_ENABLE_HPX)
+DISABLE_TYPE(Kokkos::Experimental::HPX)
+#endif
 
-VIEW_SPACE(Host, Kokkos::HostSpace, "HostSpace")
-VIEW_SPACE(Anonymous, Kokkos::AnonymousSpace, "AnonymousSpace")
-VIEW_SPACE(HBW, Kokkos::Experimental::HBWSpace, "HBWSpace")
-VIEW_SPACE(OpenMPTarget, Kokkos::Experimental::OpenMPTargetSpace,
-           "OpenMPTargetSpace")
-VIEW_SPACE(ROCm, Kokkos::Experimental::ROCmSpace, "ROCmSpace")
-VIEW_SPACE(HIP, Kokkos::Experimental::HIPSpace, "HIPSpace")
-VIEW_SPACE(Cuda, Kokkos::CudaSpace, "CudaSpace")
-VIEW_SPACE(CudaUVM, Kokkos::CudaUVMSpace, "CudaUVMSpace")
+#if !defined(KOKKOS_ENABLE_OPENMPTARGET)
+DISABLE_TYPE(Kokkos::Experimental::OpenMPTargetSpace)
+#endif
 
-template <size_t Idx>
-using space_t = typename ViewSpaceSpecialization<Idx>::type;
+#if !defined(KOKKOS_ENABLE_SYCL)
+DISABLE_TYPE(Kokkos::Experimental::SYCLSharedUSMSpace)
+DISABLE_TYPE(Kokkos::Experimental::SYCLDeviceUSMSpace)
+#endif
+
+VIEW_SPACE(Kokkos::HostSpace, HostSpace, "HostSpace", "Host", "Serial",
+           "Threads", "OpenMP", "HPX")
+VIEW_SPACE(Kokkos::AnonymousSpace, AnonymousSpace, "AnonymousSpace")
+VIEW_SPACE(Kokkos::CudaSpace, CudaSpace, "CudaSpace", "Cuda")
+VIEW_SPACE(Kokkos::CudaUVMSpace, CudaUVMSpace, "CudaUVMSpace")
+VIEW_SPACE(Kokkos::CudaHostPinnedSpace, CudaHostPinnedSpace,
+           "CudaHostPinnedSpace")
+VIEW_SPACE(Kokkos::Experimental::HBWSpace, HBWSpace, "HBWSpace")
+VIEW_SPACE(Kokkos::Experimental::HIPSpace, HIPSpace, "HIPSpace", "HIP")
+VIEW_SPACE(Kokkos::Experimental::HIPHostPinnedSpace, HIPHostPinnedSpace,
+           "HIPHostPinnedSpace")
+VIEW_SPACE(Kokkos::Experimental::OpenMPTargetSpace, OpenMPTargetSpace,
+           "OpenMPTargetSpace", "OpenMPTarget")
+VIEW_SPACE(Kokkos::Experimental::SYCLSharedUSMSpace, SYCLSharedUSMSpace,
+           "SYCLSharedUSMSpace", "SYCL")
+VIEW_SPACE(Kokkos::Experimental::SYCLDeviceUSMSpace, SYCLDeviceUSMSpace,
+           "SYCLDeviceUSMSpace")

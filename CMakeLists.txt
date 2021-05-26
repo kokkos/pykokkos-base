@@ -29,8 +29,6 @@ ENDIF()
 
 SET(libpykokkos_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/libpykokkos.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/concrete_view.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/dynamic_view.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/enumeration.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/available.cpp)
 
@@ -38,11 +36,14 @@ SET(libpykokkos_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/libpykokkos.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/common.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/traits.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/views.hpp)
+    ${CMAKE_CURRENT_LIST_DIR}/include/views.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/fwd.hpp)
 
 PYBIND11_ADD_MODULE(libpykokkos MODULE ${PYBIND11_EXTRAS}
     ${libpykokkos_SOURCES}
     ${libpykokkos_HEADERS})
+
+add_subdirectory(src)
 
 # add extra build properties to this target
 ADD_LIBRARY(libpykokkos-build-options INTERFACE)
@@ -146,10 +147,16 @@ EXECUTE_PROCESS(
     COMMAND ${CMAKE_COMMAND} -E rm ${Python3_SITEARCH}/.__kokkos__init__.py
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/pytest.ini
+    ${PROJECT_BINARY_DIR}/pytest.ini COPYONLY)
+
 INSTALL(TARGETS libpykokkos
     DESTINATION ${Kokkos_INSTALL_LIBDIR})
 
 INSTALL(FILES ${PROJECT_BINARY_DIR}/kokkos/__init__.py
+    DESTINATION ${Kokkos_INSTALL_PYTHONDIR})
+
+INSTALL(FILES ${PROJECT_BINARY_DIR}/pytest.ini
     DESTINATION ${Kokkos_INSTALL_PYTHONDIR})
 
 # glob any python package files

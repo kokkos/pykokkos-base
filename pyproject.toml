@@ -25,5 +25,6 @@ exclude = '''
   | _skbuild
   | __pycache__
   | \.pyc
+  | \.pytest_cache
 )/
 '''

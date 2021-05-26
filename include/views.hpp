@@ -193,8 +193,14 @@ struct get_item {
 
 template <typename... Args>
 std::string construct_name(const std::string &delim, Args &&... args) {
-  std::stringstream ss;
-  FOLD_EXPRESSION(ss << delim << std::forward<Args>(args));
+  auto _construct = [&](auto &&_arg) {
+    std::ostringstream _ss;
+    _ss << std::forward<decltype(_arg)>(_arg);
+    if (_ss.str().length() > 0) return delim + _ss.str();
+    return std::string{};
+  };
+  std::ostringstream ss;
+  FOLD_EXPRESSION(ss << _construct(std::forward<Args>(args)));
   return ss.str().substr(delim.length());
 }
 
@@ -203,7 +209,7 @@ std::string construct_name(const std::string &delim, Args &&... args) {
 template <typename ViewT, typename Up, size_t... Idx>
 auto get_init(const std::string &lbl, const Up &arr,
               std::index_sequence<Idx...>) {
-  return new ViewT(lbl, static_cast<const size_t>(std::get<Idx>(arr))...);
+  return new ViewT{lbl, static_cast<const size_t>(std::get<Idx>(arr))...};
 }
 
 template <typename ViewT, size_t Idx>
@@ -216,7 +222,7 @@ auto get_init() {
 template <typename ViewT, typename Up, typename Tp, size_t... Idx>
 auto get_unmanaged_init(const Up &arr, const Tp data,
                         std::index_sequence<Idx...>) {
-  return new ViewT(data, static_cast<const size_t>(std::get<Idx>(arr))...);
+  return new ViewT{data, static_cast<const size_t>(std::get<Idx>(arr))...};
 }
 
 template <typename ViewT, size_t Idx, typename Tp>
@@ -261,7 +267,8 @@ namespace Common {
 // creates overloads for data access from python
 template <typename Tp, typename View_t, size_t... Idx>
 void generate_view_access(py::class_<View_t> &_view,
-                          std::index_sequence<Idx...>) {
+                          std::index_sequence<Idx...>,
+                          enable_if_t<(sizeof...(Idx) == 1), int> = 0) {
   FOLD_EXPRESSION(_view.def("__getitem__", get_item<View_t, Idx + 1>::get(),
                             "Get the element"));
   FOLD_EXPRESSION(_view.def("__setitem__",
@@ -269,18 +276,55 @@ void generate_view_access(py::class_<View_t> &_view,
                             "Set the element"));
 }
 
+template <typename Tp, typename View_t>
+void generate_view_access(py::class_<View_t> &_view, std::index_sequence<0>) {
+  _view.def("__getitem__", get_item<View_t, 1>::get(), "Get the element");
+  _view.def("__setitem__", get_item<View_t, 1>::template set<Tp>(),
+            "Set the element");
+  _view.def(
+      "__getitem__",
+      [](View_t &_obj, std::tuple<size_t> _arg) {
+        return _obj.access(std::get<0>(_arg));
+      },
+      "Get the element");
+  _view.def(
+      "__setitem__",
+      [](View_t &_obj, std::tuple<size_t> _arg, Tp _val) {
+        _obj.access(std::get<0>(_arg)) = _val;
+      },
+      "Set the element");
+}
+
+template <typename Tp, typename View_t, size_t... Idx>
+void generate_view_access(py::class_<View_t> &_view,
+                          std::index_sequence<Idx...>,
+                          enable_if_t<(sizeof...(Idx) > 1), int> = 0) {
+  FOLD_EXPRESSION(_view.def("__getitem__", get_item<View_t, Idx + 1>::get(),
+                            "Get the element"));
+  FOLD_EXPRESSION(_view.def("__setitem__",
+                            get_item<View_t, Idx + 1>::template set<Tp>(),
+                            "Set the element"));
+  _view.def(
+      "__getitem__",
+      [](View_t &_obj, std::tuple<size_t> _arg) {
+        return _obj.access(std::get<0>(_arg));
+      },
+      "Get the element");
+  _view.def(
+      "__setitem__",
+      [](View_t &_obj, std::tuple<size_t> _arg, Tp _val) {
+        _obj.access(std::get<0>(_arg)) = _val;
+      },
+      "Set the element");
+}
+
 // generic function to generate a view once the view type has been specified
-template <typename View_t, typename Sp, typename Tp, typename Mp, size_t DimIdx,
-          size_t... Idx>
+template <typename View_t, typename Sp, typename Tp, typename Lp, typename Mp,
+          size_t DimIdx, size_t... Idx>
 void generate_view(py::module &_mod, const std::string &_name,
                    const std::string &_msg, size_t _ndim = DimIdx + 1) {
-  bool debug = false;
-#if !defined(NDEBUG)
-  debug = true;
-#endif
-
-  if (debug)
-    std::cout << "Registering " << _msg << " as python class '" << _name
+  if (DEBUG_OUTPUT)
+    std::cerr << "Registering " << _msg << " as python class '" << _name
               << "'..." << std::endl;
 
   // class decl
@@ -290,7 +334,7 @@ void generate_view(py::module &_mod, const std::string &_name,
   _view.def(py::init([]() { return new View_t{}; }));
 
   // initializer with extents
-  get_init<View_t, DimIdx + 1, Sp, Tp, Mp>(_view);
+  FOLD_EXPRESSION(get_init<View_t, Idx + 1, Sp, Tp, Mp>(_view));
 
   // conversion to/from numpy
   _view.def_buffer([_ndim](View_t &m) -> py::buffer_info {
@@ -313,21 +357,43 @@ void generate_view(py::module &_mod, const std::string &_name,
       },
       "Get the shape of the array (extents)");
 
-  // memory space
+  _view.def_property_readonly(
+      "space", [](View_t &) { return ViewSpaceIndex<Sp>::value; },
+      "Memory space of the view (alias for 'memory_space')");
+
+  _view.def_property_readonly(
+      "layout", [](View_t &) { return ViewLayoutIndex<Lp>::value; },
+      "Memory layout of the view");
+
+  _view.def_property_readonly(
+      "trait", [](View_t &) { return ViewMemoryTraitIndex<Mp>::value; },
+      "Memory trait of the view (alias for 'memory_trait')");
+
   _view.def_property_readonly(
       "memory_space", [](View_t &) { return ViewSpaceIndex<Sp>::value; },
-      "Memory space of the view");
+      "Memory space of the view (alias for 'space')");
+
+  _view.def_property_readonly(
+      "memory_trait", [](View_t &) { return ViewMemoryTraitIndex<Mp>::value; },
+      "Memory trait of the view (alias for 'trait')");
+
+  static bool _is_dynamic = (sizeof...(Idx) > 1);
+
+  _view.def_property_readonly(
+      "dynamic", [](View_t &) { return _is_dynamic; },
+      "Whether the rank is dynamic");
 
   // support []
   generate_view_access<Tp>(_view, std::index_sequence<Idx...>{});
 }
 
-template <typename View_t, typename Sp, typename Tp, typename Mp, size_t DimIdx,
-          size_t... Idx>
+template <typename View_t, typename Sp, typename Tp, typename Lp, typename Mp,
+          size_t DimIdx, size_t... Idx>
 void generate_view(py::module &_mod, const std::string &_name,
                    const std::string &_msg, size_t _ndim,
                    std::index_sequence<Idx...>) {
-  generate_view<View_t, Sp, Tp, Mp, DimIdx, Idx...>(_mod, _name, _msg, _ndim);
+  generate_view<View_t, Sp, Tp, Lp, Mp, DimIdx, Idx...>(_mod, _name, _msg,
+                                                        _ndim);
 }
 }  // namespace Common
 //

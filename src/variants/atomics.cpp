@@ -42,43 +42,18 @@
 //@HEADER
 */
 
+#include "variants/atomics.hpp"
 #include "libpykokkos.hpp"
 
-//--------------------------------------------------------------------------------------//
-//
-//        The python module
-//
-//--------------------------------------------------------------------------------------//
-
-PYBIND11_MODULE(libpykokkos, kokkos) {
-  // Initialize kokkos
-  auto _initialize = [&]() {
-    // python system module
-    py::module sys = py::module::import("sys");
-    // get the arguments for python system module
-    py::object args = sys.attr("argv");
-    auto argv       = args.cast<py::list>();
-    int _argc       = argv.size();
-    char **_argv    = new char *[argv.size()];
-    for (int i = 0; i < _argc; ++i)
-      _argv[i] = strdup(argv[i].cast<std::string>().c_str());
-    Kokkos::initialize(_argc, _argv);
-    for (int i = 0; i < _argc; ++i) free(_argv[i]);
-    delete[] _argv;
-  };
-
-  // Finalize kokkos
-  auto _finalize = []() {
-    py::module gc = py::module::import("gc");
-    gc.attr("collect")();
-    Kokkos::finalize();
-  };
-
-  kokkos.def("initialize", _initialize, "Initialize Kokkos");
-  kokkos.def("finalize", _finalize, "Finalize Kokkos");
-
-  generate_available(kokkos);
-  generate_enumeration(kokkos);
-  generate_view_variants(kokkos);
-  generate_atomic_variants(kokkos);
+void generate_atomic_variants(py::module &kokkos) {
+#if defined(ENABLE_MEMORY_TRAITS)
+  generate_atomic_variant<Right>(kokkos,
+                                 std::make_index_sequence<ViewDataTypesEnd>{});
+#  if defined(ENABLE_LAYOUTS)
+  generate_atomic_variant<Left>(kokkos,
+                                std::make_index_sequence<ViewDataTypesEnd>{});
+#  endif
+#else
+  consume_parameters(kokkos);
+#endif
 }
