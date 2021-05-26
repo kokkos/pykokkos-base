@@ -28,12 +28,12 @@ jobs:
     - name: Update container
       run:
         sudo apt-get update &&
-        sudo apt-get install -y build-essential gcc g++ &&
+        sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip
 
     - name: Install Kokkos
       run:
-        python -m pip install 'cmake==3.18.4' ninja &&
+        python -m pip install 'cmake==3.18.4' &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
@@ -93,12 +93,12 @@ jobs:
     - name: Update container
       run:
         sudo apt-get update &&
-        sudo apt-get install -y build-essential gcc g++ &&
+        sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip
 
     - name: Install Kokkos
       run:
-        python -m pip install 'cmake==3.18.4' ninja &&
+        python -m pip install 'cmake==3.18.4' &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
@@ -152,12 +152,12 @@ jobs:
     - name: Update container
       run:
         sudo apt-get update &&
-        sudo apt-get install -y build-essential gcc g++ &&
+        sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip
 
     - name: Install Kokkos
       run:
-        python -m pip install 'cmake==3.18.4' ninja &&
+        python -m pip install 'cmake==3.18.4' &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
