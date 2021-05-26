@@ -56,9 +56,9 @@ namespace SpaceDim {
 template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx>
 void generate_atomic_variant(py::module &_mod) {
   using data_spec_t   = ViewDataTypeSpecialization<DataIdx>;
-  using space_spec_t  = ViewSpaceSpecialization<SpaceIdx>;
-  using layout_spec_t = ViewLayoutSpecialization<LayoutIdx>;
-  using trait_spec_t  = ViewMemoryTraitSpecialization<Atomic>;
+  using space_spec_t  = MemorySpaceSpecialization<SpaceIdx>;
+  using layout_spec_t = MemoryLayoutSpecialization<LayoutIdx>;
+  using trait_spec_t  = MemoryTraitSpecialization<Atomic>;
   using Tp            = typename data_spec_t::type;
   using Vp            = typename ViewDataTypeRepr<Tp, DimIdx>::type;
   using Sp            = typename space_spec_t::type;
@@ -165,12 +165,13 @@ void generate_atomic_variant(py::module &_mod) {
 template <size_t LayoutIdx, size_t DataIdx, size_t SpaceIdx, size_t... DimIdx>
 void generate_atomic_variant(
     py::module &, std::index_sequence<DimIdx...>,
-    std::enable_if_t<!is_available<space_t<SpaceIdx>>::value, int> = 0) {}
+    std::enable_if_t<!is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
+}
 
 template <size_t LayoutIdx, size_t DataIdx, size_t SpaceIdx, size_t... DimIdx>
 void generate_atomic_variant(
     py::module &_mod, std::index_sequence<DimIdx...>,
-    std::enable_if_t<is_available<space_t<SpaceIdx>>::value, int> = 0) {
+    std::enable_if_t<is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
   FOLD_EXPRESSION(
       SpaceDim::generate_atomic_variant<DataIdx, SpaceIdx, DimIdx, LayoutIdx>(
           _mod));
@@ -195,6 +196,6 @@ template <size_t LayoutIdx, size_t... DataIdx>
 void generate_atomic_variant(py::module &_mod,
                              std::index_sequence<DataIdx...>) {
   FOLD_EXPRESSION(variants::generate_atomic_variant<LayoutIdx, DataIdx>(
-      _mod, std::make_index_sequence<ViewSpacesEnd>{}));
+      _mod, std::make_index_sequence<MemorySpacesEnd>{}));
 }
 }  // namespace

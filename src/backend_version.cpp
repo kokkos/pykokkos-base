@@ -42,7 +42,12 @@
 //@HEADER
 */
 
+#include "Kokkos_Core_fwd.hpp"
 #include "libpykokkos.hpp"
+
+#if defined(KOKKOS_ENABLE_OPENMP)
+#  include <omp.h>
+#endif
 
 //--------------------------------------------------------------------------------------//
 //
@@ -50,43 +55,21 @@
 //
 //--------------------------------------------------------------------------------------//
 
-PYBIND11_MODULE(libpykokkos, kokkos) {
-  // Initialize kokkos
-  auto _initialize = [&]() {
-    // python system module
-    py::module sys = py::module::import("sys");
-    // get the arguments for python system module
-    py::object args = sys.attr("argv");
-    auto argv       = args.cast<py::list>();
-    int _argc       = argv.size();
-    char **_argv    = new char *[argv.size()];
-    for (int i = 0; i < _argc; ++i) {
-      auto _args = argv[i].cast<std::string>();
-      if (_args == "--") {
-        for (int j = i; j < _argc; ++j) _argv[i] = nullptr;
-        _argc = i;
-        break;
-      }
-      _argv[i] = strdup(_args.c_str());
-    }
-    Kokkos::initialize(_argc, _argv);
-    for (int i = 0; i < _argc; ++i) free(_argv[i]);
-    delete[] _argv;
-  };
+void generate_backend_versions(py::module& kokkos) {
+  auto _version =
+      kokkos.def_submodule("backend_version", "Version info for backends");
 
-  // Finalize kokkos
-  auto _finalize = []() {
-    py::module gc = py::module::import("gc");
-    gc.attr("collect")();
-    Kokkos::finalize();
-  };
+  auto _zero = []() -> int { return -1; };
 
-  kokkos.def("initialize", _initialize, "Initialize Kokkos");
-  kokkos.def("finalize", _finalize, "Finalize Kokkos");
+#if defined(KOKKOS_ENABLE_OPENMP) && defined(_OPENMP)
+  _version.attr("openmp") = _OPENMP;
+#else
+  _version.attr("openmp")        = _zero();
+#endif
 
-  generate_available(kokkos);
-  generate_enumeration(kokkos);
-  generate_view_variants(kokkos);
-  generate_atomic_variants(kokkos);
-  generate_backend_versions(kokkos);
+#if defined(KOKKOS_ENABLE_OPENMPTARGET) && defined(_OPENMP)
+  _version.attr("openmp") = _OPENMP;
+#else
+  _version.attr("openmp_target") = _zero();
+#endif
 }

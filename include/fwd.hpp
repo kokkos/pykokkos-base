@@ -113,9 +113,23 @@ enum KokkosViewDataType {
   ViewDataTypesEnd
 };
 
-/// \enum KokkosViewSpace
+/// \enum KokkosExecutionSpace
+/// \brief An enumeration identifying all the device execution spaces
+enum KokkosExecutionSpace {
+  Serial_Backend = 0,
+  Threads_Backend,
+  OpenMP_Backend,
+  Cuda_Backend,
+  HPX_Backend,
+  HIP_Backend,
+  SYCL_Backend,
+  OpenMPTarget_Backend,
+  ExecutionSpacesEnd
+};
+
+/// \enum KokkosMemorySpace
 /// \brief An enumeration identifying all the memory spaces for a view
-enum KokkosViewSpace {
+enum KokkosMemorySpace {
   HostSpace = 0,
   AnonymousSpace,
   CudaSpace,
@@ -127,22 +141,22 @@ enum KokkosViewSpace {
   OpenMPTargetSpace,
   SYCLSharedUSMSpace,
   SYCLDeviceUSMSpace,
-  ViewSpacesEnd
+  MemorySpacesEnd
 };
 
-/// \enum KokkosViewLayoutType
+/// \enum KokkosMemoryLayoutType
 /// \brief An enumeration identifying all the layouts for a view
-enum KokkosViewLayoutType { Right = 0, Left, Stride, ViewLayoutEnd };
+enum KokkosMemoryLayoutType { Right = 0, Left, Stride, MemoryLayoutEnd };
 
-/// \enum KokkosViewMemoryTrait
+/// \enum KokkosMemoryTrait
 /// \brief An enumeration identifying all the memory traits for a view
-enum KokkosViewMemoryTrait {
+enum KokkosMemoryTrait {
   Managed = 0,
   Unmanaged,
   Atomic,
   RandomAccess,
   Restrict,
-  ViewMemoryTraitEnd
+  MemoryTraitEnd
 };
 
 //--------------------------------------------------------------------------------------//
@@ -160,31 +174,40 @@ template <size_t DataT>
 struct ViewDataTypeSpecialization;
 
 template <size_t SpaceT>
-struct ViewSpaceSpecialization;
+struct ExecutionSpaceSpecialization;
 
 template <typename Tp>
-struct ViewSpaceIndex;
+struct ExecutionSpaceIndex;
+
+template <size_t SpaceT>
+struct MemorySpaceSpecialization;
+
+template <typename Tp>
+struct MemorySpaceIndex;
 
 template <size_t DataT>
-struct ViewLayoutSpecialization;
+struct MemoryLayoutSpecialization;
 
 template <typename Tp>
-struct ViewLayoutIndex;
+struct MemoryLayoutIndex;
 
 template <size_t DataT>
-struct ViewMemoryTraitSpecialization;
+struct MemoryTraitSpecialization;
 
 template <typename Tp>
-struct ViewMemoryTraitIndex;
+struct MemoryTraitIndex;
 
 template <size_t Idx>
-using space_t = typename ViewSpaceSpecialization<Idx>::type;
+using execution_space_t = typename ExecutionSpaceSpecialization<Idx>::type;
 
 template <size_t Idx>
-using layout_t = typename ViewLayoutSpecialization<Idx>::type;
+using memory_space_t = typename MemorySpaceSpecialization<Idx>::type;
 
 template <size_t Idx>
-using memory_trait_t = typename ViewMemoryTraitSpecialization<Idx>::type;
+using memory_layout_t = typename MemoryLayoutSpecialization<Idx>::type;
+
+template <size_t Idx>
+using memory_trait_t = typename MemoryTraitSpecialization<Idx>::type;
 
 //--------------------------------------------------------------------------------------//
 //
@@ -216,55 +239,70 @@ using memory_trait_t = typename ViewMemoryTraitSpecialization<Idx>::type;
     using type = __VA_ARGS__;           \
   };
 
-#define VIEW_DATA_TYPE(ENUM_ID, DATA_TYPE, ...)                   \
+#define VIEW_DATA_TYPE(TYPE, ENUM_ID, ...)                        \
   template <>                                                     \
   struct ViewDataTypeSpecialization<ENUM_ID> {                    \
-    using type = DATA_TYPE;                                       \
+    using type = TYPE;                                            \
     static std::string label() { GET_FIRST_STRING(__VA_ARGS__); } \
     static const auto& labels() { GET_STRING_SET(__VA_ARGS__); }  \
   };
 
-#define VIEW_SPACE_IDX(VIEW_SPACE, ENUM_ID) \
-  template <>                               \
-  struct ViewSpaceIndex<VIEW_SPACE> {       \
-    static constexpr auto value = ENUM_ID;  \
+#define EXECUTION_SPACE_IDX(EXECUTION_SPACE, ENUM_ID) \
+  template <>                                         \
+  struct ExecutionSpaceIndex<EXECUTION_SPACE> {       \
+    static constexpr auto value = ENUM_ID;            \
   };
 
-#define VIEW_LAYOUT_IDX(VIEW_LAYOUT, ENUM_ID) \
-  template <>                                 \
-  struct ViewLayoutIndex<VIEW_LAYOUT> {       \
-    static constexpr auto value = ENUM_ID;    \
+#define MEMORY_SPACE_IDX(SPACE, ENUM_ID)   \
+  template <>                              \
+  struct MemorySpaceIndex<SPACE> {         \
+    static constexpr auto value = ENUM_ID; \
   };
 
-#define VIEW_MEMORY_TRAIT_IDX(VIEW_MEMORY_TRAIT, ENUM_ID) \
-  template <>                                             \
-  struct ViewMemoryTraitIndex<VIEW_MEMORY_TRAIT> {        \
-    static constexpr auto value = ENUM_ID;                \
+#define MEMORY_LAYOUT_IDX(LAYOUT, ENUM_ID) \
+  template <>                              \
+  struct MemoryLayoutIndex<LAYOUT> {       \
+    static constexpr auto value = ENUM_ID; \
   };
 
-#define VIEW_SPACE(VIEW_SPACE, ENUM_ID, ...)                      \
+#define MEMORY_TRAIT_IDX(TRAIT, ENUM_ID)   \
+  template <>                              \
+  struct MemoryTraitIndex<TRAIT> {         \
+    static constexpr auto value = ENUM_ID; \
+  };
+
+#define EXECUTION_SPACE(SPACE, ENUM_ID, ...)                      \
   template <>                                                     \
-  struct ViewSpaceSpecialization<ENUM_ID> {                       \
-    using type = VIEW_SPACE;                                      \
+  struct ExecutionSpaceSpecialization<ENUM_ID> {                  \
+    using type = SPACE;                                           \
     static std::string label() { GET_FIRST_STRING(__VA_ARGS__); } \
     static const auto& labels() { GET_STRING_SET(__VA_ARGS__); }  \
   };                                                              \
-  VIEW_SPACE_IDX(VIEW_SPACE, ENUM_ID)
+  EXECUTION_SPACE_IDX(SPACE, ENUM_ID)
 
-#define VIEW_LAYOUT_TYPE(ENUM_ID, LAYOUT_TYPE, LABEL)         \
+#define MEMORY_SPACE(SPACE, ENUM_ID, ...)                         \
+  template <>                                                     \
+  struct MemorySpaceSpecialization<ENUM_ID> {                     \
+    using type = SPACE;                                           \
+    static std::string label() { GET_FIRST_STRING(__VA_ARGS__); } \
+    static const auto& labels() { GET_STRING_SET(__VA_ARGS__); }  \
+  };                                                              \
+  MEMORY_SPACE_IDX(SPACE, ENUM_ID)
+
+#define MEMORY_LAYOUT(LAYOUT, ENUM_ID, LABEL)                 \
   template <>                                                 \
-  struct ViewLayoutSpecialization<ENUM_ID> {                  \
-    using type = LAYOUT_TYPE;                                 \
+  struct MemoryLayoutSpecialization<ENUM_ID> {                \
+    using type = LAYOUT;                                      \
     static std::string label() { return LABEL; }              \
     static std::set<std::string> labels() { return {LABEL}; } \
   };                                                          \
-  VIEW_LAYOUT_IDX(LAYOUT_TYPE, ENUM_ID)
+  MEMORY_LAYOUT_IDX(LAYOUT, ENUM_ID)
 
-#define VIEW_MEMORY_TRAIT(ENUM_ID, MEMORY_TRAIT, LABEL)       \
+#define MEMORY_TRAIT(TRAIT, ENUM_ID, LABEL)                   \
   template <>                                                 \
-  struct ViewMemoryTraitSpecialization<ENUM_ID> {             \
-    using type = MEMORY_TRAIT;                                \
+  struct MemoryTraitSpecialization<ENUM_ID> {                 \
+    using type = TRAIT;                                       \
     static std::string label() { return LABEL; }              \
     static std::set<std::string> labels() { return {LABEL}; } \
   };                                                          \
-  VIEW_MEMORY_TRAIT_IDX(MEMORY_TRAIT, ENUM_ID)
+  MEMORY_TRAIT_IDX(TRAIT, ENUM_ID)

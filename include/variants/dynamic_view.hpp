@@ -51,17 +51,18 @@ namespace Space {
 template <size_t DataIdx, size_t SpaceIdx, size_t LayoutIdx, size_t TraitIdx>
 void generate_dynamic_view_variant(
     py::module &,
-    std::enable_if_t<!is_available<space_t<SpaceIdx>>::value, int> = 0) {}
+    std::enable_if_t<!is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
+}
 
 template <size_t DataIdx, size_t SpaceIdx, size_t LayoutIdx, size_t TraitIdx>
 void generate_dynamic_view_variant(
     py::module &_mod,
-    std::enable_if_t<is_available<space_t<SpaceIdx>>::value, int> = 0) {
+    std::enable_if_t<is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
   constexpr auto DimIdx = ViewDataMaxDimensions;
   using data_spec_t     = ViewDataTypeSpecialization<DataIdx>;
-  using space_spec_t    = ViewSpaceSpecialization<SpaceIdx>;
-  using layout_spec_t   = ViewLayoutSpecialization<LayoutIdx>;
-  using trait_spec_t    = ViewMemoryTraitSpecialization<TraitIdx>;
+  using space_spec_t    = MemorySpaceSpecialization<SpaceIdx>;
+  using layout_spec_t   = MemoryLayoutSpecialization<LayoutIdx>;
+  using trait_spec_t    = MemoryTraitSpecialization<TraitIdx>;
   using Tp              = typename data_spec_t::type;
   using Vp              = Tp;
   using Sp              = typename space_spec_t::type;
@@ -108,6 +109,6 @@ void generate_dynamic_view_variant(py::module &_mod,
                                    std::index_sequence<DataIdx...>) {
   FOLD_EXPRESSION(
       variants::generate_dynamic_view_variant<LayoutIdx, TraitIdx, DataIdx>(
-          _mod, std::make_index_sequence<ViewSpacesEnd>{}));
+          _mod, std::make_index_sequence<MemorySpacesEnd>{}));
 }
 }  // namespace

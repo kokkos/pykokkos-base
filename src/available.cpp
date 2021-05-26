@@ -89,6 +89,33 @@ auto get_available(const std::string &str, std::index_sequence<Idx, Tail...>) {
 //--------------------------------------------------------------------------------------//
 
 void generate_available(py::module &kokkos) {
+  //----------------------------------------------------------------------------//
+  //
+  //                                execution spaces
+  //
+  //----------------------------------------------------------------------------//
+  auto _get_execspace_idx = [](int idx) {
+    return get_available<ExecutionSpaceSpecialization>(
+        idx, std::make_index_sequence<ExecutionSpacesEnd>{});
+  };
+  auto _get_execspace_name = [](std::string str) {
+    return get_available<ExecutionSpaceSpecialization>(
+        str, std::make_index_sequence<ExecutionSpacesEnd>{});
+  };
+  kokkos.def("get_device_available", _get_execspace_name,
+             "Get whether the execution space (i.e. device) is available");
+  kokkos.def("get_device_available", _get_execspace_idx,
+             "Get whether the execution space (i.e. device) is available");
+  kokkos.def("get_execution_space_available", _get_execspace_name,
+             "Get whether the execution space is available");
+  kokkos.def("get_execution_space_available", _get_execspace_idx,
+             "Get whether the execution space is available");
+
+  //----------------------------------------------------------------------------//
+  //
+  //                                data types
+  //
+  //----------------------------------------------------------------------------//
   kokkos.attr("max_concrete_rank") = ViewDataMaxDimensions;
 
   //----------------------------------------------------------------------------//
@@ -97,12 +124,12 @@ void generate_available(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   auto _get_memspace_idx = [](int idx) {
-    return get_available<ViewSpaceSpecialization>(
-        idx, std::make_index_sequence<ViewSpacesEnd>{});
+    return get_available<MemorySpaceSpecialization>(
+        idx, std::make_index_sequence<MemorySpacesEnd>{});
   };
   auto _get_memspace_name = [](std::string str) {
-    return get_available<ViewSpaceSpecialization>(
-        str, std::make_index_sequence<ViewSpacesEnd>{});
+    return get_available<MemorySpaceSpecialization>(
+        str, std::make_index_sequence<MemorySpacesEnd>{});
   };
   kokkos.def("get_memory_space_available", _get_memspace_name,
              "Get whether the memory space is available");
@@ -115,12 +142,12 @@ void generate_available(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   auto _get_ltype_name = [](int idx) {
-    return get_available<ViewLayoutSpecialization>(
-        idx, std::make_index_sequence<ViewLayoutEnd>{});
+    return get_available<MemoryLayoutSpecialization>(
+        idx, std::make_index_sequence<MemoryLayoutEnd>{});
   };
   auto _get_ltype_idx = [](std::string str) {
-    return get_available<ViewLayoutSpecialization>(
-        str, std::make_index_sequence<ViewLayoutEnd>{});
+    return get_available<MemoryLayoutSpecialization>(
+        str, std::make_index_sequence<MemoryLayoutEnd>{});
   };
   kokkos.def("get_layout_available", _get_ltype_name,
              "Get whether the layout type is available");
@@ -133,12 +160,12 @@ void generate_available(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   auto _get_memtrait_name = [](int idx) {
-    return get_available<ViewMemoryTraitSpecialization>(
-        idx, std::make_index_sequence<ViewMemoryTraitEnd>{});
+    return get_available<MemoryTraitSpecialization>(
+        idx, std::make_index_sequence<MemoryTraitEnd>{});
   };
   auto _get_memtype_idx = [](std::string str) {
-    return get_available<ViewMemoryTraitSpecialization>(
-        str, std::make_index_sequence<ViewMemoryTraitEnd>{});
+    return get_available<MemoryTraitSpecialization>(
+        str, std::make_index_sequence<MemoryTraitEnd>{});
   };
   kokkos.def("get_memory_trait_available", _get_memtrait_name,
              "Get whether the memory trait is available");

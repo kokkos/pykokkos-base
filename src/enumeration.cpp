@@ -122,6 +122,21 @@ auto get_enumeration(const std::string &str,
 void generate_enumeration(py::module &kokkos) {
   //----------------------------------------------------------------------------//
   //
+  //                                execution spaces
+  //
+  //----------------------------------------------------------------------------//
+  py::enum_<KokkosExecutionSpace> _device(kokkos, "device",
+                                          "Device execution spaces");
+  generate_enumeration<ExecutionSpaceSpecialization>(
+      _device, std::make_index_sequence<ExecutionSpacesEnd>{});
+
+  kokkos.attr("device") = []() {
+    return generate_enumeration_tuple<KokkosExecutionSpace>(
+        std::make_index_sequence<ExecutionSpacesEnd>{});
+  }();
+
+  //----------------------------------------------------------------------------//
+  //
   //                                data types
   //
   //----------------------------------------------------------------------------//
@@ -153,24 +168,24 @@ void generate_enumeration(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   // an enumeration of the memory spaces for views
-  py::enum_<KokkosViewSpace> _memspace(kokkos, "memory_space",
-                                       "View memory spaces");
-  generate_enumeration<ViewSpaceSpecialization>(
-      _memspace, std::make_index_sequence<ViewSpacesEnd>{});
+  py::enum_<KokkosMemorySpace> _memspace(kokkos, "memory_space",
+                                         "View memory spaces");
+  generate_enumeration<MemorySpaceSpecialization>(
+      _memspace, std::make_index_sequence<MemorySpacesEnd>{});
   _memspace.export_values();
 
   kokkos.attr("memory_spaces") = []() {
-    return generate_enumeration_tuple<KokkosViewSpace>(
-        std::make_index_sequence<ViewSpacesEnd>{});
+    return generate_enumeration_tuple<KokkosMemorySpace>(
+        std::make_index_sequence<MemorySpacesEnd>{});
   }();
 
   auto _get_memspace_name = [](int idx) {
-    return get_enumeration<ViewSpaceSpecialization>(
-        idx, std::make_index_sequence<ViewSpacesEnd>{});
+    return get_enumeration<MemorySpaceSpecialization>(
+        idx, std::make_index_sequence<MemorySpacesEnd>{});
   };
   auto _get_memspace_idx = [](std::string str) {
-    return get_enumeration<ViewSpaceSpecialization>(
-        str, std::make_index_sequence<ViewSpacesEnd>{});
+    return get_enumeration<MemorySpaceSpecialization>(
+        str, std::make_index_sequence<MemorySpacesEnd>{});
   };
   kokkos.def("get_memory_space", _get_memspace_name, "Get the memory space");
   kokkos.def("get_memory_space", _get_memspace_idx, "Get the memory space");
@@ -181,23 +196,24 @@ void generate_enumeration(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   // an enumeration of the layout types for views
-  py::enum_<KokkosViewLayoutType> _ltype(kokkos, "layout", "View layout types");
-  generate_enumeration<ViewLayoutSpecialization>(
-      _ltype, std::make_index_sequence<ViewLayoutEnd>{});
+  py::enum_<KokkosMemoryLayoutType> _ltype(kokkos, "layout",
+                                           "View layout types");
+  generate_enumeration<MemoryLayoutSpecialization>(
+      _ltype, std::make_index_sequence<MemoryLayoutEnd>{});
   _ltype.export_values();
 
   kokkos.attr("layouts") = []() {
-    return generate_enumeration_tuple<KokkosViewLayoutType>(
-        std::make_index_sequence<ViewLayoutEnd>{});
+    return generate_enumeration_tuple<KokkosMemoryLayoutType>(
+        std::make_index_sequence<MemoryLayoutEnd>{});
   }();
 
   auto _get_ltype_name = [](int idx) {
-    return get_enumeration<ViewLayoutSpecialization>(
-        idx, std::make_index_sequence<ViewLayoutEnd>{});
+    return get_enumeration<MemoryLayoutSpecialization>(
+        idx, std::make_index_sequence<MemoryLayoutEnd>{});
   };
   auto _get_ltype_idx = [](std::string str) {
-    return get_enumeration<ViewLayoutSpecialization>(
-        str, std::make_index_sequence<ViewLayoutEnd>{});
+    return get_enumeration<MemoryLayoutSpecialization>(
+        str, std::make_index_sequence<MemoryLayoutEnd>{});
   };
   kokkos.def("get_layout", _get_ltype_name, "Get the layout type");
   kokkos.def("get_layout", _get_ltype_idx, "Get the layout type");
@@ -208,24 +224,24 @@ void generate_enumeration(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   // an enumeration of the memory traits for views
-  py::enum_<KokkosViewMemoryTrait> _memtrait(kokkos, "memory_trait",
-                                             "View memory traits");
-  generate_enumeration<ViewMemoryTraitSpecialization>(
-      _memtrait, std::make_index_sequence<ViewMemoryTraitEnd>{});
+  py::enum_<KokkosMemoryTrait> _memtrait(kokkos, "memory_trait",
+                                         "View memory traits");
+  generate_enumeration<MemoryTraitSpecialization>(
+      _memtrait, std::make_index_sequence<MemoryTraitEnd>{});
   _memtrait.export_values();
 
   kokkos.attr("memory_traits") = []() {
-    return generate_enumeration_tuple<KokkosViewMemoryTrait>(
-        std::make_index_sequence<ViewMemoryTraitEnd>{});
+    return generate_enumeration_tuple<KokkosMemoryTrait>(
+        std::make_index_sequence<MemoryTraitEnd>{});
   }();
 
   auto _get_memtrait_name = [](int idx) {
-    return get_enumeration<ViewMemoryTraitSpecialization>(
-        idx, std::make_index_sequence<ViewMemoryTraitEnd>{});
+    return get_enumeration<MemoryTraitSpecialization>(
+        idx, std::make_index_sequence<MemoryTraitEnd>{});
   };
   auto _get_memtype_idx = [](std::string str) {
-    return get_enumeration<ViewMemoryTraitSpecialization>(
-        str, std::make_index_sequence<ViewMemoryTraitEnd>{});
+    return get_enumeration<MemoryTraitSpecialization>(
+        str, std::make_index_sequence<MemoryTraitEnd>{});
   };
   kokkos.def("get_memory_trait", _get_memtrait_name, "Get the memory trait");
   kokkos.def("get_memory_trait", _get_memtype_idx, "Get the memory trait");

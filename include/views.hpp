@@ -358,23 +358,23 @@ void generate_view(py::module &_mod, const std::string &_name,
       "Get the shape of the array (extents)");
 
   _view.def_property_readonly(
-      "space", [](View_t &) { return ViewSpaceIndex<Sp>::value; },
+      "space", [](View_t &) { return MemorySpaceIndex<Sp>::value; },
       "Memory space of the view (alias for 'memory_space')");
 
   _view.def_property_readonly(
-      "layout", [](View_t &) { return ViewLayoutIndex<Lp>::value; },
+      "layout", [](View_t &) { return MemoryLayoutIndex<Lp>::value; },
       "Memory layout of the view");
 
   _view.def_property_readonly(
-      "trait", [](View_t &) { return ViewMemoryTraitIndex<Mp>::value; },
+      "trait", [](View_t &) { return MemoryTraitIndex<Mp>::value; },
       "Memory trait of the view (alias for 'memory_trait')");
 
   _view.def_property_readonly(
-      "memory_space", [](View_t &) { return ViewSpaceIndex<Sp>::value; },
+      "memory_space", [](View_t &) { return MemorySpaceIndex<Sp>::value; },
       "Memory space of the view (alias for 'space')");
 
   _view.def_property_readonly(
-      "memory_trait", [](View_t &) { return ViewMemoryTraitIndex<Mp>::value; },
+      "memory_trait", [](View_t &) { return MemoryTraitIndex<Mp>::value; },
       "Memory trait of the view (alias for 'trait')");
 
   static bool _is_dynamic = (sizeof...(Idx) > 1);
