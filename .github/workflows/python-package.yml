@@ -65,11 +65,12 @@ jobs:
     - name: clang-format
       run: |
         set +e
-        FORMAT_OUT=$(clang-format-8 -output-replacements-xml $(find include src examples -type f | egrep '\.hpp$|\.cpp$|\.cpp\.in'))
+        FILES=$(find include src examples -type f | egrep '\.hpp$|\.cpp$|\.cpp\.in$')
+        FORMAT_OUT=$(clang-format-8 -output-replacements-xml ${FILES})
         RET=$(echo ${FORMAT_OUT} | grep -c '<replacement ')
         if [ "${RET}" -ne 0 ]; then
           echo -e "\nError! Code not formatted. Detected ${RET} lines\n"
-          clang-format-8 -i $(find include src examples -type f | egrep '\.hpp$|\.cpp$|\.cpp\.in$')
+          clang-format-8 -i ${FILES}
           git diff
           exit ${RET}
         fi

@@ -165,7 +165,7 @@ def parse_requirements(fname="requirements.txt"):
         _req = list(filter(bool, (line.strip() for line in fp)))
     # look for entries which read other files
     for itr in _req:
-        if itr.startswith("-e "):
+        if itr.startswith("-r "):
             # read another file
             for fitr in itr.split(" "):
                 if os.path.exists(fitr):

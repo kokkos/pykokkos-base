@@ -33,7 +33,7 @@ jobs:
 
     - name: Install Kokkos
       run:
-        python -m pip install 'cmake==3.18.4' &&
+        python -m pip install 'cmake==3.18.4' ninja &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
@@ -98,7 +98,7 @@ jobs:
 
     - name: Install Kokkos
       run:
-        python -m pip install 'cmake==3.18.4' &&
+        python -m pip install 'cmake==3.18.4' ninja &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
@@ -157,7 +157,7 @@ jobs:
 
     - name: Install Kokkos
       run:
-        python -m pip install 'cmake==3.18.4' &&
+        python -m pip install 'cmake==3.18.4' ninja &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
