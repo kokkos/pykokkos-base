@@ -59,7 +59,7 @@ PYKOKKOS_TARGET_FLAG(
     libpykokkos-build-options
     CHECK_FLAGS
     MODE        INTERFACE
-    FLAGS       -W -Wall -Wextra /bigobj -fvisibility=default
+    FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations /bigobj -fvisibility=default
     LANGUAGES   CXX)
 
 TRY_COMPILE(ENABLE_DEMANGLE
