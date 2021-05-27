@@ -64,7 +64,7 @@ except ImportError:
     import kokkos.test._conftest as conf
 
 
-class PyKokkosBaseViewTests(unittest.TestCase):
+class PyKokkosBaseViewsTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         kokkos.initialize()
