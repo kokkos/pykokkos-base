@@ -56,12 +56,7 @@ __status__ = "Development"
 
 import kokkos
 import unittest
-import numpy as np
 
-try:
-    from . import _conftest as conf
-except ImportError:
-    import kokkos.test._conftest as conf
 
 data = {}
 temp = {}
