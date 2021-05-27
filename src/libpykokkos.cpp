@@ -53,13 +53,14 @@
 PYBIND11_MODULE(libpykokkos, kokkos) {
   // Initialize kokkos
   auto _initialize = [&]() {
+    if (Kokkos::is_initialized()) return false;
     // python system module
     py::module sys = py::module::import("sys");
     // get the arguments for python system module
     py::object args = sys.attr("argv");
     auto argv       = args.cast<py::list>();
     int _argc       = argv.size();
-    char **_argv    = new char *[argv.size()];
+    char** _argv    = new char*[argv.size()];
     for (int i = 0; i < _argc; ++i) {
       auto _args = argv[i].cast<std::string>();
       if (_args == "--") {
@@ -72,18 +73,28 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
     Kokkos::initialize(_argc, _argv);
     for (int i = 0; i < _argc; ++i) free(_argv[i]);
     delete[] _argv;
+    return true;
   };
 
   // Finalize kokkos
   auto _finalize = []() {
+    if (!Kokkos::is_initialized()) return false;
+    destroy_callbacks();
+    Kokkos::Tools::Experimental::set_deallocate_data_callback(nullptr);
     py::module gc = py::module::import("gc");
     gc.attr("collect")();
     Kokkos::finalize();
+    return true;
   };
 
+  std::atexit(destroy_callbacks);
+
+  kokkos.def("is_initialized", &Kokkos::is_initialized,
+             "Query initialization state");
   kokkos.def("initialize", _initialize, "Initialize Kokkos");
   kokkos.def("finalize", _finalize, "Finalize Kokkos");
 
+  generate_tools(kokkos);
   generate_available(kokkos);
   generate_enumeration(kokkos);
   generate_view_variants(kokkos);

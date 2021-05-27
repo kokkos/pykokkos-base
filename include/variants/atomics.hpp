@@ -44,11 +44,13 @@
 
 #pragma once
 
-#include "libpykokkos.hpp"
-
 #include <pybind11/operators.h>
 
 #include <type_traits>
+
+#include "common.hpp"
+#include "traits.hpp"
+#include "views.hpp"
 
 namespace Space {
 namespace SpaceDim {
@@ -82,6 +84,10 @@ void generate_atomic_variant(py::module &_mod) {
                      (explicit_layout) ? demangle<Lp>() : std::string{},
                      demangle<Sp>(), demangle<Mp>()) +
       ">>";
+
+  if (DEBUG_OUTPUT)
+    std::cerr << "Registering " << desc << " as python class '" << name
+              << "'..." << std::endl;
 
   // class decl
   py::class_<atomic_type> _atomic{_mod, name.c_str()};
@@ -186,6 +192,11 @@ void generate_atomic_variant(py::module &_mod,
                              std::index_sequence<SpaceIdx...>) {
   FOLD_EXPRESSION(Space::generate_atomic_variant<LayoutIdx, DataIdx, SpaceIdx>(
       _mod, std::make_index_sequence<ViewDataMaxDimensions>{}));
+  // ensure atomic type for DynRankView is created
+#if ENABLE_VIEW_RANKS < 6
+  FOLD_EXPRESSION(Space::generate_atomic_variant<LayoutIdx, DataIdx, SpaceIdx>(
+      _mod, std::index_sequence<6>{}));
+#endif
 }
 
 }  // namespace variants

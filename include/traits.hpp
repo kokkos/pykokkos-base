@@ -53,6 +53,14 @@
 
 //--------------------------------------------------------------------------------------//
 
+DISABLE_TYPE(type_list<>)
+
+//--------------------------------------------------------------------------------------//
+/// \todo Reduce (or make it configurable) the number of dimensions supported by
+/// concrete views. Currently, we instantiate up to 8 dimensions but we could
+/// theoretically just say that python only supports up to 3 dimensions and if
+/// higher than that, user bindings must convert View to DynRankView.
+///
 VIEW_DATA_DIMS(1, T *)
 VIEW_DATA_DIMS(2, T **)
 VIEW_DATA_DIMS(3, T ***)
@@ -97,14 +105,19 @@ ENABLE_IMPLICIT(Kokkos::LayoutRight)
 //  the first string identifier is the "canonical name" (i.e. what gets encoded)
 //  and the remaining string entries are used to generate aliases
 //
+/// \todo Determine if there any combinations of memory traits that are commonly
+/// used and should be supported, e.g. RandomAccess + Restrict
+///
 MEMORY_TRAIT(Kokkos::MemoryTraits<0>, Managed, "Managed")
 MEMORY_TRAIT(Kokkos::MemoryTraits<Kokkos::Unmanaged>, Unmanaged, "Unmanaged")
+MEMORY_TRAIT(Kokkos::MemoryTraits<Kokkos::Aligned>, Aligned, "Aligned")
 MEMORY_TRAIT(Kokkos::MemoryTraits<Kokkos::Atomic>, Atomic, "Atomic")
 MEMORY_TRAIT(Kokkos::MemoryTraits<Kokkos::RandomAccess>, RandomAccess,
              "RandomAccess")
 MEMORY_TRAIT(Kokkos::MemoryTraits<Kokkos::Restrict>, Restrict, "Restrict")
 
 #if !defined(ENABLE_MEMORY_TRAITS)
+DISABLE_TYPE(Kokkos::MemoryTraits<Kokkos::Aligned>)
 DISABLE_TYPE(Kokkos::MemoryTraits<Kokkos::Atomic>)
 DISABLE_TYPE(Kokkos::MemoryTraits<Kokkos::RandomAccess>)
 DISABLE_TYPE(Kokkos::MemoryTraits<Kokkos::Restrict>)
@@ -171,8 +184,6 @@ DISABLE_TYPE(Kokkos::Experimental::OpenMPTarget)
 //  we declare these so that we can map the enum value to the type along with a
 //  label
 //
-DISABLE_TYPE(Kokkos::AnonymousSpace)
-
 #if !defined(KOKKOS_ENABLE_CUDA)
 DISABLE_TYPE(Kokkos::CudaSpace)
 DISABLE_TYPE(Kokkos::CudaHostPinnedSpace)
@@ -202,7 +213,6 @@ DISABLE_TYPE(Kokkos::Experimental::SYCLDeviceUSMSpace)
 
 MEMORY_SPACE(Kokkos::HostSpace, HostSpace, "HostSpace", "Host", "Serial",
              "Threads", "OpenMP", "HPX")
-MEMORY_SPACE(Kokkos::AnonymousSpace, AnonymousSpace, "AnonymousSpace")
 MEMORY_SPACE(Kokkos::CudaSpace, CudaSpace, "CudaSpace", "Cuda")
 MEMORY_SPACE(Kokkos::CudaUVMSpace, CudaUVMSpace, "CudaUVMSpace")
 MEMORY_SPACE(Kokkos::CudaHostPinnedSpace, CudaHostPinnedSpace,

@@ -31,10 +31,13 @@ SET(libpykokkos_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/libpykokkos.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/backend_version.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/enumeration.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/available.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/src/available.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/tools.cpp)
 
 SET(libpykokkos_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/libpykokkos.hpp
+    # ${CMAKE_CURRENT_LIST_DIR}/include/type_caster.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/deep_copy.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/common.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/traits.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/views.hpp
@@ -79,6 +82,8 @@ ENDIF()
 IF(ENABLE_MEMORY_TRAITS)
     TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_MEMORY_TRAITS)
 ENDIF()
+
+TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_VIEW_RANKS=${ENABLE_VIEW_RANKS})
 
 PYKOKKOS_TARGET_FLAG(
     libpykokkos-build-options

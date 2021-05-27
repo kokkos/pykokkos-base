@@ -44,7 +44,9 @@
 
 #pragma once
 
-#include "libpykokkos.hpp"
+#include "common.hpp"
+#include "traits.hpp"
+#include "views.hpp"
 
 namespace Space {
 namespace SpaceDim {
@@ -102,26 +104,13 @@ void generate_concrete_view_variant(
 }
 }  // namespace Space
 
-namespace variants {
-
+namespace {
 // generate data-type, memory-space buffers for concrete dimension
-template <size_t LayoutIdx, size_t TraitIdx, size_t DataIdx, size_t... SpaceIdx>
+template <size_t DataIdx, size_t LayoutIdx, size_t TraitIdx, size_t... SpaceIdx>
 void generate_concrete_view_variant(py::module &_mod,
                                     std::index_sequence<SpaceIdx...>) {
   FOLD_EXPRESSION(Space::generate_concrete_view_variant<LayoutIdx, TraitIdx,
                                                         DataIdx, SpaceIdx>(
       _mod, std::make_index_sequence<ViewDataMaxDimensions>{}));
-}
-
-}  // namespace variants
-
-namespace {
-// generate data type buffers for each memory space
-template <size_t LayoutIdx, size_t TraitIdx, size_t... DataIdx>
-void generate_concrete_view_variant(py::module &_mod,
-                                    std::index_sequence<DataIdx...>) {
-  FOLD_EXPRESSION(
-      variants::generate_concrete_view_variant<LayoutIdx, TraitIdx, DataIdx>(
-          _mod, std::make_index_sequence<MemorySpacesEnd>{}));
 }
 }  // namespace

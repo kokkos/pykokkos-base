@@ -77,10 +77,11 @@ class SYCL;
 //                                   Memory spaces
 //
 //--------------------------------------------------------------------------------------//
-
+//
+// NOTE: do not support AnonymousSpace
+//
 namespace Kokkos {
 class HostSpace;
-class AnonymousSpace;
 class CudaSpace;
 class CudaUVMSpace;
 class CudaHostPinnedSpace;
@@ -131,7 +132,7 @@ enum KokkosExecutionSpace {
 /// \brief An enumeration identifying all the memory spaces for a view
 enum KokkosMemorySpace {
   HostSpace = 0,
-  AnonymousSpace,
+  // AnonymousSpace,
   CudaSpace,
   CudaUVMSpace,
   CudaHostPinnedSpace,
@@ -153,9 +154,10 @@ enum KokkosMemoryLayoutType { Right = 0, Left, Stride, MemoryLayoutEnd };
 enum KokkosMemoryTrait {
   Managed = 0,
   Unmanaged,
-  Atomic,
   RandomAccess,
+  Atomic,
   Restrict,
+  Aligned,
   MemoryTraitEnd
 };
 
@@ -165,7 +167,14 @@ enum KokkosMemoryTrait {
 //
 //--------------------------------------------------------------------------------------//
 
-static constexpr size_t ViewDataMaxDimensions = 8;
+#if !defined(ENABLE_VIEW_RANKS)
+#  define ENABLE_VIEW_RANKS 4
+#endif
+
+static constexpr size_t ViewDataMaxDimensions = ENABLE_VIEW_RANKS;
+
+static_assert(ViewDataMaxDimensions < 8,
+              "Error! ViewDataMaxDimensions must be in range [0, 8)");
 
 template <typename T, size_t Dim>
 struct ViewDataTypeRepr;

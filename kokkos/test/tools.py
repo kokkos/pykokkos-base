@@ -1,0 +1,333 @@
+#!@PYTHON_EXECUTABLE@
+# ************************************************************************
+#
+#                        Kokkos v. 3.0
+#       Copyright (2020) National Technology & Engineering
+#               Solutions of Sandia, LLC (NTESS).
+#
+# Under the terms of Contract DE-NA0003525 with NTESS,
+# the U.S. Government retains certain rights in this software.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+# 1. Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the Corporation nor the names of the
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY NTESS "AS IS" AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL NTESS OR THE
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Questions? Contact Christian R. Trott (crtrott@sandia.gov)
+#
+# ************************************************************************
+#
+
+from __future__ import absolute_import
+
+__author__ = "Jonathan R. Madsen"
+__copyright__ = (
+    "Copyright 2020, National Technology & Engineering Solutions of Sandia, LLC (NTESS)"
+)
+__credits__ = ["Kokkos"]
+__license__ = "BSD-3"
+__version__ = "@PROJECT_VERSION@"
+__maintainer__ = "Jonathan R. Madsen"
+__email__ = "jrmadsen@lbl.gov"
+__status__ = "Development"
+
+
+import kokkos
+import unittest
+import numpy as np
+
+try:
+    from . import _conftest as conf
+except ImportError:
+    import kokkos.test._conftest as conf
+
+data = {}
+temp = {}
+count = 0
+regions = []
+
+
+def initialize(seq, ver, deviceCount, deviceInfo):
+    global data
+
+    if "initialize" not in data:
+        data["initialize"] = 1
+    else:
+        data["initialize"] += 1
+
+
+def finalize():
+    global data
+
+    if "finalize" not in data:
+        data["finalize"] = 1
+    else:
+        data["finalize"] += 1
+
+
+def begin_parallel(name, devid):
+    global data
+    global temp
+    global count
+
+    count += 1
+    kernid = count
+    data[f"begin_{name}"] = kernid
+    temp[kernid] = name
+    return kernid
+
+
+def end_parallel(kernid):
+    global data
+    global temp
+
+    name = temp[kernid]
+    data[f"end_{name}"] = kernid
+
+
+def push_region(name):
+    global data
+    global regions
+
+    data[name] = [True, False]
+    regions += [name]
+
+
+def pop_region():
+    global data
+    global regions
+
+    data[regions[-1]][1] = True
+
+
+def alloc_data(handle, label, ptr, size):
+    global data
+
+    data[f"alloc_{label}"] = (size, handle.name)
+
+
+def dealloc_data(handle, label, ptr, size):
+    global data
+
+    data[f"dealloc_{label}"] = (size, handle.name)
+
+
+def create_prof(name):
+    global data
+    global temp
+    global count
+
+    count += 1
+    secid = count
+    data[f"create_{name}"] = secid
+    temp[secid] = name
+    return secid
+
+
+def start_prof(secid):
+    global data
+    global temp
+
+    name = temp[secid]
+    data[f"start_{name}"] = secid
+
+
+def stop_prof(secid):
+    global data
+    global temp
+
+    name = temp[secid]
+    data[f"stop_{name}"] = secid
+
+
+def destroy_prof(secid):
+    global data
+    global temp
+
+    name = temp[secid]
+    data[f"destroy_{name}"] = secid
+
+
+def prof_event(name):
+    global data
+
+    data[f"{name}"] = True
+
+
+def begin_deep_copy(dst_handle, dst_name, dst_ptr, src_handle, src_name, src_ptr, size):
+    global data
+    global temp
+
+    data[f"begin_{dst_name}/{dst_handle.name}/dst"] = [size, True, False]
+    data[f"begin_{src_name}/{src_handle.name}/src"] = [size, True, False]
+    temp["deep_copy"] = (dst_handle, dst_name, src_handle, src_name, size)
+
+
+def end_deep_copy():
+    global data
+    global temp
+
+    (dst_handle, dst_name, src_handle, src_name, size) = temp["deep_copy"]
+    del temp["deep_copy"]
+
+    data[f"begin_{dst_name}/{dst_handle.name}/dst"][-1] = True
+    data[f"begin_{src_name}/{src_handle.name}/src"][-1] = True
+
+
+class PyKokkosBaseToolsTests(unittest.TestCase):
+    """ToolsTests"""
+
+    @classmethod
+    def setUpClass(self):
+        import gc
+
+        kokkos.tools.set_init_callback(initialize)
+        kokkos.tools.set_finalize_callback(finalize)
+
+        kokkos.initialize()
+        # self.assertTrue(data["initialize"])
+
+        # configure internal testing data before setting other callbacks
+        kokkos.tools._internal.setup()
+
+        for itr in ("parallel_for", "parallel_reduce", "parallel_scan", "fence"):
+            getattr(kokkos.tools, f"set_begin_{itr}_callback")(begin_parallel)
+            getattr(kokkos.tools, f"set_end_{itr}_callback")(end_parallel)
+
+        kokkos.tools.set_push_region_callback(push_region)
+        kokkos.tools.set_pop_region_callback(pop_region)
+        kokkos.tools.set_allocate_data_callback(alloc_data)
+        kokkos.tools.set_deallocate_data_callback(dealloc_data)
+        kokkos.tools.set_create_profile_section_callback(create_prof)
+        kokkos.tools.set_start_profile_section_callback(start_prof)
+        kokkos.tools.set_stop_profile_section_callback(stop_prof)
+        kokkos.tools.set_destroy_profile_section_callback(destroy_prof)
+        kokkos.tools.set_profile_event_callback(prof_event)
+        kokkos.tools.set_begin_deep_copy_callback(begin_deep_copy)
+        kokkos.tools.set_end_deep_copy_callback(end_deep_copy)
+
+        # run internal testing (parallel_for, parallel_reduce, etc.)
+        kokkos.tools._internal.test()
+
+        # disable parallel callbacks
+        for itr in ("parallel_for", "parallel_reduce", "parallel_scan"):
+            getattr(kokkos.tools, f"set_begin_{itr}_callback")(None)
+            getattr(kokkos.tools, f"set_end_{itr}_callback")(None)
+
+        # generate some profiling data in python
+        source = kokkos.array(
+            "python_source", [10], space=kokkos.Host, dtype=kokkos.int64
+        )
+        target = kokkos.array(
+            "python_target", [10], space=kokkos.Host, dtype=kokkos.int64
+        )
+        kokkos.deep_copy(target, source)
+
+        # delete the source and target and run garbage collector
+        del source
+        del target
+        gc.collect()
+
+    @classmethod
+    def tearDownClass(self):
+        global data
+
+        kokkos.finalize()
+        print("")
+        for key, item in data.items():
+            print("{:30} : {}".format(key, item))
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def fib(self, n):
+        return n if n < 2 else self.fib(n - 1) + self.fib(n - 2)
+
+    def test_routines(self):
+        """cxx_routines"""
+
+        self.assertEqual(data["begin_cxx_parallel_for"], 1)
+        self.assertEqual(data["begin_cxx_parallel_reduce"], 2)
+        self.assertEqual(data["begin_cxx_parallel_scan"], 3)
+
+        self.assertEqual(data["end_cxx_parallel_for"], 1)
+        self.assertEqual(data["end_cxx_parallel_reduce"], 2)
+        self.assertEqual(data["end_cxx_parallel_scan"], 3)
+
+        self.assertEqual(data["create_cxx_created_section"], 4)
+        self.assertEqual(data["start_cxx_created_section"], 4)
+        self.assertEqual(data["stop_cxx_created_section"], 4)
+        self.assertEqual(data["destroy_cxx_created_section"], 4)
+
+        self.assertEqual(data["create_python_profile_section"], 5)
+        self.assertEqual(data["start_python_profile_section"], 5)
+        self.assertEqual(data["stop_python_profile_section"], 5)
+        self.assertEqual(data["destroy_python_profile_section"], 5)
+
+        self.assertCountEqual(data["begin_cxx_target/Host/dst"], [40, True, True])
+        self.assertCountEqual(data["begin_cxx_source/Host/src"], [40, True, True])
+
+        self.assertCountEqual(data["cxx_push_region"], [True, True])
+
+        self.assertCountEqual(data["alloc_python_source"], [80, "Host"])
+        self.assertCountEqual(data["alloc_python_target"], [80, "Host"])
+        self.assertCountEqual(data["dealloc_python_source"], [80, "Host"])
+        self.assertCountEqual(data["dealloc_python_target"], [80, "Host"])
+        self.assertCountEqual(data["dealloc_cxx_source"], [40, "Host"])
+        self.assertCountEqual(data["dealloc_cxx_target"], [40, "Host"])
+
+    def test_region(self):
+        """python_region"""
+        kokkos.tools.push_region(self.shortDescription())
+        kokkos.tools.pop_region()
+
+    def test_profile_section(self):
+        """python_profile_section"""
+        idx = kokkos.tools.create_profile_section(self.shortDescription())
+        kokkos.tools.start_section(idx)
+        self.fib(10)
+        kokkos.tools.stop_section(idx)
+        kokkos.tools.destroy_profile_section(idx)
+
+    def test_mark_event(self):
+        """python_mark_event"""
+        kokkos.tools.mark_event(self.shortDescription())
+
+    def test_declare_metadata(self):
+        """python_declare_metadata"""
+        kokkos.tools.declare_metadata("dogs", "good")
+
+
+# main runner
+def run():
+    # run all tests
+    unittest.main()
+
+
+if __name__ == "__main__":
+    run()
