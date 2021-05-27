@@ -83,7 +83,7 @@ IF("${CMAKE_INSTALL_PREFIX}" STREQUAL "/kokkos-install-dir")
     SET(CMAKE_INSTALL_PREFIX "${Kokkos_INSTALL_DIR}" CACHE PATH "Installation directory" FORCE)
 ENDIF()
 
-set(CMAKE_VISIBILITY_INLINES_HIDDEN OFF CACHE BOOL "Add compile flag to hide symbols of inline functions")
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON CACHE BOOL "Add compile flag to hide symbols of inline functions")
 set(CMAKE_C_VISIBILITY_PRESET "default" CACHE STRING "Default visibility")
 set(CMAKE_CXX_VISIBILITY_PRESET "default" CACHE STRING "Default visibility")
 

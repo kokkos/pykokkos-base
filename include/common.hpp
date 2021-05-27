@@ -162,6 +162,20 @@ using enable_if_t = typename std::enable_if<B, T>::type;
 
 //--------------------------------------------------------------------------------------//
 
+#if defined(__GNUC__) || defined(__clang__)
+#  define PYKOKKOS_HIDDEN __attribute__((visibility("hidden")))
+#elif defined(__has_attribute)
+#  if __has_attribute(visibility)
+#    define PYKOKKOS_HIDDEN __attribute__((visibility("hidden")))
+#  else
+#    define PYKOKKOS_HIDDEN
+#  endif
+#else
+#  define PYKOKKOS_HIDDEN
+#endif
+
+//--------------------------------------------------------------------------------------//
+
 template <typename... Args>
 void consume_parameters(Args &&...) {}
 

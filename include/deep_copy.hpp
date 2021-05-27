@@ -264,14 +264,14 @@ struct deep_copy_compatible {
 //--------------------------------------------------------------------------------------//
 
 template <typename LhsT>
-struct deep_copy {
+struct PYKOKKOS_HIDDEN deep_copy {
   static_assert(!std::is_same<LhsT, type_list<>>::value,
                 "Error! Empty type list");
 
-  explicit deep_copy(py::class_<LhsT>& _module) : m_module{_module} {}
+  explicit inline deep_copy(py::class_<LhsT>& _module) : m_module{_module} {}
 
   template <typename... RhsT>
-  auto operator()(type_list<RhsT...>&&) {
+  inline auto operator()(type_list<RhsT...>&&) {
     FOLD_EXPRESSION(sfinae<LhsT, RhsT>(0));
   }
 
@@ -279,8 +279,8 @@ struct deep_copy {
   py::class_<LhsT>& m_module;
 
   template <typename Tp, typename Up>
-  auto sfinae(int,
-              enable_if_t<deep_copy_compatible<Tp, Up>::value, int> = 0) const
+  inline auto sfinae(
+      int, enable_if_t<deep_copy_compatible<Tp, Up>::value, int> = 0) const
       -> decltype(Kokkos::deep_copy(std::declval<Tp&>(),
                                     std::declval<const Up&>()),
                   void()) {
@@ -290,5 +290,5 @@ struct deep_copy {
   }
 
   template <typename Tp, typename Up>
-  auto sfinae(long) const {}
+  inline auto sfinae(long) const {}
 };
