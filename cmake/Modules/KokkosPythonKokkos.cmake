@@ -34,11 +34,11 @@ IF(_INTERNAL_KOKKOS)
     SET(Threads_FOUND OFF)
     SET(CUDA_FOUND OFF)
 
-    IF(NOT Kokkos_ENABLE_PTHREADS)
+    IF(NOT Kokkos_ENABLE_PTHREAD)
         FIND_PACKAGE(OpenMP QUIET)
     ENDIF()
 
-    IF(NOT DEFINED Kokkos_ENABLE_PTHREADS AND NOT OpenMP_FOUND)
+    IF(NOT DEFINED Kokkos_ENABLE_PTHREAD AND NOT OpenMP_FOUND)
         FIND_PACKAGE(Threads QUIET)
     ENDIF()
 
@@ -51,9 +51,9 @@ IF(_INTERNAL_KOKKOS)
     ADD_OPTION(ENABLE_THREADS "Enable Pthreads when building Kokkos submodule" ${Threads_FOUND})
     ADD_OPTION(ENABLE_CUDA "Enable CUDA when building Kokkos submodule" ${CUDA_FOUND})
 
-    # if OpenMP defaulted to ON but Kokkos_ENABLE_PTHREADS was explicitly set,
+    # if OpenMP defaulted to ON but Kokkos_ENABLE_PTHREAD was explicitly set,
     # disable OpenMP defaulting to ON
-    IF(ENABLE_OPENMP AND Kokkos_ENABLE_PTHREADS)
+    IF(ENABLE_OPENMP AND Kokkos_ENABLE_PTHREAD)
         SET(ENABLE_OPENMP OFF)
         SET(Kokkos_ENABLE_OPENMP OFF)
     ENDIF()
@@ -85,22 +85,22 @@ IF(_INTERNAL_KOKKOS)
     ENDIF()
 
     # define the kokkos option as default and/or get it to display
-    IF(ENABLE_SERIAL OR Kokkos_ENABLE_SERIAL)
+    IF(ENABLE_SERIAL)
         ADD_OPTION(Kokkos_ENABLE_SERIAL "Build Kokkos submodule with serial support" ON)
     ENDIF()
 
     # define the kokkos option as default and/or get it to display
-    IF(ENABLE_OPENMP OR Kokkos_ENABLE_OPENMP)
+    IF(ENABLE_OPENMP)
         ADD_OPTION(Kokkos_ENABLE_OPENMP "Build Kokkos submodule with OpenMP support" ON)
     ENDIF()
 
     # define the kokkos option as default and/or get it to display
-    IF(ENABLE_THREADS OR Kokkos_ENABLE_PTHREAD)
+    IF(ENABLE_THREADS)
         ADD_OPTION(Kokkos_ENABLE_PTHREAD "Build Kokkos submodule with Pthread support" ON)
     ENDIF()
 
     # define the kokkos option as default and/or get it to display
-    IF(ENABLE_CUDA OR Kokkos_ENABLE_CUDA)
+    IF(ENABLE_CUDA)
         ADD_OPTION(Kokkos_ENABLE_CUDA "Build Kokkos submodule with CUDA support" ON)
         ADD_OPTION(Kokkos_ENABLE_CUDA_UVM "Build Kokkos submodule with CUDA UVM support" ON)
         ADD_OPTION(Kokkos_ENABLE_CUDA_LAMBDA "Build Kokkos submodule with CUDA lambda support" ON)
