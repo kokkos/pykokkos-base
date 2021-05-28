@@ -30,13 +30,21 @@ ENDIF()
 IF(_INTERNAL_KOKKOS)
 
     # try to find some packages quietly in order to set some defaults
-    FIND_PACKAGE(OpenMP QUIET)
-    IF(NOT OpenMP_FOUND)
-        FIND_PACKAGE(Threads QUIET)
-    ELSE()
-        SET(Threads_FOUND OFF)
+    SET(OpenMP_FOUND OFF)
+    SET(Threads_FOUND OFF)
+    SET(CUDA_FOUND OFF)
+
+    IF(NOT Kokkos_ENABLE_PTHREADS)
+        FIND_PACKAGE(OpenMP QUIET)
     ENDIF()
-    FIND_PACKAGE(CUDA QUIET)
+
+    IF(NOT DEFINED Kokkos_ENABLE_PTHREADS AND NOT OpenMP_FOUND)
+        FIND_PACKAGE(Threads QUIET)
+    ENDIF()
+
+    IF(NOT DEFINED Kokkos_ENABLE_CUDA)
+        FIND_PACKAGE(CUDA QUIET)
+    ENDIF()
 
     ADD_OPTION(ENABLE_SERIAL "Enable Serial backend when building Kokkos submodule" ON)
     ADD_OPTION(ENABLE_OPENMP "Enable OpenMP when building Kokkos submodule" ${OpenMP_FOUND})
