@@ -48,8 +48,10 @@
 #include "traits.hpp"
 #include "views.hpp"
 
+void generate_tools(py::module& kokkos);
 void generate_available(py::module& kokkos);
 void generate_enumeration(py::module& kokkos);
 void generate_view_variants(py::module& kokkos);
 void generate_atomic_variants(py::module& kokkos);
 void generate_backend_versions(py::module& kokkos);
+void destroy_callbacks();

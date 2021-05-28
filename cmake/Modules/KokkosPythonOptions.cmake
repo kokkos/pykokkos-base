@@ -38,6 +38,7 @@ IF("CUDA" IN_LIST Kokkos_DEVICES)
     SET(_ENABLE_MEM_DEFAULT OFF)
     SET(_ENABLE_LAY_DEFAULT OFF)
 ENDIF()
+SET(_VIEW_RANK_MSG "Set this value to the max number of ranks needed for Kokkos::View<...>. E.g. value of 4 means Kokkos::View<int*****, Kokkos::HostSpace> cannot be returned to python")
 
 ADD_FEATURE(CMAKE_BUILD_TYPE "Build type")
 ADD_FEATURE(CMAKE_INSTALL_PREFIX "Installation prefix")
@@ -52,9 +53,18 @@ ADD_OPTION(ENABLE_EXAMPLES "Build the examples" ${BUILD_EXAMPLES})
 ADD_OPTION(ENABLE_EXPERIMENTAL "Build the experimental code" OFF)
 ADD_OPTION(ENABLE_THIN_LTO "Pass THIN_LTO to pybind11_add_module instead of NO_EXTRAS" OFF)
 # these affect which Kokkos::View and Kokkos::DynRankView templates that are instantiated
-ADD_OPTION(ENABLE_ALL "Enable all build configurations (layouts, memory-traits, etc.)" ${_ENABLE_ALL_DEFAULT})
-ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)" ${_ENABLE_MEM_DEFAULT})
-ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)" ${_ENABLE_LAY_DEFAULT})
+ADD_OPTION(ENABLE_ALL "Enable all build configurations (layouts, memory-traits, etc.)"
+    ${_ENABLE_ALL_DEFAULT})
+ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)"
+    ${_ENABLE_MEM_DEFAULT})
+ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)"
+    ${_ENABLE_LAY_DEFAULT})
+
+SET(ENABLE_VIEW_RANKS "4" CACHE STRING "${_VIEW_RANK_MSG}")
+IF(ENABLE_VIEW_RANKS LESS 0 OR ENABLE_VIEW_RANKS GREATER 7)
+    MESSAGE(FATAL_ERROR "ENABLE_VIEW_RANKS (=${ENABLE_VIEW_RANKS}) must be in range: [0, 7]")
+ENDIF()
+ADD_FEATURE(ENABLE_VIEW_RANKS "${_VIEW_RANK_MSG}")
 
 IF(ENABLE_ALL AND (NOT ENABLE_MEMORY_TRAITS OR NOT ENABLE_LAYOUTS))
     MESSAGE(WARNING "ENABLE_ALL option was set to ON but either/both ENABLE_LAYOUTS and ENABLE_MEMORY_TRAITS were already cached to OFF")
@@ -73,7 +83,7 @@ IF("${CMAKE_INSTALL_PREFIX}" STREQUAL "/kokkos-install-dir")
     SET(CMAKE_INSTALL_PREFIX "${Kokkos_INSTALL_DIR}" CACHE PATH "Installation directory" FORCE)
 ENDIF()
 
-set(CMAKE_VISIBILITY_INLINES_HIDDEN OFF CACHE BOOL "Add compile flag to hide symbols of inline functions")
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON CACHE BOOL "Add compile flag to hide symbols of inline functions")
 set(CMAKE_C_VISIBILITY_PRESET "default" CACHE STRING "Default visibility")
 set(CMAKE_CXX_VISIBILITY_PRESET "default" CACHE STRING "Default visibility")
 
@@ -99,7 +109,7 @@ IF(APPLE)
 ENDIF()
 
 # NOTE: PyPy does not support embedding the interpreter
-SET(Python3_FIND_IMPLEMENTATIONS "CPython" CACHE STRING "Different implementations which will be searched.")
+SET(Python3_FIND_IMPLEMENTATIONS "CPython;PyPy" CACHE STRING "Different implementations which will be searched.")
 SET_PROPERTY(CACHE Python3_FIND_IMPLEMENTATIONS PROPERTY STRINGS "CPython;IronPython;PyPy")
 
 # create cache entries
@@ -110,4 +120,32 @@ IF(DEFINED PYTHON_EXECUTABLE AND NOT DEFINED Python3_EXECUTABLE)
 ENDIF()
 
 # always disallow unity build
-SET(CMAKE_UNITY_BUILD OFF)
+# SET(CMAKE_UNITY_BUILD OFF)
+IF(ENABLE_MEMORY_TRAITS)
+    ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ON)
+ELSE()
+    ADD_FEATURE(CMAKE_UNITY_BUILD "Enable unity build")
+ENDIF()
+
+SET(CMAKE_UNITY_BUILD_BATCH_SIZE 6 CACHE STRING "Unity build batch size")
+IF(CMAKE_UNITY_BUILD)
+    ADD_FEATURE(CMAKE_UNITY_BUILD_BATCH_SIZE "Unity build batch size")
+ENDIF()
+
+OPTION(ENABLE_CTP "Enable compile-time-perf" OFF)
+MARK_AS_ADVANCED(ENABLE_CTP)
+IF(ENABLE_CTP)
+    FIND_PACKAGE(compile-time-perf)
+    IF(compile-time-perf_FOUND)
+        enable_compile_time_perf(pykokkos-base-compile-time
+            LINK
+            ANALYZER_OPTIONS
+                -s "${PROJECT_BINARY_DIR}/" "${PROJECT_SOURCE_DIR}/"
+                -f "lang-all" "so" "a" "dylib" "dll"
+                -i ".*(_tests)$" "^(ex_).*"
+                -e "^(@rpath).*" "^(/usr)" "^(/opt)")
+        SET(ENABLE_CTP ON)
+    ELSE()
+        SET(ENABLE_CTP OFF)
+    ENDIF()
+ENDIF()

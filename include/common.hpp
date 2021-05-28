@@ -104,8 +104,37 @@ struct gather {
                                            concat_t<T>, type_list<>>...>;
 };
 
+//--------------------------------------------------------------------------------------//
+
+template <typename In, typename Out>
+struct convert {
+  using type = Out;
+};
+
+template <template <typename...> class InTuple, typename... In,
+          template <typename...> class OutTuple, typename... Out>
+struct convert<InTuple<In...>, OutTuple<Out...>> {
+  using type = OutTuple<Out..., In...>;
+};
+
+//--------------------------------------------------------------------------------------//
+
+template <typename T, typename U>
+using convert_t = typename convert<T, U>::type;
+
 template <template <typename> class PredicateT, bool ValueT, typename... T>
 using gather_t = typename gather<PredicateT, ValueT, T...>::type;
+
+//--------------------------------------------------------------------------------------//
+
+template <typename...>
+struct concrete_view_type_list;
+
+template <typename...>
+struct dynamic_view_type_list;
+
+template <size_t Idx>
+struct index_val;
 
 //--------------------------------------------------------------------------------------//
 
@@ -123,6 +152,26 @@ using enable_if_t = typename std::enable_if<B, T>::type;
 #  define DEBUG_OUTPUT true
 #else
 #  define DEBUG_OUTPUT false
+#endif
+
+//--------------------------------------------------------------------------------------//
+
+#if !defined(EXPAND)
+#  define EXPAND(...) __VA_ARGS__
+#endif
+
+//--------------------------------------------------------------------------------------//
+
+#if defined(__GNUC__) || defined(__clang__)
+#  define PYKOKKOS_HIDDEN __attribute__((visibility("hidden")))
+#elif defined(__has_attribute)
+#  if __has_attribute(visibility)
+#    define PYKOKKOS_HIDDEN __attribute__((visibility("hidden")))
+#  else
+#    define PYKOKKOS_HIDDEN
+#  endif
+#else
+#  define PYKOKKOS_HIDDEN
 #endif
 
 //--------------------------------------------------------------------------------------//
@@ -194,6 +243,43 @@ struct is_implicit : std::false_type {};
   template <>                 \
   struct is_implicit<TYPE> : std::true_type {};
 
+template <typename Tp>
+struct is_memory_traits : std::false_type {};
+
+namespace Kokkos {
+//
+template <unsigned T>
+struct MemoryTraits;
+//
+template <typename DataType, class... Properties>
+class DynRankView;  // forward declare
+//
+template <typename DataType, class... Properties>
+class View;  // forward declare
+//
+template <class ExecutionSpace, class MemorySpace>
+struct Device;
+}  // namespace Kokkos
+
+template <unsigned T>
+struct is_memory_traits<Kokkos::MemoryTraits<T>> : std::true_type {};
+
+//--------------------------------------------------------------------------------------//
+//  this is used to convert Kokkos::Device<ExecSpace, MemSpace> to MemSpace
+//
+template <typename Tp>
+struct remove_device {
+  using type = Tp;
+};
+
+template <typename ExecT, typename MemT>
+struct remove_device<Kokkos::Device<ExecT, MemT>> {
+  using type = MemT;
+};
+
+template <typename Tp>
+using remove_device_t = typename remove_device<Tp>::type;
+
 //--------------------------------------------------------------------------------------//
 //  this is used to get the view type
 //
@@ -203,10 +289,95 @@ struct view_type;
 template <template <typename...> class ViewT, typename ValueT,
           typename... Types>
 struct view_type<ViewT<ValueT>, type_list<Types...>> {
-  using type = ViewT<ValueT, Types...>;
+  using type = ViewT<ValueT, remove_device_t<Types>...>;
 };
 
 template <template <typename...> class ViewT, typename ValueT,
           typename... Types>
 struct view_type<ViewT<ValueT>, Types...>
     : view_type<ViewT<ValueT>, gather_t<is_implicit, false, Types...>> {};
+
+template <template <typename...> class ViewT, typename ValueT,
+          typename... Types>
+struct view_type<ViewT<ValueT, Types...>>
+    : view_type<ViewT<ValueT>, gather_t<is_implicit, false, Types...>> {};
+
+template <typename... T>
+using view_type_t = typename view_type<T...>::type;
+
+//--------------------------------------------------------------------------------------//
+//  this is used to get the deep copy view type
+//
+template <typename, typename...>
+struct deep_copy_view_type;
+
+template <template <typename...> class ViewT, typename ValueT,
+          typename... Types>
+struct deep_copy_view_type<ViewT<ValueT>, type_list<Types...>> {
+  using type = ViewT<ValueT, Types...>;
+};
+
+template <template <typename...> class ViewT, typename ValueT,
+          typename... Types>
+struct deep_copy_view_type<ViewT<ValueT>, Types...>
+    : deep_copy_view_type<ViewT<ValueT>,
+                          gather_t<is_memory_traits, false, Types...>> {};
+
+template <template <typename...> class ViewT, typename ValueT,
+          typename... Types>
+struct deep_copy_view_type<ViewT<ValueT, Types...>>
+    : deep_copy_view_type<ViewT<ValueT>,
+                          gather_t<is_memory_traits, false, Types...>> {};
+
+template <typename... T>
+using deep_copy_view_type_t = typename deep_copy_view_type<T...>::type;
+
+//--------------------------------------------------------------------------------------//
+//  this is used to get the deep copy view type
+//
+template <typename, typename...>
+struct uniform_view_type;
+
+template <typename ValueT, typename... Types>
+struct uniform_view_type<Kokkos::View<ValueT, Types...>> {
+  using type =
+      view_type_t<typename Kokkos::View<ValueT, Types...>::uniform_type>;
+};
+
+template <typename ValueT, typename... Types>
+struct uniform_view_type<Kokkos::DynRankView<ValueT, Types...>> {
+  using type = view_type_t<Kokkos::DynRankView<ValueT, Types...>>;
+};
+
+template <typename... T>
+using uniform_view_type_t = typename uniform_view_type<T...>::type;
+
+//--------------------------------------------------------------------------------------//
+//  this fixes an issue where uniform_type type on 1D views will convert
+//  LayoutRight template parameters to LayoutLeft template parameters since they
+//  are compatible (left vs. right doesn't matter in 1D). If ENABLE_LAYOUTS is
+//  defined this does not cause problems but if it is not defined, calling
+//  create_mirror or create_mirror_view will return a template instantiation
+//  that has not been generated.
+//
+template <typename ViewT, typename UniformT>
+struct resolve_uniform_view_type {
+  using type = UniformT;
+};
+
+template <typename ViewValueT, typename ViewLayoutT, typename... ViewExtraT,
+          typename UniformValueT, typename UniformLayoutT,
+          typename... UniformExtraT>
+struct resolve_uniform_view_type<
+    Kokkos::View<ViewValueT *, ViewLayoutT, ViewExtraT...>,
+    Kokkos::View<UniformValueT *, UniformLayoutT, UniformExtraT...>> {
+  using type = std::conditional_t<
+      !std::is_same<ViewLayoutT, UniformLayoutT>::value &&
+          !std::is_pointer<UniformValueT>::value,
+      view_type_t<Kokkos::View<UniformValueT *, ViewLayoutT, UniformExtraT...>>,
+      Kokkos::View<UniformValueT *, UniformLayoutT, UniformExtraT...>>;
+};
+
+template <typename ViewT, typename UniformT>
+using resolve_uniform_view_type_t =
+    typename resolve_uniform_view_type<ViewT, UniformT>::type;

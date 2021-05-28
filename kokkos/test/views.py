@@ -54,6 +54,7 @@ __email__ = "jrmadsen@lbl.gov"
 __status__ = "Development"
 
 
+import kokkos
 import unittest
 import numpy as np
 
@@ -63,18 +64,14 @@ except ImportError:
     import kokkos.test._conftest as conf
 
 
-class PyKokkosBaseViewTests(unittest.TestCase):
+class PyKokkosBaseViewsTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        import kokkos
-
         kokkos.initialize()
 
     @classmethod
     def tearDownClass(self):
-        import kokkos
-
-        kokkos.finalize()
+        pass
 
     def setUp(self):
         pass
@@ -83,8 +80,6 @@ class PyKokkosBaseViewTests(unittest.TestCase):
         pass
 
     def _generate(self, *_args, **_kwargs):
-        import kokkos
-
         con_arr = None
         dyn_arr = None
         if _kwargs["trait"] == kokkos.Unmanaged:
@@ -99,8 +94,6 @@ class PyKokkosBaseViewTests(unittest.TestCase):
         return [con_view, dyn_view, con_arr, dyn_arr]
 
     def _get_variants(self):
-        import kokkos
-
         _variants = []
         for _dims in range(1, conf.get_max_concrete_dims()):
             _shape = []
@@ -112,8 +105,6 @@ class PyKokkosBaseViewTests(unittest.TestCase):
                 _idx.append(1)
             for _dtype in conf.get_dtypes():
                 for _space in conf.get_memory_spaces():
-                    if _space == kokkos.AnonymousSpace:
-                        continue
                     for _layout in conf.get_layouts():
                         for _trait in conf.get_memory_traits():
                             _variant = {}
@@ -230,6 +221,121 @@ class PyKokkosBaseViewTests(unittest.TestCase):
             self.assertEqual(_data[0][_idx], 3)
             self.assertEqual(_data[1][_idx], 6)
 
+    #
+    def test_view_create_mirror(self):
+        """view_create_mirror"""
+        print("")
+        for itr in self._get_variants():
+            _shape = itr[0]
+            _idx = itr[1]
+            _zeros = itr[2]
+            _kwargs = itr[3]
+
+            if _kwargs["trait"] in (kokkos.Unmanaged, None):
+                continue
+
+            _data = self._generate(_shape, **_kwargs)
+
+            print("concrete type  : {}".format(type(_data[0]).__name__))
+            print("dynamic type   : {}".format(type(_data[1]).__name__))
+
+            _data[0][_idx] = 1
+            _data[1][_idx] = 2
+
+            _data[0][_idx] *= 3
+            _data[1][_idx] *= 3
+
+            self.assertEqual(_data[0][_zeros], 0)
+            self.assertEqual(_data[1][_zeros], 0)
+            self.assertEqual(_data[0][_idx], 3)
+            self.assertEqual(_data[1][_idx], 6)
+
+            _mirror_data = [_data[0].create_mirror(), _data[1].create_mirror()]
+            kokkos.deep_copy(_mirror_data[0], _data[0])
+            kokkos.deep_copy(_mirror_data[1], _data[1])
+
+            self.assertEqual(_mirror_data[0][_zeros], 0)
+            self.assertEqual(_mirror_data[1][_zeros], 0)
+            self.assertEqual(_mirror_data[0][_idx], 3)
+            self.assertEqual(_mirror_data[1][_idx], 6)
+
+    #
+    def test_view_create_mirror_view(self):
+        """view_create_mirror_view"""
+
+        print("")
+        for itr in self._get_variants():
+            _shape = itr[0]
+            _idx = itr[1]
+            _zeros = itr[2]
+            _kwargs = itr[3]
+
+            _data = self._generate(_shape, **_kwargs)
+
+            print("concrete type  : {}".format(type(_data[0]).__name__))
+            print("dynamic type   : {}".format(type(_data[1]).__name__))
+
+            _data[0][_idx] = 1
+            _data[1][_idx] = 2
+
+            _data[0][_idx] *= 3
+            _data[1][_idx] *= 3
+
+            self.assertEqual(_data[0][_zeros], 0)
+            self.assertEqual(_data[1][_zeros], 0)
+            self.assertEqual(_data[0][_idx], 3)
+            self.assertEqual(_data[1][_idx], 6)
+
+            _mirror_data = [
+                _data[0].create_mirror_view(),
+                _data[1].create_mirror_view(),
+            ]
+
+            self.assertEqual(_mirror_data[0][_zeros], 0)
+            self.assertEqual(_mirror_data[1][_zeros], 0)
+            self.assertEqual(_mirror_data[0][_idx], 3)
+            self.assertEqual(_mirror_data[1][_idx], 6)
+
+    #
+    def test_view_deep_copy(self):
+        """view_deep_copy"""
+        print("")
+        for itr in self._get_variants():
+            _shape = itr[0]
+            _idx = itr[1]
+            _zeros = itr[2]
+            _kwargs = itr[3]
+            if _kwargs["trait"] != kokkos.Managed:
+                continue
+
+            _data = self._generate(_shape, **_kwargs)
+
+            if _kwargs["trait"] in (kokkos.Unmanaged, None):
+                continue
+
+            print("concrete type  : {}".format(type(_data[0]).__name__))
+            print("dynamic type   : {}".format(type(_data[1]).__name__))
+
+            _data[0][_idx] = 1
+            _data[1][_idx] = 2
+
+            _data[0][_idx] *= 3
+            _data[1][_idx] *= 3
+
+            self.assertEqual(_data[0][_zeros], 0)
+            self.assertEqual(_data[1][_zeros], 0)
+            self.assertEqual(_data[0][_idx], 3)
+            self.assertEqual(_data[1][_idx], 6)
+
+            _mirror_data = self._generate(_shape, **_kwargs)
+            kokkos.deep_copy(_mirror_data[0], _data[0])
+            kokkos.deep_copy(_mirror_data[1], _data[1])
+
+            self.assertEqual(_mirror_data[0][_zeros], 0)
+            self.assertEqual(_mirror_data[1][_zeros], 0)
+            self.assertEqual(_mirror_data[0][_idx], 3)
+            self.assertEqual(_mirror_data[1][_idx], 6)
+
 
 # main runner
 def run():
@@ -238,8 +344,4 @@ def run():
 
 
 if __name__ == "__main__":
-    import kokkos
-
-    kokkos.initialize()
     run()
-    kokkos.finalize()

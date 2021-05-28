@@ -122,7 +122,6 @@ try:
         "float",
         "double",
         "HostSpace",  # memory spaces
-        "AnonymousSpace",
         "HBWSpace",
         "OpenMPTargetSpace",
         "HIPSpace",

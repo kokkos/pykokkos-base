@@ -167,6 +167,7 @@ def unmanaged_array(
 
 
 def convert_dtype(_dtype, _module=None):
+    """Converts kokkos data types into numpy dtype"""
     if isinstance(_dtype, (str, int)):
         _true_dtype = lib.get_dtype(_dtype)
     else:
@@ -176,3 +177,18 @@ def convert_dtype(_dtype, _module=None):
 
         _module = np
     return getattr(_module, _true_dtype)
+
+
+def create_mirror(dst, src):
+    """Performs Kokkos::create_mirror"""
+    return dst.create_mirror(src)
+
+
+def create_mirror_view(dst, src):
+    """Performs Kokkos::create_mirror_view"""
+    return dst.create_mirror_view(src)
+
+
+def deep_copy(dst, src):
+    """Performs Kokkos::deep_copy"""
+    return dst.deep_copy(src)

@@ -42,7 +42,9 @@
 //@HEADER
 */
 
-#include "libpykokkos.hpp"
+#include "common.hpp"
+#include "traits.hpp"
+#include "views.hpp"
 
 #pragma once
 
@@ -91,24 +93,13 @@ void generate_dynamic_view_variant(
 }
 }  // namespace Space
 
-namespace variants {
+namespace {
 // generate data-type, memory-space buffers for dynamic dimension
-template <size_t LayoutIdx, size_t TraitIdx, size_t DataIdx, size_t... SpaceIdx>
+template <size_t DataIdx, size_t LayoutIdx, size_t TraitIdx, size_t... SpaceIdx>
 void generate_dynamic_view_variant(py::module &_mod,
                                    std::index_sequence<SpaceIdx...>) {
   FOLD_EXPRESSION(
       Space::generate_dynamic_view_variant<DataIdx, SpaceIdx, LayoutIdx,
                                            TraitIdx>(_mod));
-}
-}  // namespace variants
-
-namespace {
-// generate data type buffers for each memory space
-template <size_t LayoutIdx, size_t TraitIdx, size_t... DataIdx>
-void generate_dynamic_view_variant(py::module &_mod,
-                                   std::index_sequence<DataIdx...>) {
-  FOLD_EXPRESSION(
-      variants::generate_dynamic_view_variant<LayoutIdx, TraitIdx, DataIdx>(
-          _mod, std::make_index_sequence<MemorySpacesEnd>{}));
 }
 }  // namespace

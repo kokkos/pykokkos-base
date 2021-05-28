@@ -46,10 +46,9 @@
 
 #include "Kokkos_Core.hpp"
 #include "Kokkos_DynRankView.hpp"
-#include "Kokkos_DynamicView.hpp"
 #include "Kokkos_View.hpp"
-
 #include "common.hpp"
+#include "deep_copy.hpp"
 
 //--------------------------------------------------------------------------------------//
 
@@ -206,60 +205,51 @@ std::string construct_name(const std::string &delim, Args &&... args) {
 
 //--------------------------------------------------------------------------------------//
 
+namespace Impl {
+//
 template <typename ViewT, typename Up, size_t... Idx>
 auto get_init(const std::string &lbl, const Up &arr,
               std::index_sequence<Idx...>) {
   return new ViewT{lbl, static_cast<const size_t>(std::get<Idx>(arr))...};
 }
-
-template <typename ViewT, size_t Idx>
-auto get_init() {
-  return [](std::string lbl, std::array<size_t, Idx> arr) {
-    return get_init<ViewT>(lbl, arr, std::make_index_sequence<Idx>{});
-  };
-}
-
+//
 template <typename ViewT, typename Up, typename Tp, size_t... Idx>
 auto get_unmanaged_init(const Up &arr, const Tp data,
                         std::index_sequence<Idx...>) {
   return new ViewT{data, static_cast<const size_t>(std::get<Idx>(arr))...};
 }
+//
+}  // namespace Impl
+
+template <typename ViewT, size_t Idx>
+auto get_init() {
+  return [](std::string lbl, std::array<size_t, Idx> arr) {
+    return Impl::get_init<ViewT>(lbl, arr, std::make_index_sequence<Idx>{});
+  };
+}
 
 template <typename ViewT, size_t Idx, typename Tp>
 auto get_unmanaged_init() {
   return [](py::buffer buf, std::array<size_t, Idx> arr) {
-    return get_unmanaged_init<ViewT>(arr, static_cast<Tp *>(buf.request().ptr),
-                                     std::make_index_sequence<Idx>{});
+    return Impl::get_unmanaged_init<ViewT>(arr,
+                                           static_cast<Tp *>(buf.request().ptr),
+                                           std::make_index_sequence<Idx>{});
   };
 }
 
-// define managed init
-template <typename ViewT, size_t Idx, typename Tp, typename Mp, typename Vp,
-          enable_if_t<!std::is_same<
-              Mp, Kokkos::MemoryTraits<Kokkos::Unmanaged>>::value> = 0>
-auto get_init(Vp &_view) {
+template <typename ViewT, size_t Idx, typename Tp, typename Vp>
+auto get_init(Vp &_view, enable_if_t<ViewT::traits::is_managed, int> = 0) {
+  // define managed init
   _view.def(py::init(get_init<ViewT, Idx>()));
-}
-
-// define unmanaged init
-template <typename ViewT, size_t Idx, typename Tp, typename Mp, typename Vp,
-          enable_if_t<std::is_same<
-              Mp, Kokkos::MemoryTraits<Kokkos::Unmanaged>>::value> = 0>
-auto get_init(Vp &_view) {
+  // define unmanaged init
   _view.def(py::init(get_unmanaged_init<ViewT, Idx, Tp>()));
 }
 
-template <typename ViewT, size_t Idx, typename Up, typename Tp, typename Mp,
-          typename Vp,
-          enable_if_t<!std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
-auto get_init(Vp &_view) {
-  get_init<ViewT, Idx, Tp, Mp>(_view);
+template <typename ViewT, size_t Idx, typename Tp, typename Vp>
+auto get_init(Vp &_view, enable_if_t<!ViewT::traits::is_managed, int> = 0) {
+  // define unmanaged init
+  _view.def(py::init(get_unmanaged_init<ViewT, Idx, Tp>()));
 }
-
-template <typename ViewT, size_t Idx, typename Up, typename Tp, typename Mp,
-          typename Vp,
-          enable_if_t<std::is_same<Up, Kokkos::AnonymousSpace>::value> = 0>
-auto get_init(Vp &) {}
 
 //--------------------------------------------------------------------------------------//
 
@@ -334,7 +324,7 @@ void generate_view(py::module &_mod, const std::string &_name,
   _view.def(py::init([]() { return new View_t{}; }));
 
   // initializer with extents
-  FOLD_EXPRESSION(get_init<View_t, Idx + 1, Sp, Tp, Mp>(_view));
+  FOLD_EXPRESSION(get_init<View_t, Idx + 1, Tp>(_view));
 
   // conversion to/from numpy
   _view.def_buffer([_ndim](View_t &m) -> py::buffer_info {
@@ -348,6 +338,37 @@ void generate_view(py::module &_mod, const std::string &_name,
                            _strides   // Strides (in bytes) for each index
     );
   });
+
+  _view.def(
+      "create_mirror",
+      [](View_t &_v) {
+        auto _m           = Kokkos::create_mirror(_v);
+        using mirror_type = std::decay_t<decltype(_m)>;
+        using cast_type =
+            resolve_uniform_view_type_t<mirror_type,
+                                        uniform_view_type_t<mirror_type>>;
+        return static_cast<cast_type>(_m);
+      },
+      "Create a host mirror (always creates a new view)");
+
+  _view.def(
+      "create_mirror_view",
+      [](View_t &_v) {
+        auto _m           = Kokkos::create_mirror_view(_v);
+        using mirror_type = std::decay_t<decltype(_m)>;
+        using cast_type =
+            resolve_uniform_view_type_t<mirror_type,
+                                        uniform_view_type_t<mirror_type>>;
+        return static_cast<cast_type>(_m);
+      },
+      "Create a host mirror view (only creates new view if this is not on "
+      "host)");
+
+  using view_type_list_t =
+      std::conditional_t<Kokkos::is_dyn_rank_view<View_t>::value,
+                         dynamic_view_type_list_t, concrete_view_type_list_t>;
+
+  deep_copy<View_t>{_view}(view_type_list_t{});
 
   // shape property
   _view.def_property_readonly(
