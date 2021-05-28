@@ -100,7 +100,7 @@ jobs:
     - name: Install Kokkos
       if: ${{ matrix.python-version != '3.8' && matrix.python-version != '3.9' }}
       run:
-        python -m pip install 'cmake==3.19' &&
+        python -m pip install 'cmake==3.16.8' &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
@@ -160,7 +160,7 @@ jobs:
     - name: Install Kokkos
       if: ${{ matrix.python-version != '3.6' && matrix.python-version != '3.7' }}
       run:
-        python -m pip install 'cmake==3.20.0' &&
+        python -m pip install 'cmake==3.20.2' &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
