@@ -32,6 +32,7 @@ jobs:
         python -m pip install --upgrade pip
 
     - name: Install Kokkos
+      if: ${{ matrix.python-version != 'pypy-3.6' && matrix.python-version != 'pypy-3.7' }}
       run:
         python -m pip install 'cmake==3.18.4' &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
@@ -97,8 +98,9 @@ jobs:
         python -m pip install --upgrade pip
 
     - name: Install Kokkos
+      if: ${{ matrix.python-version != '3.8' && matrix.python-version != '3.9' }}
       run:
-        python -m pip install 'cmake==3.18.4' &&
+        python -m pip install 'cmake==3.19' &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
@@ -156,8 +158,9 @@ jobs:
         python -m pip install --upgrade pip
 
     - name: Install Kokkos
+      if: ${{ matrix.python-version != '3.6' && matrix.python-version != '3.7' }}
       run:
-        python -m pip install 'cmake==3.18.4' &&
+        python -m pip install 'cmake==3.20.0' &&
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
@@ -172,7 +175,7 @@ jobs:
       run:
         python -m pip install -r requirements.txt &&
         python -m pip install pytest &&
-        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=ON -DENABLE_LAYOUTS=ON -DCMAKE_CXX_STANDARD=17"
+        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=ON -DENABLE_LAYOUTS=ON -DCMAKE_CXX_STANDARD=17 -DKokkos_ENABLE_PTHREAD=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
           python -m pip install -v --user --no-deps -e .
 
     - name: Import Test

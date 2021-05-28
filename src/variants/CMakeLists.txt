@@ -41,7 +41,9 @@ FOREACH(TYPE ${_types})
                 STRING(TOLOWER "${TYPE}_view_${VARIANT}" _TAG)
                 SET(ENUM "${DATA_VARIANT}, ${LAYOUT_VARIANT}, ${MEMORY_TRAIT_VARIANT}")
                 SET(FUNC "generate_${_TAG}")
-                MESSAGE(STATUS "Generating '${_TAG}.cpp'...")
+                IF(NOT ENABLE_QUIET)
+                    MESSAGE(STATUS "Generating '${_TAG}.cpp'...")
+                ENDIF()
                 CONFIGURE_FILE(
                     ${CMAKE_CURRENT_SOURCE_DIR}/variant.cpp.in
                     ${CMAKE_CURRENT_BINARY_DIR}/${_TAG}.cpp

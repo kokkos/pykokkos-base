@@ -16,6 +16,7 @@ include pytest.ini
 recursive-include cmake *
 recursive-include kokkos *
 recursive-include examples *
+recursive-include external *
 recursive-include include *
 recursive-include src *
 recursive-include pybind11 *

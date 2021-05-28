@@ -55,6 +55,8 @@
 namespace Space {
 namespace SpaceDim {
 
+// this function creates bindings for the atomic type returned to python from
+// views with MemoryTrait<Kokkos::Atomic | ...>
 template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx>
 void generate_atomic_variant(py::module &_mod) {
   using data_spec_t   = ViewDataTypeSpecialization<DataIdx>;
@@ -168,12 +170,14 @@ void generate_atomic_variant(py::module &_mod) {
 }
 }  // namespace SpaceDim
 
+// if the space is not available do nothing
 template <size_t LayoutIdx, size_t DataIdx, size_t SpaceIdx, size_t... DimIdx>
 void generate_atomic_variant(
     py::module &, std::index_sequence<DimIdx...>,
     std::enable_if_t<!is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
 }
 
+// if the space is available expand for every dimension
 template <size_t LayoutIdx, size_t DataIdx, size_t SpaceIdx, size_t... DimIdx>
 void generate_atomic_variant(
     py::module &_mod, std::index_sequence<DimIdx...>,
@@ -186,7 +190,7 @@ void generate_atomic_variant(
 
 namespace variants {
 
-// generate data-type, memory-space buffers for atomic_concrete dimension
+// expand for all the spaces with a given layout and data-type
 template <size_t LayoutIdx, size_t DataIdx, size_t... SpaceIdx>
 void generate_atomic_variant(py::module &_mod,
                              std::index_sequence<SpaceIdx...>) {

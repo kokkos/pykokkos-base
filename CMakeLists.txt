@@ -1,10 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
 
-# set this to a known value to we can override the cache if user doesn't specify install dir
-IF(NOT SKBUILD)
-    SET(CMAKE_INSTALL_PREFIX "/kokkos-install-dir" CACHE PATH "Installation directory")
-ENDIF()
-
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
 INCLUDE(KokkosPythonSetup)
@@ -14,8 +9,7 @@ PROJECT(
     LANGUAGES   C CXX
     VERSION     ${pykokkos-base_VERSION})
 
-FIND_PACKAGE(Kokkos REQUIRED)
-
+INCLUDE(KokkosPythonKokkos)     # find external Kokkos or add submodule
 INCLUDE(KokkosPythonFormat)     # format target
 INCLUDE(KokkosPythonCompilers)  # compiler identification
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions

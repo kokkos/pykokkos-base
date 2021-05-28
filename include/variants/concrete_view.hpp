@@ -51,6 +51,7 @@
 namespace Space {
 namespace SpaceDim {
 
+// this generates a binding for a fixed rank view (i.e. Kokkos::View<...>)
 template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx,
           size_t TraitIdx>
 void generate_concrete_view_variant(py::module &_mod) {

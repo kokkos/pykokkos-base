@@ -398,10 +398,9 @@ void generate_view(py::module &_mod, const std::string &_name,
       "memory_trait", [](View_t &) { return MemoryTraitIndex<Mp>::value; },
       "Memory trait of the view (alias for 'trait')");
 
-  static bool _is_dynamic = (sizeof...(Idx) > 1);
-
   _view.def_property_readonly(
-      "dynamic", [](View_t &) { return _is_dynamic; },
+      "dynamic",
+      [](View_t &) { return Kokkos::is_dyn_rank_view<View_t>::value; },
       "Whether the rank is dynamic");
 
   // support []
