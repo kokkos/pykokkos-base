@@ -17,5 +17,5 @@ using exec_space = Kokkos::DefaultHostExecutionSpace;
 using view_space = Kokkos::HostSpace;
 #endif
 
-using view_type = Kokkos::View<double**, view_space>;
+using view_type = Kokkos::View<double**, Kokkos::LayoutRight, view_space>;
 view_type generate_view(size_t);
