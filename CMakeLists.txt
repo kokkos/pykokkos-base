@@ -37,8 +37,9 @@ SET(libpykokkos_SOURCES
 
 SET(libpykokkos_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/libpykokkos.hpp
-    # ${CMAKE_CURRENT_LIST_DIR}/include/type_caster.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/deep_copy.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/concepts.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/defines.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/common.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/traits.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/views.hpp
