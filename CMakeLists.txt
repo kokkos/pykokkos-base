@@ -107,16 +107,6 @@ ENDIF()
 # link to kokkos and the custom build properties
 TARGET_LINK_LIBRARIES(libpykokkos PRIVATE Kokkos::kokkos libpykokkos-build-options)
 
-# set the output path to <BINARY_DIR>/kokkos so one
-# can test the python import from the build directory
-# Really, only LIBRARY_* is needed for Unix but Windows
-# builds are weird so just setting all of them
-SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
-    ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
-    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
-    PDB_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos)
-
 IF(SKBUILD)
     SET(Kokkos_INSTALL_PYTHONDIR ${CMAKE_INSTALL_PREFIX})
     SET(Kokkos_INSTALL_LIBDIR    ${CMAKE_INSTALL_PREFIX}/kokkos)
@@ -147,8 +137,47 @@ EXECUTE_PROCESS(
     COMMAND ${CMAKE_COMMAND} -E rm -f ${Python3_SITEARCH}/.__kokkos__init__.py
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
+# location where kokkos libraries are/will be installed
+IF(ENABLE_INTERNAL_KOKKOS OR NOT Kokkos_DIR)
+    SET(_Kokkos_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+ELSEIF(Kokkos_DIR)
+    STRING(REGEX REPLACE "/cmake/.*" "" _Kokkos_LIBDIR "${Kokkos_DIR}")
+ENDIF()
+
+# absolute path to libpykokkos install
+SET(Kokkos_INSTALL_FULL_PYTHONDIR ${Kokkos_INSTALL_LIBDIR})
+IF(NOT IS_ABSOLUTE "${Kokkos_INSTALL_FULL_PYTHONDIR}")
+    SET(Kokkos_INSTALL_FULL_PYTHONDIR ${CMAKE_INSTALL_PREFIX}/${Kokkos_INSTALL_FULL_PYTHONDIR})
+ENDIF()
+
+# relative path from libpykokkos install directory to library install directory
+FILE(RELATIVE_PATH LIB_RELPATH "${Kokkos_INSTALL_FULL_PYTHONDIR}" "${_Kokkos_LIBDIR}")
+
+# configure the rpath: <RELATIVE>:<CWD>:<FULL>
+IF(APPLE)
+    SET(_INSTALL_RPATH MACOSX_RPATH "@loader_path/${LIB_RELPATH}:@loader_path:${_Kokkos_LIBDIR}:${CMAKE_INSTALL_RPATH}")
+ELSEIF(UNIX)
+    SET(_INSTALL_RPATH INSTALL_RPATH "\$ORIGIN/${LIB_RELPATH}:\$ORIGIN:${_Kokkos_LIBDIR}:${CMAKE_INSTALL_RPATH}")
+ENDIF()
+
+# set the output path to <BINARY_DIR>/kokkos so one
+# can test the python import from the build directory
+# Really, only LIBRARY_* is needed for Unix but Windows
+# builds are weird so just setting all of them
+SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
+    ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
+    PDB_OUTPUT_DIRECTORY     ${PROJECT_BINARY_DIR}/kokkos
+    ${_INSTALL_RPATH})
+
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/pytest.ini
     ${PROJECT_BINARY_DIR}/pytest.ini COPYONLY)
+
+IF(NOT SKBUILD)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/setup.cfg
+        ${PROJECT_BINARY_DIR}/setup.cfg COPYONLY)
+ENDIF()
 
 INSTALL(TARGETS libpykokkos
     DESTINATION ${Kokkos_INSTALL_LIBDIR})

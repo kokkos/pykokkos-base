@@ -64,6 +64,16 @@ count = 0
 regions = []
 
 
+def print_help(arg0):
+    pass
+
+
+def parse_args(argc, argv):
+    global data
+
+    data["parse_args"] = (argc, argv)
+
+
 def initialize(seq, ver, deviceCount, deviceInfo):
     global data
 
@@ -198,6 +208,8 @@ class PyKokkosBaseToolsTests(unittest.TestCase):
     def setUpClass(self):
         import gc
 
+        kokkos.tools.set_parse_args_callback(parse_args)
+        kokkos.tools.set_print_help_callback(print_help)
         kokkos.tools.set_init_callback(initialize)
         kokkos.tools.set_finalize_callback(finalize)
 
@@ -208,8 +220,12 @@ class PyKokkosBaseToolsTests(unittest.TestCase):
         kokkos.tools._internal.setup()
 
         for itr in ("parallel_for", "parallel_reduce", "parallel_scan", "fence"):
-            getattr(kokkos.tools, f"set_begin_{itr}_callback")(begin_parallel)
-            getattr(kokkos.tools, f"set_end_{itr}_callback")(end_parallel)
+            import sys
+
+            begin_func = getattr(sys.modules[__name__], "begin_parallel")
+            end_func = getattr(sys.modules[__name__], "end_parallel")
+            getattr(kokkos.tools, f"set_begin_{itr}_callback")(begin_func)
+            getattr(kokkos.tools, f"set_end_{itr}_callback")(end_func)
 
         kokkos.tools.set_push_region_callback(push_region)
         kokkos.tools.set_pop_region_callback(pop_region)

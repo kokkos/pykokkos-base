@@ -4,7 +4,7 @@
 INCLUDE(KokkosPythonUtilities)
 
 # don't build a static python module
-SET(BUILD_SHARED_LIBS ON)
+SET(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
 
 # force to release if not specified
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -43,7 +43,7 @@ SET(_VIEW_RANK_MSG "Set this value to the max number of ranks needed for Kokkos:
 ADD_FEATURE(CMAKE_BUILD_TYPE "Build type")
 ADD_FEATURE(CMAKE_INSTALL_PREFIX "Installation prefix")
 ADD_FEATURE(CMAKE_CXX_FLAGS "C++ compiler flags")
-# ADD_OPTION(CMAKE_INSTALL_RPATH_USE_LINK_PATH "Build with rpath resolution" ON)
+ADD_OPTION(CMAKE_INSTALL_RPATH_USE_LINK_PATH "Build with rpath resolution" ON)
 ADD_FEATURE(Kokkos_CXX_STANDARD "Kokkos C++ Standard")
 ADD_FEATURE(Kokkos_DIR "Kokkos installation")
 ADD_OPTION(ENABLE_INTERNAL_PYBIND11 "Build with pybind11 submodule" ON)
@@ -124,7 +124,6 @@ IF(DEFINED PYTHON_EXECUTABLE AND NOT DEFINED Python3_EXECUTABLE)
 ENDIF()
 
 # always disallow unity build
-# SET(CMAKE_UNITY_BUILD OFF)
 IF(ENABLE_MEMORY_TRAITS)
     ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ON)
 ELSE()
