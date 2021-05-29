@@ -45,6 +45,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "concepts.hpp"
 #include "traits.hpp"
 #include "views.hpp"
 
@@ -64,26 +65,33 @@ void generate_concrete_view_variant(py::module &_mod) {
   using Sp            = typename space_spec_t::type;
   using Lp            = typename layout_spec_t::type;
   using Mp            = typename trait_spec_t::type;
-  using View_t        = typename view_type<Kokkos::View<Vp>, Lp, Sp, Mp>::type;
+  using ViewT         = typename view_type<Kokkos::View<Vp>, Lp, Sp, Mp>::type;
 
   constexpr bool explicit_layout = !is_implicit<Lp>::value;
   constexpr bool explicit_trait  = !is_implicit<Mp>::value;
 
-  auto name = construct_name(
+  auto name = join(
       "_", "KokkosView", data_spec_t::label(), space_spec_t::label(),
       (explicit_layout) ? layout_spec_t::label() : std::string{},
       (explicit_trait) ? trait_spec_t::label() : std::string{}, DimIdx + 1);
 
   auto desc =
       std::string{"Kokkos::View<"} +
-      construct_name(", ", demangle<Vp>(),
-                     (explicit_layout) ? demangle<Lp>() : std::string{},
-                     demangle<Sp>(),
-                     (explicit_trait) ? demangle<Mp>() : std::string{}) +
+      join(", ", demangle<Vp>(),
+           (explicit_layout) ? demangle<Lp>() : std::string{}, demangle<Sp>(),
+           (explicit_trait) ? demangle<Mp>() : std::string{}) +
       ">";
 
-  Common::generate_view<View_t, Sp, Tp, Lp, Mp, DimIdx, DimIdx>(_mod, name,
-                                                                desc);
+  Common::generate_view<ViewT, Sp, Tp, Lp, Mp, DimIdx, DimIdx>(_mod, name,
+                                                               desc);
+
+  using UniformT = uniform_view_type_t<ViewT>;
+  Common::generate_view<UniformT, Sp, Tp, Lp, Mp, DimIdx, DimIdx>(
+      _mod, name + "_uniform", demangle<UniformT>());
+
+  using MirrorT = uniform_view_type_t<typename ViewT::HostMirror>;
+  Common::generate_view<MirrorT, Sp, Tp, Lp, Mp, DimIdx, DimIdx>(
+      _mod, name + "_mirror", demangle<MirrorT>());
 }
 }  // namespace SpaceDim
 

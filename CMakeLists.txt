@@ -9,10 +9,17 @@ PROJECT(
     LANGUAGES   C CXX
     VERSION     ${pykokkos-base_VERSION})
 
+INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
+
+ADD_OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
+# force to release if not specified
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
+    SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+ENDIF()
+
 INCLUDE(KokkosPythonKokkos)     # find external Kokkos or add submodule
 INCLUDE(KokkosPythonFormat)     # format target
 INCLUDE(KokkosPythonCompilers)  # compiler identification
-INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 INCLUDE(KokkosPythonOptions)    # cache options and various variable settings
 INCLUDE(KokkosPythonPackages)   # Python Interp
 
@@ -181,11 +188,6 @@ ENDIF()
 
 INSTALL(TARGETS libpykokkos
     DESTINATION ${Kokkos_INSTALL_LIBDIR})
-
-IF(ENABLE_INTERNAL_KOKKOS)
-    INSTALL(TARGETS kokkoscore kokkoscontainers
-        DESTINATION ${Kokkos_INSTALL_LIBDIR})
-ENDIF()
 
 INSTALL(FILES ${PROJECT_BINARY_DIR}/kokkos/__init__.py
     DESTINATION ${Kokkos_INSTALL_PYTHONDIR})

@@ -43,7 +43,6 @@
 */
 
 #include "variants/atomics.hpp"
-#include "libpykokkos.hpp"
 
 void generate_atomic_variants(py::module &kokkos) {
 #if defined(ENABLE_MEMORY_TRAITS)

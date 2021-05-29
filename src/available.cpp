@@ -42,7 +42,10 @@
 //@HEADER
 */
 
-#include "libpykokkos.hpp"
+#include "traits.hpp"
+#include "common.hpp"
+#include "fwd.hpp"
+#include "defines.hpp"
 
 //--------------------------------------------------------------------------------------//
 

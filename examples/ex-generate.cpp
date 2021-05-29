@@ -55,6 +55,8 @@
 #  pragma GCC diagnostic pop
 #endif
 
+#include <cstdlib>
+
 namespace py = pybind11;
 
 //--------------------------------------------------------------------------------------//
@@ -71,4 +73,10 @@ PYBIND11_MODULE(ex_generate, ex) {
   ///
   ex.def("generate_view", &generate_view, "Generate a random view",
          py::arg("n") = 10);
+
+  static auto _atexit = []() {
+    if (Kokkos::is_initialized()) Kokkos::finalize();
+  };
+
+  atexit(_atexit);
 }

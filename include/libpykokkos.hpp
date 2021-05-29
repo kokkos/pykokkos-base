@@ -45,8 +45,10 @@
 #pragma once
 
 #include "common.hpp"
-#include "traits.hpp"
-#include "views.hpp"
+
+#include <pybind11/pybind11.h>
+
+namespace py = pybind11;
 
 void generate_tools(py::module& kokkos);
 void generate_available(py::module& kokkos);

@@ -42,8 +42,12 @@
 //@HEADER
 */
 
-#include "Kokkos_Core.hpp"
-#include "libpykokkos.hpp"
+#include "traits.hpp"
+#include "common.hpp"
+#include "fwd.hpp"
+#include "defines.hpp"
+
+#include <Kokkos_Core.hpp>
 
 //--------------------------------------------------------------------------------------//
 //

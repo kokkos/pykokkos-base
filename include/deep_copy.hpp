@@ -44,12 +44,14 @@
 
 #pragma once
 
-#include "Kokkos_Core.hpp"
-#include "Kokkos_DynRankView.hpp"
-#include "Kokkos_View.hpp"
 #include "common.hpp"
+#include "concepts.hpp"
 #include "fwd.hpp"
 #include "traits.hpp"
+
+#include <Kokkos_Core.hpp>
+#include <Kokkos_DynRankView.hpp>
+#include <Kokkos_View.hpp>
 
 //--------------------------------------------------------------------------------------//
 

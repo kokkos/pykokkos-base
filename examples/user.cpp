@@ -21,6 +21,10 @@ struct InitView {
 /// which returns a Kokkos::View and will have a python binding
 ///
 view_type generate_view(size_t n) {
+  if (!Kokkos::is_initialized()) {
+    std::cerr << "[user-bindings]> Initializing Kokkos..." << std::endl;
+    Kokkos::initialize();
+  }
   view_type _v("user_view", n, 2);
   Kokkos::RangePolicy<exec_space, int> range(0, n);
   Kokkos::parallel_for("generate_view", range, InitView{_v});

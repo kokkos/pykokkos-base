@@ -42,7 +42,10 @@
 //@HEADER
 */
 
-#include "libpykokkos.hpp"
+#include "common.hpp"
+#include "defines.hpp"
+#include "fwd.hpp"
+#include "traits.hpp"
 
 #include <pybind11/pytypes.h>
 
