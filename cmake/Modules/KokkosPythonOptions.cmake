@@ -54,7 +54,7 @@ ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC comp
     ${_ENABLE_LAY_DEFAULT})
 ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ON)
 
-SET(CMAKE_UNITY_BUILD_BATCH_SIZE 6 CACHE STRING "Unity build batch size")
+SET(CMAKE_UNITY_BUILD_BATCH_SIZE 5 CACHE STRING "Unity build batch size")
 IF(CMAKE_UNITY_BUILD)
     ADD_FEATURE(CMAKE_UNITY_BUILD_BATCH_SIZE "Unity build batch size")
 ENDIF()

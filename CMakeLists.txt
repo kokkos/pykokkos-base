@@ -49,7 +49,7 @@ PYBIND11_ADD_MODULE(libpykokkos MODULE ${PYBIND11_EXTRAS}
     ${libpykokkos_SOURCES}
     ${libpykokkos_HEADERS})
 
-add_subdirectory(src)
+ADD_SUBDIRECTORY(src)
 
 # add extra build properties to this target
 ADD_LIBRARY(libpykokkos-build-options INTERFACE)

@@ -335,8 +335,7 @@ void generate_view(py::module &_mod, const std::string &_name,
       [](ViewT &_v) {
         auto _m           = Kokkos::create_mirror(_v);
         using mirror_type = typename ViewT::HostMirror;
-        using cast_type =
-            mirror_view_type_t<mirror_type, uniform_view_type_t<mirror_type>>;
+        using cast_type   = uniform_view_type_t<mirror_type>;
         return static_cast<cast_type>(_m);
       },
       "Create a host mirror (always creates a new view)");
@@ -346,8 +345,7 @@ void generate_view(py::module &_mod, const std::string &_name,
       [](ViewT &_v) {
         auto _m           = Kokkos::create_mirror_view(_v);
         using mirror_type = typename ViewT::HostMirror;
-        using cast_type =
-            mirror_view_type_t<mirror_type, uniform_view_type_t<mirror_type>>;
+        using cast_type   = uniform_view_type_t<mirror_type>;
         return static_cast<cast_type>(_m);
       },
       "Create a host mirror view (only creates new view if this is not on "

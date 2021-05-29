@@ -83,6 +83,16 @@
 #endif
 
 //--------------------------------------------------------------------------------------//
+
+#if !defined(IF_CONSTEXPR)
+#  if __cplusplus >= 201703L  // C++17
+#    define IF_CONSTEXPR(...) if constexpr (__VA_ARGS__)
+#  else
+#    define IF_CONSTEXPR(...) if (__VA_ARGS__)
+#  endif
+#endif
+
+//--------------------------------------------------------------------------------------//
 //
 //                          Number of views to instantiate
 //

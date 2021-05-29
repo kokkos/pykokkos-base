@@ -17,7 +17,7 @@ SET(_variants           layout memory_trait)
 SET(_data_types         Int16 Int32 Int64 Uint16 Uint32 Uint64 Float32 Float64)
 
 SET(layout_enums        Right)
-SET(memory_trait_enums  Managed Unmanaged)
+SET(memory_trait_enums  Managed)
 
 IF(ENABLE_LAYOUTS)
     LIST(APPEND layout_enums        Left)

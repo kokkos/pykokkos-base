@@ -101,12 +101,6 @@ struct is_available : std::true_type {};
 template <typename Tp>
 struct is_implicit : std::false_type {};
 
-template <typename Tp>
-struct is_memory_traits : std::false_type {};
-
-template <unsigned T>
-struct is_memory_traits<Kokkos::MemoryTraits<T>> : std::true_type {};
-
 //--------------------------------------------------------------------------------------//
 //  this is used to convert Kokkos::Device<ExecSpace, MemSpace> to MemSpace
 //
@@ -167,7 +161,7 @@ struct uniform_view_type;
 template <template <typename...> class ViewT, typename ValueT,
           typename... Types>
 struct uniform_view_type<ViewT<ValueT>, type_list<Types...>> {
-  using type = ViewT<ValueT, Types...>;
+  using type = ViewT<ValueT, remove_device_t<Types>...>;
 };
 
 template <template <typename...> class ViewT, typename ValueT,
@@ -194,8 +188,7 @@ struct uniform_view_type;
 
 template <typename ValueT, typename... Types>
 struct uniform_view_type<Kokkos::View<ValueT, Types...>> {
-  using type = Impl::uniform_view_type_t<
-      typename Kokkos::View<ValueT, Types...>::uniform_type>;
+  using type = Impl::uniform_view_type_t<Kokkos::View<ValueT, Types...>>;
 };
 
 template <typename ValueT, typename... Types>
@@ -205,32 +198,3 @@ struct uniform_view_type<Kokkos::DynRankView<ValueT, Types...>> {
 
 template <typename... T>
 using uniform_view_type_t = typename uniform_view_type<T...>::type;
-
-//--------------------------------------------------------------------------------------//
-//  this fixes an issue where uniform_type type on 1D views will convert
-//  LayoutRight template parameters to LayoutLeft template parameters since they
-//  are compatible (left vs. right doesn't matter in 1D). If ENABLE_LAYOUTS is
-//  defined this does not cause problems but if it is not defined, calling
-//  create_mirror or create_mirror_view will return a template instantiation
-//  that has not been generated.
-//
-template <typename ViewT, typename UniformT>
-struct mirror_view_type {
-  using type = UniformT;
-};
-
-template <typename ViewValueT, typename ViewLayoutT, typename... ViewExtraT,
-          typename UniformValueT, typename UniformLayoutT,
-          typename... UniformExtraT>
-struct mirror_view_type<
-    Kokkos::View<ViewValueT *, ViewLayoutT, ViewExtraT...>,
-    Kokkos::View<UniformValueT *, UniformLayoutT, UniformExtraT...>> {
-  using type = std::conditional_t<
-      !std::is_same<ViewLayoutT, UniformLayoutT>::value &&
-          !std::is_pointer<UniformValueT>::value,
-      view_type_t<Kokkos::View<UniformValueT *, ViewLayoutT, UniformExtraT...>>,
-      Kokkos::View<UniformValueT *, UniformLayoutT, UniformExtraT...>>;
-};
-
-template <typename ViewT, typename UniformT>
-using mirror_view_type_t = typename mirror_view_type<ViewT, UniformT>::type;

@@ -100,8 +100,6 @@ DISABLE_TYPE(Kokkos::LayoutLeft)
 #endif
 DISABLE_TYPE(Kokkos::LayoutStride)
 
-ENABLE_IMPLICIT(Kokkos::LayoutRight)
-
 //--------------------------------------------------------------------------------------//
 // <data-type> <enum> <string identifiers>
 //  the first string identifier is the "canonical name" (i.e. what gets encoded)

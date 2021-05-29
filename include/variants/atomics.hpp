@@ -68,21 +68,17 @@ void generate_atomic_variant(py::module &_mod) {
   using Sp            = typename space_spec_t::type;
   using Lp            = typename layout_spec_t::type;
   using Mp            = typename trait_spec_t::type;
-  using View_t        = typename view_type<Kokkos::View<Vp>, Lp, Sp, Mp>::type;
-  using atomic_type   = typename View_t::reference_type;
+  using ViewT         = view_type_t<Kokkos::View<Vp>, Lp, Sp, Mp>;
+  using atomic_type   = typename ViewT::reference_type;
   using value_type    = typename atomic_type::value_type;
 
-  constexpr bool explicit_layout = !is_implicit<Lp>::value;
-
   auto name = join("_", "KokkosAtomicDataElement", data_spec_t::label(),
-                   space_spec_t::label(),
-                   (explicit_layout) ? layout_spec_t::label() : std::string{},
+                   space_spec_t::label(), layout_spec_t::label(),
                    trait_spec_t::label(), DimIdx + 1);
 
   auto desc =
       std::string{"Kokkos::Impl::AtomicDataElement<Kokkos::ViewTraits<"} +
-      join(", ", demangle<Vp>(),
-           (explicit_layout) ? demangle<Lp>() : std::string{}, demangle<Sp>(),
+      join(", ", demangle<Vp>(), demangle<Lp>(), demangle<Sp>(),
            demangle<Mp>()) +
       ">>";
 
