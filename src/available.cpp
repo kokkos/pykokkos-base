@@ -42,10 +42,10 @@
 //@HEADER
 */
 
-#include "traits.hpp"
 #include "common.hpp"
-#include "fwd.hpp"
 #include "defines.hpp"
+#include "fwd.hpp"
+#include "traits.hpp"
 
 //--------------------------------------------------------------------------------------//
 
