@@ -91,7 +91,7 @@ version = sys.modules[__name__].__getattribute__("version")
 
 def _load_kokkos_libs():
     """Loads the kokkos shared libraries (generally only needed on macOS)"""
-    relative_lib_path = "@LIB_RELPATH@"
+    relative_lib_path = ("@LIB_RELPATH@", "../../..")
     ext = None
 
     import ctypes
@@ -107,8 +107,11 @@ def _load_kokkos_libs():
     def _load(name):
         # get the path to this directory
         this_path = os.path.abspath(os.path.dirname(__file__))
-        p = os.path.realpath(os.path.join(this_path, relative_lib_path, name))
-        return ctypes.CDLL(p)
+        for itr in relative_lib_path:
+            p = os.path.realpath(os.path.join(this_path, itr, name))
+            if os.path.exists(p):
+                return ctypes.CDLL(p)
+        return ctypes.CDLL(name)
 
     for itr in ("core", "containers"):
         try:
