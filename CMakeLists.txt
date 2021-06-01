@@ -161,13 +161,6 @@ ENDIF()
 # relative path from libpykokkos install directory to library install directory
 FILE(RELATIVE_PATH LIB_RELPATH "${Kokkos_INSTALL_FULL_PYTHONDIR}" "${_Kokkos_LIBDIR}")
 
-# configure the rpath: <RELATIVE>:<CWD>:<FULL>
-IF(APPLE)
-    SET(_INSTALL_RPATH MACOSX_RPATH "@loader_path/${LIB_RELPATH}:@loader_path:${_Kokkos_LIBDIR}:${CMAKE_INSTALL_RPATH}")
-ELSEIF(UNIX)
-    SET(_INSTALL_RPATH INSTALL_RPATH "\$ORIGIN/${LIB_RELPATH}:\$ORIGIN:${_Kokkos_LIBDIR}:${CMAKE_INSTALL_RPATH}")
-ENDIF()
-
 # set the output path to <BINARY_DIR>/kokkos so one
 # can test the python import from the build directory
 # Really, only LIBRARY_* is needed for Unix but Windows
@@ -176,8 +169,16 @@ SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
     ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/kokkos
-    PDB_OUTPUT_DIRECTORY     ${PROJECT_BINARY_DIR}/kokkos
-    ${_INSTALL_RPATH})
+    PDB_OUTPUT_DIRECTORY     ${PROJECT_BINARY_DIR}/kokkos)
+
+# configure the rpath: <RELATIVE>:<CWD>:<FULL>
+IF(APPLE)
+    SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
+        MACOSX_RPATH "@loader_path/${LIB_RELPATH}:@loader_path:${_Kokkos_LIBDIR}:${CMAKE_INSTALL_RPATH}")
+ELSEIF(UNIX)
+    SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
+        INSTALL_RPATH "\$ORIGIN/${LIB_RELPATH}:\$ORIGIN:${_Kokkos_LIBDIR}:${CMAKE_INSTALL_RPATH}")
+ENDIF()
 
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/pytest.ini
     ${PROJECT_BINARY_DIR}/pytest.ini COPYONLY)
