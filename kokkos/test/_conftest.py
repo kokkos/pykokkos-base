@@ -95,3 +95,49 @@ def get_memory_traits(only_available=True):
         for e in kokkos.memory_traits
         if not only_available or kokkos.get_memory_trait_available(e)
     ]
+
+
+def generate_variant(*_args, **_kwargs):
+    """Generate a view from the variant arguments"""
+
+    import kokkos
+    import numpy as np
+
+    con_arr = None
+    dyn_arr = None
+    if _kwargs["trait"] == kokkos.Unmanaged:
+        con_arr = np.zeros(_args[0], dtype=kokkos.convert_dtype(_kwargs["dtype"]))
+        con_view = kokkos.unmanaged_array(con_arr, **_kwargs, dynamic=False)
+        dyn_arr = np.zeros(_args[0], dtype=kokkos.convert_dtype(_kwargs["dtype"]))
+        dyn_view = kokkos.unmanaged_array(dyn_arr, **_kwargs, dynamic=True)
+    else:
+        con_view = kokkos.array(*_args, **_kwargs, dynamic=False)
+        dyn_view = kokkos.array(*_args, **_kwargs, dynamic=True)
+    # retain con_arr and dyn_arr since python might run GC and delete them
+    return [con_view, dyn_view, con_arr, dyn_arr]
+
+
+def get_variants():
+    """Return a list of all view variants"""
+    _variants = []
+    for _dims in range(1, get_max_concrete_dims()):
+        _shape = []
+        _idx = []
+        _zeros = []
+
+        for i in range(_dims):
+            _shape.append(2)
+            _zeros.append(0)
+            _idx.append((i + 1) % 2)
+
+        for _dtype in get_dtypes():
+            for _space in get_memory_spaces():
+                for _layout in get_layouts():
+                    for _trait in get_memory_traits():
+                        _variant = {}
+                        _variant["dtype"] = _dtype
+                        _variant["space"] = _space
+                        _variant["layout"] = _layout
+                        _variant["trait"] = _trait
+                        _variants.append([_shape, _idx, _zeros, _variant])
+    return _variants

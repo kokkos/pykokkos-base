@@ -3,16 +3,6 @@
 #
 INCLUDE(KokkosPythonUtilities)
 
-# don't build a static python module
-SET(BUILD_SHARED_LIBS ON)
-
-# force to release if not specified
-IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
-    SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-ENDIF()
-
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON CACHE BOOL "Install with rpath")
-
 # backwards compat
 IF(NOT DEFINED ENABLE_EXAMPLES)
     SET(BUILD_EXAMPLES OFF CACHE BOOL "(deprecated) Use ENABLE_EXAMPLES")
@@ -45,10 +35,13 @@ ADD_FEATURE(CMAKE_INSTALL_PREFIX "Installation prefix")
 ADD_FEATURE(CMAKE_CXX_FLAGS "C++ compiler flags")
 ADD_FEATURE(Kokkos_CXX_STANDARD "Kokkos C++ Standard")
 ADD_FEATURE(Kokkos_DIR "Kokkos installation")
+
+ADD_OPTION(CMAKE_INSTALL_RPATH_USE_LINK_PATH "Install with rpath to linked libraries" ON)
 ADD_OPTION(ENABLE_INTERNAL_PYBIND11 "Build with pybind11 submodule" ON)
+ADD_OPTION(ENABLE_INTERNAL_KOKKOS "Build with kokkos submodule" ${_INTERNAL_KOKKOS})
 ADD_OPTION(ENABLE_WERROR "Build with -Werror" OFF)
 ADD_OPTION(ENABLE_TIMING "Build with -ftime-trace (Clang) or -ftime-report (GNU) or -time (NVCC)" OFF)
-ADD_OPTION(ENABLE_QUIET "Suppress flag checking info" OFF)
+ADD_OPTION(ENABLE_QUIET "Suppress non-essential information" OFF)
 ADD_OPTION(ENABLE_EXAMPLES "Build the examples" ${BUILD_EXAMPLES})
 ADD_OPTION(ENABLE_EXPERIMENTAL "Build the experimental code" OFF)
 ADD_OPTION(ENABLE_THIN_LTO "Pass THIN_LTO to pybind11_add_module instead of NO_EXTRAS" OFF)
@@ -59,6 +52,12 @@ ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)"
     ${_ENABLE_MEM_DEFAULT})
 ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)"
     ${_ENABLE_LAY_DEFAULT})
+ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ON)
+
+SET(CMAKE_UNITY_BUILD_BATCH_SIZE 5 CACHE STRING "Unity build batch size")
+IF(CMAKE_UNITY_BUILD)
+    ADD_FEATURE(CMAKE_UNITY_BUILD_BATCH_SIZE "Unity build batch size")
+ENDIF()
 
 SET(ENABLE_VIEW_RANKS "4" CACHE STRING "${_VIEW_RANK_MSG}")
 IF(ENABLE_VIEW_RANKS LESS 0 OR ENABLE_VIEW_RANKS GREATER 7)
@@ -71,16 +70,18 @@ IF(ENABLE_ALL AND (NOT ENABLE_MEMORY_TRAITS OR NOT ENABLE_LAYOUTS))
     MESSAGE(FATAL_ERROR "ENABLE_ALL is invalid with existing CMakeCache.txt")
 ENDIF()
 
-STRING(REGEX REPLACE "/lib(|..)/cmake/.*" "" Kokkos_INSTALL_DIR "${Kokkos_DIR}")
-IF("${Kokkos_INSTALL_DIR}" STREQUAL "${Kokkos_DIR}")
-    GET_FILENAME_COMPONENT(Kokkos_INSTALL_DIR "${Kokkos_DIR}" PATH)
-    GET_FILENAME_COMPONENT(Kokkos_INSTALL_DIR "${Kokkos_INSTALL_DIR}" PATH)
-    GET_FILENAME_COMPONENT(Kokkos_INSTALL_DIR "${Kokkos_INSTALL_DIR}" PATH)
-ENDIF()
+IF(Kokkos_DIR)
+    STRING(REGEX REPLACE "/lib(|..)/cmake/.*" "" Kokkos_INSTALL_DIR "${Kokkos_DIR}")
+    IF("${Kokkos_INSTALL_DIR}" STREQUAL "${Kokkos_DIR}")
+        GET_FILENAME_COMPONENT(Kokkos_INSTALL_DIR "${Kokkos_DIR}" PATH)
+        GET_FILENAME_COMPONENT(Kokkos_INSTALL_DIR "${Kokkos_INSTALL_DIR}" PATH)
+        GET_FILENAME_COMPONENT(Kokkos_INSTALL_DIR "${Kokkos_INSTALL_DIR}" PATH)
+    ENDIF()
 
-IF("${CMAKE_INSTALL_PREFIX}" STREQUAL "/kokkos-install-dir")
-    MESSAGE(STATUS "Setting CMAKE_INSTALL_PREFIX to install prefix for Kokkos: ${Kokkos_INSTALL_DIR}")
-    SET(CMAKE_INSTALL_PREFIX "${Kokkos_INSTALL_DIR}" CACHE PATH "Installation directory" FORCE)
+    IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        MESSAGE(STATUS "Setting CMAKE_INSTALL_PREFIX to install prefix for Kokkos: ${Kokkos_INSTALL_DIR}")
+        SET(CMAKE_INSTALL_PREFIX "${Kokkos_INSTALL_DIR}" CACHE PATH "Installation directory" FORCE)
+    ENDIF()
 ENDIF()
 
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON CACHE BOOL "Add compile flag to hide symbols of inline functions")
@@ -117,19 +118,6 @@ SET(Python3_ARTIFACTS_INTERACTIVE ON CACHE BOOL "Create CMake cache entries so t
 
 IF(DEFINED PYTHON_EXECUTABLE AND NOT DEFINED Python3_EXECUTABLE)
     SET(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
-ENDIF()
-
-# always disallow unity build
-# SET(CMAKE_UNITY_BUILD OFF)
-IF(ENABLE_MEMORY_TRAITS)
-    ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ON)
-ELSE()
-    ADD_FEATURE(CMAKE_UNITY_BUILD "Enable unity build")
-ENDIF()
-
-SET(CMAKE_UNITY_BUILD_BATCH_SIZE 6 CACHE STRING "Unity build batch size")
-IF(CMAKE_UNITY_BUILD)
-    ADD_FEATURE(CMAKE_UNITY_BUILD_BATCH_SIZE "Unity build batch size")
 ENDIF()
 
 OPTION(ENABLE_CTP "Enable compile-time-perf" OFF)

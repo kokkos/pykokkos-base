@@ -44,12 +44,14 @@
 
 #pragma once
 
-#include "Kokkos_Core.hpp"
-#include "Kokkos_DynRankView.hpp"
-#include "Kokkos_View.hpp"
 #include "common.hpp"
+#include "concepts.hpp"
 #include "fwd.hpp"
 #include "traits.hpp"
+
+#include <Kokkos_Core.hpp>
+#include <Kokkos_DynRankView.hpp>
+#include <Kokkos_View.hpp>
 
 //--------------------------------------------------------------------------------------//
 
@@ -272,7 +274,8 @@ struct PYKOKKOS_HIDDEN deep_copy {
 
   template <typename... RhsT>
   inline auto operator()(type_list<RhsT...>&&) {
-    FOLD_EXPRESSION(sfinae<LhsT, RhsT>(0));
+    FOLD_EXPRESSION(
+        sfinae<uniform_view_type_t<LhsT>, uniform_view_type_t<RhsT>>(0));
   }
 
  private:

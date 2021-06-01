@@ -1,12 +1,32 @@
 # pykokkos-base
 
+> Extended Documentation can be found in [Wiki](https://github.com/kokkos/pykokkos-base/wiki)
+
 This package contains the minimal set of bindings for [Kokkos](https://github.com/kokkos/kokkos)
 interoperability with Python:
 
-- `Kokkos::initialize(...)`
-- `Kokkos::finalize()`
-- `Kokkos::View<...>`
-- `Kokkos::DynRankView<...>`
+- Free-standing function bindings
+    - `Kokkos::initialize(...)`
+    - `Kokkos::finalize()`
+    - `Kokkos::is_initialized()`
+    - `Kokkos::deep_copy(...)`
+    - `Kokkos::create_mirror(...)`
+    - `Kokkos::create_mirror_view(...)`
+    - `Kokkos::Tools::profileLibraryLoaded()`
+    - `Kokkos::Tools::pushRegion(...)`
+    - `Kokkos::Tools::popRegion()`
+    - `Kokkos::Tools::createProfileSection(...)`
+    - `Kokkos::Tools::destroyProfileSection(...)`
+    - `Kokkos::Tools::startSection(...)`
+    - `Kokkos::Tools::stopSection(...)`
+    - `Kokkos::Tools::markEvent(...)`
+    - `Kokkos::Tools::declareMetadata(...)`
+    - `Kokkos::Tools::Experimental::set_<...>_callback(...)`
+- Data structures
+    - `Kokkos::View<...>`
+    - `Kokkos::DynRankView<...>`
+    - `Kokkos_Profiling_KokkosPDeviceInfo`
+    - `Kokkos_Profiling_SpaceHandle`
 
 By importing this package in Python, you can pass the supported Kokkos Views and DynRankViews
 from C++ to Python and vice-versa. Furthermore, in Python, these bindings provide interoperability
@@ -31,14 +51,55 @@ In order to write native Kokkos in Python, see [pykokkos](https://github.com/kok
 
 ## Installation
 
-You can install this package via CMake or Python's `setup.py`. There are two important cmake options:
+You can install this package via CMake or Python's `setup.py`. The important cmake options are:
 
-- `ENABLE_LAYOUTS`
-- `ENABLE_MEMORY_TRAITS`
+- `ENABLE_VIEW_RANKS` (integer)
+- `ENABLE_LAYOUTS` (bool)
+- `ENABLE_MEMORY_TRAITS` (bool)
+- `ENABLE_INTERNAL_KOKKOS` (bool)
 
-By default, CMake will enable these options if the Kokkos installation was not built with CUDA support.
+By default, CMake will enable the layouts and memory traits options if the Kokkos installation was not
+built with CUDA support.
 If Kokkos was built with CUDA support, these options will be disabled by default due to unreasonable
 compilation times (> 1 hour).
+The `ENABLE_VIEW_RANKS` option (defaults to a value of 4) is the max number of ranks for
+`Kokkos::View<...>` that can be returned to Python. For example, value of 4 means that
+views of data type `T*`, `T**`, `T***`, and `T****` can be returned to python but
+`T*****` and higher cannot. Increasing this value up to 7 can dramatically increase the length
+of time required to compile the bindings.
+
+### Kokkos Installation
+
+If the `ENABLE_INTERNAL_KOKKOS` option is not specified the first time CMake is run, CMake will try to
+find an existing Kokkos installation. If no existing installation is found, it will build and install
+Kokkos from a submodule. When Kokkos is added as a submodule, you can configure the submodule
+as you would normally configure Kokkos. However, due to some general awkwardness configuring cmake
+from `setup.py` (especially via `pip install`), CMake tries to "automatically" configure
+reasonable default CMake settings for the Kokkos submodule.
+
+Here are the steps when Kokkos is added as a submodule:
+
+- Does `external/kokkos/CMakeLists.txt` exists?
+    - **YES**: assumes the submodule is already checked out
+        - > _If compute node does not have internet access, checkout submodule before installing!_
+    - **NO**: does `.gitmodules` exist?
+        - **YES**: `git submodule update --init external/kokkos`
+        - **NO**: `git clone -b master https://github.com/kokkos/kokkos.git external/kokkos`
+- Set `BUILD_SHARED_LIBS=ON`
+- Set `Kokkos_ENABLE_SERIAL=ON`
+- `find_package(OpenMP)`
+    - Was OpenMP found?
+        - **YES**: set `Kokkos_ENABLE_OPENMP=ON`
+        - **NO**: `find_package(Threads)`
+            - Was Threads found?
+                - **YES**: set `Kokkos_ENABLE_PTHREADS=ON` (if not Windows)
+- `find_package(CUDA)`
+    - Was CUDA found?
+        - **YES**: set:
+            - `Kokkos_ENABLE_CUDA=ON`
+            - `Kokkos_ENABLE_CUDA_UVM=ON`
+            - `Kokkos_ENABLE_CUDA_LAMBDA=ON`
+            - `Kokkos_ENABLE_CUDA_CONSTEXPR=ON`
 
 ### Configuring Options via CMake
 

@@ -44,11 +44,16 @@
 
 #pragma once
 
-#include "Kokkos_Core.hpp"
-#include "Kokkos_DynRankView.hpp"
-#include "Kokkos_View.hpp"
 #include "common.hpp"
+#include "concepts.hpp"
 #include "deep_copy.hpp"
+#include "defines.hpp"
+#include "fwd.hpp"
+#include "traits.hpp"
+
+#include <Kokkos_Core.hpp>
+#include <Kokkos_DynRankView.hpp>
+#include <Kokkos_View.hpp>
 
 //--------------------------------------------------------------------------------------//
 
@@ -67,12 +72,6 @@ RetT get_strides(Tp &m, std::index_sequence<Idx...>) {
   return RetT{(sizeof(Up) * m.stride(Idx))...};
 }
 
-#define GET_STRIDE(IDX_NUM)                                             \
-  template <size_t Idx, typename Tp, enable_if_t<(Idx == IDX_NUM)> = 0> \
-  constexpr auto get_stride(Tp &m) {                                    \
-    return m.stride_##IDX_NUM();                                        \
-  }
-
 GET_STRIDE(0)
 GET_STRIDE(1)
 GET_STRIDE(2)
@@ -90,7 +89,7 @@ RetT get_stride(Tp &m, std::index_sequence<Idx...>) {
 
 //--------------------------------------------------------------------------------------//
 
-namespace impl {
+namespace Impl {
 template <typename Tp, typename... Args>
 struct get_item {
   static constexpr auto sequence = std::make_index_sequence<sizeof...(Args)>{};
@@ -131,52 +130,52 @@ struct get_type;
 
 template <typename Tp>
 struct get_type<Tp, 1> {
-  using type = impl::get_item<Tp, size_t>;
+  using type = Impl::get_item<Tp, size_t>;
 };
 
 template <typename Tp>
 struct get_type<Tp, 2> {
-  using type = impl::get_item<Tp, size_t, size_t>;
+  using type = Impl::get_item<Tp, size_t, size_t>;
 };
 
 template <typename Tp>
 struct get_type<Tp, 3> {
-  using type = impl::get_item<Tp, size_t, size_t, size_t>;
+  using type = Impl::get_item<Tp, size_t, size_t, size_t>;
 };
 
 template <typename Tp>
 struct get_type<Tp, 4> {
-  using type = impl::get_item<Tp, size_t, size_t, size_t, size_t>;
+  using type = Impl::get_item<Tp, size_t, size_t, size_t, size_t>;
 };
 
 template <typename Tp>
 struct get_type<Tp, 5> {
-  using type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t>;
+  using type = Impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t>;
 };
 
 template <typename Tp>
 struct get_type<Tp, 6> {
   using type =
-      impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t, size_t>;
+      Impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t, size_t>;
 };
 
 template <typename Tp>
 struct get_type<Tp, 7> {
-  using type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
+  using type = Impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
                               size_t, size_t>;
 };
 
 template <typename Tp>
 struct get_type<Tp, 8> {
-  using type = impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
+  using type = Impl::get_item<Tp, size_t, size_t, size_t, size_t, size_t,
                               size_t, size_t, size_t>;
 };
 
-}  // namespace impl
+}  // namespace Impl
 
 template <typename Tp, size_t Idx>
 struct get_item {
-  using impl_type                = typename impl::get_type<Tp, Idx>::type;
+  using impl_type                = typename Impl::get_type<Tp, Idx>::type;
   using array_type               = std::array<Tp, Idx>;
   static constexpr auto sequence = std::make_index_sequence<Idx>{};
 
@@ -187,21 +186,6 @@ struct get_item {
     return impl_type::template set<Vp>();
   }
 };
-
-//--------------------------------------------------------------------------------------//
-
-template <typename... Args>
-std::string construct_name(const std::string &delim, Args &&... args) {
-  auto _construct = [&](auto &&_arg) {
-    std::ostringstream _ss;
-    _ss << std::forward<decltype(_arg)>(_arg);
-    if (_ss.str().length() > 0) return delim + _ss.str();
-    return std::string{};
-  };
-  std::ostringstream ss;
-  FOLD_EXPRESSION(ss << _construct(std::forward<Args>(args)));
-  return ss.str().substr(delim.length());
-}
 
 //--------------------------------------------------------------------------------------//
 
@@ -255,79 +239,86 @@ auto get_init(Vp &_view, enable_if_t<!ViewT::traits::is_managed, int> = 0) {
 
 namespace Common {
 // creates overloads for data access from python
-template <typename Tp, typename View_t, size_t... Idx>
-void generate_view_access(py::class_<View_t> &_view,
-                          std::index_sequence<Idx...>,
+template <typename Tp, typename ViewT, size_t... Idx>
+void generate_view_access(py::class_<ViewT> &_view, std::index_sequence<Idx...>,
                           enable_if_t<(sizeof...(Idx) == 1), int> = 0) {
-  FOLD_EXPRESSION(_view.def("__getitem__", get_item<View_t, Idx + 1>::get(),
+  FOLD_EXPRESSION(_view.def("__getitem__", get_item<ViewT, Idx + 1>::get(),
                             "Get the element"));
   FOLD_EXPRESSION(_view.def("__setitem__",
-                            get_item<View_t, Idx + 1>::template set<Tp>(),
+                            get_item<ViewT, Idx + 1>::template set<Tp>(),
                             "Set the element"));
 }
 
-template <typename Tp, typename View_t>
-void generate_view_access(py::class_<View_t> &_view, std::index_sequence<0>) {
-  _view.def("__getitem__", get_item<View_t, 1>::get(), "Get the element");
-  _view.def("__setitem__", get_item<View_t, 1>::template set<Tp>(),
+template <typename Tp, typename ViewT>
+void generate_view_access(py::class_<ViewT> &_view, std::index_sequence<0>) {
+  _view.def("__getitem__", get_item<ViewT, 1>::get(), "Get the element");
+  _view.def("__setitem__", get_item<ViewT, 1>::template set<Tp>(),
             "Set the element");
   _view.def(
       "__getitem__",
-      [](View_t &_obj, std::tuple<size_t> _arg) {
+      [](ViewT &_obj, std::tuple<size_t> _arg) {
         return _obj.access(std::get<0>(_arg));
       },
       "Get the element");
   _view.def(
       "__setitem__",
-      [](View_t &_obj, std::tuple<size_t> _arg, Tp _val) {
+      [](ViewT &_obj, std::tuple<size_t> _arg, Tp _val) {
         _obj.access(std::get<0>(_arg)) = _val;
       },
       "Set the element");
 }
 
-template <typename Tp, typename View_t, size_t... Idx>
-void generate_view_access(py::class_<View_t> &_view,
-                          std::index_sequence<Idx...>,
+template <typename Tp, typename ViewT, size_t... Idx>
+void generate_view_access(py::class_<ViewT> &_view, std::index_sequence<Idx...>,
                           enable_if_t<(sizeof...(Idx) > 1), int> = 0) {
-  FOLD_EXPRESSION(_view.def("__getitem__", get_item<View_t, Idx + 1>::get(),
+  FOLD_EXPRESSION(_view.def("__getitem__", get_item<ViewT, Idx + 1>::get(),
                             "Get the element"));
   FOLD_EXPRESSION(_view.def("__setitem__",
-                            get_item<View_t, Idx + 1>::template set<Tp>(),
+                            get_item<ViewT, Idx + 1>::template set<Tp>(),
                             "Set the element"));
   _view.def(
       "__getitem__",
-      [](View_t &_obj, std::tuple<size_t> _arg) {
+      [](ViewT &_obj, std::tuple<size_t> _arg) {
         return _obj.access(std::get<0>(_arg));
       },
       "Get the element");
   _view.def(
       "__setitem__",
-      [](View_t &_obj, std::tuple<size_t> _arg, Tp _val) {
+      [](ViewT &_obj, std::tuple<size_t> _arg, Tp _val) {
         _obj.access(std::get<0>(_arg)) = _val;
       },
       "Set the element");
 }
 
+//--------------------------------------------------------------------------------------//
+//
+//                          Primary View generation function
+//
+//--------------------------------------------------------------------------------------//
+
 // generic function to generate a view once the view type has been specified
-template <typename View_t, typename Sp, typename Tp, typename Lp, typename Mp,
+template <typename ViewT, typename Sp, typename Tp, typename Lp, typename Mp,
           size_t DimIdx, size_t... Idx>
 void generate_view(py::module &_mod, const std::string &_name,
                    const std::string &_msg, size_t _ndim = DimIdx + 1) {
+  // some mirror views will instantiate types that were added already
+  if (!add_pyclass<ViewT>()) return;
+
   if (DEBUG_OUTPUT)
     std::cerr << "Registering " << _msg << " as python class '" << _name
               << "'..." << std::endl;
 
   // class decl
-  py::class_<View_t> _view(_mod, _name.c_str(), py::buffer_protocol());
+  py::class_<ViewT> _view(_mod, _name.c_str(), py::buffer_protocol());
 
   // default initializer
-  _view.def(py::init([]() { return new View_t{}; }));
+  _view.def(py::init([]() { return new ViewT{}; }));
 
   // initializer with extents
-  FOLD_EXPRESSION(get_init<View_t, Idx + 1, Tp>(_view));
+  FOLD_EXPRESSION(get_init<ViewT, Idx + 1, Tp>(_view));
 
   // conversion to/from numpy
-  _view.def_buffer([_ndim](View_t &m) -> py::buffer_info {
+  _view.def_buffer([_ndim](ViewT &m) -> py::buffer_info {
     auto _extents = get_extents(m, std::make_index_sequence<DimIdx + 1>{});
     auto _strides = get_stride<Tp>(m, std::make_index_sequence<DimIdx + 1>{});
     return py::buffer_info(m.data(),    // Pointer to buffer
@@ -341,80 +332,74 @@ void generate_view(py::module &_mod, const std::string &_name,
 
   _view.def(
       "create_mirror",
-      [](View_t &_v) {
+      [](ViewT &_v) {
         auto _m           = Kokkos::create_mirror(_v);
-        using mirror_type = std::decay_t<decltype(_m)>;
-        using cast_type =
-            resolve_uniform_view_type_t<mirror_type,
-                                        uniform_view_type_t<mirror_type>>;
+        using mirror_type = typename ViewT::HostMirror;
+        using cast_type   = uniform_view_type_t<mirror_type>;
         return static_cast<cast_type>(_m);
       },
       "Create a host mirror (always creates a new view)");
 
   _view.def(
       "create_mirror_view",
-      [](View_t &_v) {
+      [](ViewT &_v) {
         auto _m           = Kokkos::create_mirror_view(_v);
-        using mirror_type = std::decay_t<decltype(_m)>;
-        using cast_type =
-            resolve_uniform_view_type_t<mirror_type,
-                                        uniform_view_type_t<mirror_type>>;
+        using mirror_type = typename ViewT::HostMirror;
+        using cast_type   = uniform_view_type_t<mirror_type>;
         return static_cast<cast_type>(_m);
       },
       "Create a host mirror view (only creates new view if this is not on "
       "host)");
 
   using view_type_list_t =
-      std::conditional_t<Kokkos::is_dyn_rank_view<View_t>::value,
+      std::conditional_t<Kokkos::is_dyn_rank_view<ViewT>::value,
                          dynamic_view_type_list_t, concrete_view_type_list_t>;
 
-  deep_copy<View_t>{_view}(view_type_list_t{});
+  deep_copy<ViewT>{_view}(view_type_list_t{});
 
   // shape property
   _view.def_property_readonly(
       "shape",
-      [](View_t &m) {
+      [](ViewT &m) {
         return get_extents(m, std::make_index_sequence<DimIdx + 1>{});
       },
       "Get the shape of the array (extents)");
 
   _view.def_property_readonly(
-      "space", [](View_t &) { return MemorySpaceIndex<Sp>::value; },
+      "space", [](ViewT &) { return MemorySpaceIndex<Sp>::value; },
       "Memory space of the view (alias for 'memory_space')");
 
   _view.def_property_readonly(
-      "layout", [](View_t &) { return MemoryLayoutIndex<Lp>::value; },
+      "layout", [](ViewT &) { return MemoryLayoutIndex<Lp>::value; },
       "Memory layout of the view");
 
   _view.def_property_readonly(
-      "trait", [](View_t &) { return MemoryTraitIndex<Mp>::value; },
+      "trait", [](ViewT &) { return MemoryTraitIndex<Mp>::value; },
       "Memory trait of the view (alias for 'memory_trait')");
 
   _view.def_property_readonly(
-      "memory_space", [](View_t &) { return MemorySpaceIndex<Sp>::value; },
+      "memory_space", [](ViewT &) { return MemorySpaceIndex<Sp>::value; },
       "Memory space of the view (alias for 'space')");
 
   _view.def_property_readonly(
-      "memory_trait", [](View_t &) { return MemoryTraitIndex<Mp>::value; },
+      "memory_trait", [](ViewT &) { return MemoryTraitIndex<Mp>::value; },
       "Memory trait of the view (alias for 'trait')");
 
-  static bool _is_dynamic = (sizeof...(Idx) > 1);
-
   _view.def_property_readonly(
-      "dynamic", [](View_t &) { return _is_dynamic; },
+      "dynamic", [](ViewT &) { return Kokkos::is_dyn_rank_view<ViewT>::value; },
       "Whether the rank is dynamic");
 
   // support []
   generate_view_access<Tp>(_view, std::index_sequence<Idx...>{});
 }
 
-template <typename View_t, typename Sp, typename Tp, typename Lp, typename Mp,
+template <typename ViewT, typename Sp, typename Tp, typename Lp, typename Mp,
           size_t DimIdx, size_t... Idx>
 void generate_view(py::module &_mod, const std::string &_name,
                    const std::string &_msg, size_t _ndim,
                    std::index_sequence<Idx...>) {
-  generate_view<View_t, Sp, Tp, Lp, Mp, DimIdx, Idx...>(_mod, _name, _msg,
-                                                        _ndim);
+  generate_view<ViewT, Sp, Tp, Lp, Mp, DimIdx, Idx...>(_mod, _name, _msg,
+                                                       _ndim);
 }
 }  // namespace Common
 //

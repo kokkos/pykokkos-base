@@ -44,6 +44,8 @@
 
 #pragma once
 
+#include "defines.hpp"
+
 #if defined(__GNUC__)
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -59,15 +61,11 @@
 
 namespace py = pybind11;
 
-#include <array>
 #include <cstdint>
 #include <cstdio>
-#include <initializer_list>
 #include <sstream>
 #include <string>
-#include <tuple>
 #include <type_traits>
-#include <typeinfo>
 
 #if defined(ENABLE_DEMANGLE)
 #  include <cxxabi.h>
@@ -75,104 +73,16 @@ namespace py = pybind11;
 
 //--------------------------------------------------------------------------------------//
 
-template <typename...>
-struct type_list {};
-
-//--------------------------------------------------------------------------------------//
-
-// default definition
-template <typename... T>
-struct concat {
-  using type = type_list<T...>;
-};
-
-// append to type_list
-template <typename... T, typename... Tail>
-struct concat<type_list<T...>, Tail...> : concat<T..., Tail...> {};
-
-// combine consecutive type_lists
-template <typename... T, typename... U, typename... Tail>
-struct concat<type_list<T...>, type_list<U...>, Tail...>
-    : concat<type_list<T..., U...>, Tail...> {};
-
-template <typename... T>
-using concat_t = typename concat<T...>::type;
-
-template <template <typename> class PredicateT, bool ValueT, typename... T>
-struct gather {
-  using type = concat_t<std::conditional_t<PredicateT<T>::value == ValueT,
-                                           concat_t<T>, type_list<>>...>;
-};
-
-//--------------------------------------------------------------------------------------//
-
-template <typename In, typename Out>
-struct convert {
-  using type = Out;
-};
-
-template <template <typename...> class InTuple, typename... In,
-          template <typename...> class OutTuple, typename... Out>
-struct convert<InTuple<In...>, OutTuple<Out...>> {
-  using type = OutTuple<Out..., In...>;
-};
-
-//--------------------------------------------------------------------------------------//
-
-template <typename T, typename U>
-using convert_t = typename convert<T, U>::type;
-
-template <template <typename> class PredicateT, bool ValueT, typename... T>
-using gather_t = typename gather<PredicateT, ValueT, T...>::type;
-
-//--------------------------------------------------------------------------------------//
-
-template <typename...>
-struct concrete_view_type_list;
-
-template <typename...>
-struct dynamic_view_type_list;
-
-template <size_t Idx>
-struct index_val;
-
-//--------------------------------------------------------------------------------------//
-
 template <bool B, typename T = int>
 using enable_if_t = typename std::enable_if<B, T>::type;
 
-//--------------------------------------------------------------------------------------//
-
-#define FOLD_EXPRESSION(...) \
-  ::consume_parameters(::std::initializer_list<int>{(__VA_ARGS__, 0)...})
+template <typename Tp>
+using decay_t = typename std::decay<Tp>::type;
 
 //--------------------------------------------------------------------------------------//
 
-#if !defined(NDEBUG)
-#  define DEBUG_OUTPUT true
-#else
-#  define DEBUG_OUTPUT false
-#endif
-
-//--------------------------------------------------------------------------------------//
-
-#if !defined(EXPAND)
-#  define EXPAND(...) __VA_ARGS__
-#endif
-
-//--------------------------------------------------------------------------------------//
-
-#if defined(__GNUC__) || defined(__clang__)
-#  define PYKOKKOS_HIDDEN __attribute__((visibility("hidden")))
-#elif defined(__has_attribute)
-#  if __has_attribute(visibility)
-#    define PYKOKKOS_HIDDEN __attribute__((visibility("hidden")))
-#  else
-#    define PYKOKKOS_HIDDEN
-#  endif
-#else
-#  define PYKOKKOS_HIDDEN
-#endif
+template <typename...>
+struct type_list {};
 
 //--------------------------------------------------------------------------------------//
 
@@ -187,7 +97,7 @@ inline std::string demangle(const char *_cstr) {
   int _ret      = 0;
   char *_demang = abi::__cxa_demangle(_cstr, 0, 0, &_ret);
   if (_demang && _ret == 0)
-    return std::string(const_cast<const char *>(_demang));
+    return std::string{const_cast<const char *>(_demang)};
   else
     return _cstr;
 #else
@@ -224,160 +134,32 @@ inline std::string demangle() {
 }
 
 //--------------------------------------------------------------------------------------//
-//  this is used to mark memory spaces as unavailable
-//
-template <typename Tp>
-struct is_available : std::true_type {};
 
-#define DISABLE_TYPE(TYPE) \
-  template <>              \
-  struct is_available<TYPE> : std::false_type {};
-
-//--------------------------------------------------------------------------------------//
-//  this is used to mark template parameters as implicit
-//
-template <typename Tp>
-struct is_implicit : std::false_type {};
-
-#define ENABLE_IMPLICIT(TYPE) \
-  template <>                 \
-  struct is_implicit<TYPE> : std::true_type {};
-
-template <typename Tp>
-struct is_memory_traits : std::false_type {};
-
-namespace Kokkos {
-//
-template <unsigned T>
-struct MemoryTraits;
-//
-template <typename DataType, class... Properties>
-class DynRankView;  // forward declare
-//
-template <typename DataType, class... Properties>
-class View;  // forward declare
-//
-template <class ExecutionSpace, class MemorySpace>
-struct Device;
-}  // namespace Kokkos
-
-template <unsigned T>
-struct is_memory_traits<Kokkos::MemoryTraits<T>> : std::true_type {};
+template <typename... Args>
+std::string join(const std::string &delim, Args &&... args) {
+  auto _construct = [&](auto &&_arg) {
+    std::ostringstream _ss;
+    _ss << std::forward<decltype(_arg)>(_arg);
+    if (_ss.str().length() > 0) return delim + _ss.str();
+    return std::string{};
+  };
+  std::ostringstream ss;
+  FOLD_EXPRESSION(ss << _construct(std::forward<Args>(args)));
+  return ss.str().substr(delim.length());
+}
 
 //--------------------------------------------------------------------------------------//
-//  this is used to convert Kokkos::Device<ExecSpace, MemSpace> to MemSpace
-//
-template <typename Tp>
-struct remove_device {
-  using type = Tp;
-};
 
-template <typename ExecT, typename MemT>
-struct remove_device<Kokkos::Device<ExecT, MemT>> {
-  using type = MemT;
-};
+inline auto &get_existing_pyclass_names() {
+  static std::set<std::string> _instance{};
+  return _instance;
+}
+
+//--------------------------------------------------------------------------------------//
 
 template <typename Tp>
-using remove_device_t = typename remove_device<Tp>::type;
-
-//--------------------------------------------------------------------------------------//
-//  this is used to get the view type
-//
-template <typename, typename...>
-struct view_type;
-
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct view_type<ViewT<ValueT>, type_list<Types...>> {
-  using type = ViewT<ValueT, remove_device_t<Types>...>;
-};
-
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct view_type<ViewT<ValueT>, Types...>
-    : view_type<ViewT<ValueT>, gather_t<is_implicit, false, Types...>> {};
-
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct view_type<ViewT<ValueT, Types...>>
-    : view_type<ViewT<ValueT>, gather_t<is_implicit, false, Types...>> {};
-
-template <typename... T>
-using view_type_t = typename view_type<T...>::type;
-
-//--------------------------------------------------------------------------------------//
-//  this is used to get the deep copy view type
-//
-template <typename, typename...>
-struct deep_copy_view_type;
-
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct deep_copy_view_type<ViewT<ValueT>, type_list<Types...>> {
-  using type = ViewT<ValueT, Types...>;
-};
-
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct deep_copy_view_type<ViewT<ValueT>, Types...>
-    : deep_copy_view_type<ViewT<ValueT>,
-                          gather_t<is_memory_traits, false, Types...>> {};
-
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct deep_copy_view_type<ViewT<ValueT, Types...>>
-    : deep_copy_view_type<ViewT<ValueT>,
-                          gather_t<is_memory_traits, false, Types...>> {};
-
-template <typename... T>
-using deep_copy_view_type_t = typename deep_copy_view_type<T...>::type;
-
-//--------------------------------------------------------------------------------------//
-//  this is used to get the deep copy view type
-//
-template <typename, typename...>
-struct uniform_view_type;
-
-template <typename ValueT, typename... Types>
-struct uniform_view_type<Kokkos::View<ValueT, Types...>> {
-  using type =
-      view_type_t<typename Kokkos::View<ValueT, Types...>::uniform_type>;
-};
-
-template <typename ValueT, typename... Types>
-struct uniform_view_type<Kokkos::DynRankView<ValueT, Types...>> {
-  using type = view_type_t<Kokkos::DynRankView<ValueT, Types...>>;
-};
-
-template <typename... T>
-using uniform_view_type_t = typename uniform_view_type<T...>::type;
-
-//--------------------------------------------------------------------------------------//
-//  this fixes an issue where uniform_type type on 1D views will convert
-//  LayoutRight template parameters to LayoutLeft template parameters since they
-//  are compatible (left vs. right doesn't matter in 1D). If ENABLE_LAYOUTS is
-//  defined this does not cause problems but if it is not defined, calling
-//  create_mirror or create_mirror_view will return a template instantiation
-//  that has not been generated.
-//
-template <typename ViewT, typename UniformT>
-struct resolve_uniform_view_type {
-  using type = UniformT;
-};
-
-template <typename ViewValueT, typename ViewLayoutT, typename... ViewExtraT,
-          typename UniformValueT, typename UniformLayoutT,
-          typename... UniformExtraT>
-struct resolve_uniform_view_type<
-    Kokkos::View<ViewValueT *, ViewLayoutT, ViewExtraT...>,
-    Kokkos::View<UniformValueT *, UniformLayoutT, UniformExtraT...>> {
-  using type = std::conditional_t<
-      !std::is_same<ViewLayoutT, UniformLayoutT>::value &&
-          !std::is_pointer<UniformValueT>::value,
-      view_type_t<Kokkos::View<UniformValueT *, ViewLayoutT, UniformExtraT...>>,
-      Kokkos::View<UniformValueT *, UniformLayoutT, UniformExtraT...>>;
-};
-
-template <typename ViewT, typename UniformT>
-using resolve_uniform_view_type_t =
-    typename resolve_uniform_view_type<ViewT, UniformT>::type;
+inline auto add_pyclass() {
+  if (get_existing_pyclass_names().count(demangle<Tp>()) > 0) return false;
+  get_existing_pyclass_names().insert(demangle<Tp>());
+  return true;
+}

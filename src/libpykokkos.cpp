@@ -43,6 +43,12 @@
 */
 
 #include "libpykokkos.hpp"
+#include "common.hpp"
+#include "defines.hpp"
+#include "fwd.hpp"
+#include "traits.hpp"
+
+#include <Kokkos_Core.hpp>
 
 //--------------------------------------------------------------------------------------//
 //
@@ -51,6 +57,10 @@
 //--------------------------------------------------------------------------------------//
 
 PYBIND11_MODULE(libpykokkos, kokkos) {
+  kokkos.doc() =
+      "Python bindings to critical Kokkos functions, Kokkos data strucures, "
+      "and tools";
+
   // Initialize kokkos
   auto _initialize = [&]() {
     if (Kokkos::is_initialized()) return false;

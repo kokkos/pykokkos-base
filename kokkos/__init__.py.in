@@ -88,9 +88,48 @@ build_info = sys.modules[__name__].__getattribute__("build_info")
 version = sys.modules[__name__].__getattribute__("version")
 """Version string"""
 
+
+def _load_kokkos_libs():
+    """Loads the kokkos shared libraries (generally only needed on macOS)"""
+    relative_lib_path = "@LIB_RELPATH@"
+    ext = None
+
+    import ctypes
+    import platform
+
+    if platform.system().lower().startswith("darwin"):
+        ext = "dylib"
+    elif platform.system().lower().startswith("linux"):
+        ext = "so"
+    elif platform.system().lower().startswith("win"):
+        ext = "dll"
+
+    def _load(name):
+        # get the path to this directory
+        this_path = os.path.abspath(os.path.dirname(__file__))
+        p = os.path.realpath(os.path.join(this_path, relative_lib_path, name))
+        return ctypes.CDLL(p)
+
+    for itr in ("core", "containers"):
+        try:
+            _load(f"libkokkos{itr}.{ext}")
+        except Exception as e:
+            sys.stderr.write(f"Error loading libkokkos{itr}: {e}\n")
+
+
 try:
-    from . import libpykokkos
-    from .libpykokkos import *
+    _loaded_bindings = True
+    try:
+        from . import libpykokkos
+        from .libpykokkos import *
+    except Exception:
+        _loaded_bindings = False
+        _load_kokkos_libs()
+
+    if not _loaded_bindings:
+        from . import libpykokkos  # noqa: F811
+        from .libpykokkos import *  # noqa: F811
+
     from .utility import *
 
     __all__ = [

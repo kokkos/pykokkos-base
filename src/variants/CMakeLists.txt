@@ -17,7 +17,7 @@ SET(_variants           layout memory_trait)
 SET(_data_types         Int16 Int32 Int64 Uint16 Uint32 Uint64 Float32 Float64)
 
 SET(layout_enums        Right)
-SET(memory_trait_enums  Managed Unmanaged)
+SET(memory_trait_enums  Managed)
 
 IF(ENABLE_LAYOUTS)
     LIST(APPEND layout_enums        Left)
@@ -41,7 +41,9 @@ FOREACH(TYPE ${_types})
                 STRING(TOLOWER "${TYPE}_view_${VARIANT}" _TAG)
                 SET(ENUM "${DATA_VARIANT}, ${LAYOUT_VARIANT}, ${MEMORY_TRAIT_VARIANT}")
                 SET(FUNC "generate_${_TAG}")
-                MESSAGE(STATUS "Generating '${_TAG}.cpp'...")
+                IF(NOT ENABLE_QUIET)
+                    MESSAGE(STATUS "Generating '${_TAG}.cpp'...")
+                ENDIF()
                 CONFIGURE_FILE(
                     ${CMAKE_CURRENT_SOURCE_DIR}/variant.cpp.in
                     ${CMAKE_CURRENT_BINARY_DIR}/${_TAG}.cpp

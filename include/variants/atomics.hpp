@@ -55,6 +55,8 @@
 namespace Space {
 namespace SpaceDim {
 
+// this function creates bindings for the atomic type returned to python from
+// views with MemoryTrait<Kokkos::Atomic | ...>
 template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx>
 void generate_atomic_variant(py::module &_mod) {
   using data_spec_t   = ViewDataTypeSpecialization<DataIdx>;
@@ -66,23 +68,18 @@ void generate_atomic_variant(py::module &_mod) {
   using Sp            = typename space_spec_t::type;
   using Lp            = typename layout_spec_t::type;
   using Mp            = typename trait_spec_t::type;
-  using View_t        = typename view_type<Kokkos::View<Vp>, Lp, Sp, Mp>::type;
-  using atomic_type   = typename View_t::reference_type;
+  using ViewT         = view_type_t<Kokkos::View<Vp>, Lp, Sp, Mp>;
+  using atomic_type   = typename ViewT::reference_type;
   using value_type    = typename atomic_type::value_type;
 
-  constexpr bool explicit_layout = !is_implicit<Lp>::value;
-
-  auto name =
-      construct_name("_", "KokkosAtomicDataElement", data_spec_t::label(),
-                     space_spec_t::label(),
-                     (explicit_layout) ? layout_spec_t::label() : std::string{},
-                     trait_spec_t::label(), DimIdx + 1);
+  auto name = join("_", "KokkosAtomicDataElement", data_spec_t::label(),
+                   space_spec_t::label(), layout_spec_t::label(),
+                   trait_spec_t::label(), DimIdx + 1);
 
   auto desc =
       std::string{"Kokkos::Impl::AtomicDataElement<Kokkos::ViewTraits<"} +
-      construct_name(", ", demangle<Vp>(),
-                     (explicit_layout) ? demangle<Lp>() : std::string{},
-                     demangle<Sp>(), demangle<Mp>()) +
+      join(", ", demangle<Vp>(), demangle<Lp>(), demangle<Sp>(),
+           demangle<Mp>()) +
       ">>";
 
   if (DEBUG_OUTPUT)
@@ -168,12 +165,14 @@ void generate_atomic_variant(py::module &_mod) {
 }
 }  // namespace SpaceDim
 
+// if the space is not available do nothing
 template <size_t LayoutIdx, size_t DataIdx, size_t SpaceIdx, size_t... DimIdx>
 void generate_atomic_variant(
     py::module &, std::index_sequence<DimIdx...>,
     std::enable_if_t<!is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
 }
 
+// if the space is available expand for every dimension
 template <size_t LayoutIdx, size_t DataIdx, size_t SpaceIdx, size_t... DimIdx>
 void generate_atomic_variant(
     py::module &_mod, std::index_sequence<DimIdx...>,
@@ -186,7 +185,7 @@ void generate_atomic_variant(
 
 namespace variants {
 
-// generate data-type, memory-space buffers for atomic_concrete dimension
+// expand for all the spaces with a given layout and data-type
 template <size_t LayoutIdx, size_t DataIdx, size_t... SpaceIdx>
 void generate_atomic_variant(py::module &_mod,
                              std::index_sequence<SpaceIdx...>) {

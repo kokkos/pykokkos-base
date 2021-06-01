@@ -44,11 +44,12 @@
 
 #pragma once
 
-#include "Kokkos_Core_fwd.hpp"
-#include "Kokkos_Layout.hpp"
-#include "Kokkos_MemoryTraits.hpp"
-
 #include "common.hpp"
+#include "defines.hpp"
+
+#include <Kokkos_Core_fwd.hpp>
+#include <Kokkos_Layout.hpp>
+#include <Kokkos_MemoryTraits.hpp>
 
 #include <set>
 #include <string>
@@ -94,6 +95,27 @@ class OpenMPTargetSpace;
 class SYCLSharedUSMSpace;
 class SYCLDeviceUSMSpace;
 }  // namespace Experimental
+}  // namespace Kokkos
+
+//--------------------------------------------------------------------------------------//
+//
+//                                   Miscellaneous
+//
+//--------------------------------------------------------------------------------------//
+
+namespace Kokkos {
+//
+template <unsigned T>
+struct MemoryTraits;
+//
+template <typename DataType, class... Properties>
+class DynRankView;  // forward declare
+//
+template <typename DataType, class... Properties>
+class View;  // forward declare
+//
+template <class ExecutionSpace, class MemorySpace>
+struct Device;
 }  // namespace Kokkos
 
 //--------------------------------------------------------------------------------------//
@@ -167,10 +189,6 @@ enum KokkosMemoryTrait {
 //
 //--------------------------------------------------------------------------------------//
 
-#if !defined(ENABLE_VIEW_RANKS)
-#  define ENABLE_VIEW_RANKS 4
-#endif
-
 static constexpr size_t ViewDataMaxDimensions = ENABLE_VIEW_RANKS;
 
 static_assert(ViewDataMaxDimensions < 8,
@@ -217,101 +235,3 @@ using memory_layout_t = typename MemoryLayoutSpecialization<Idx>::type;
 
 template <size_t Idx>
 using memory_trait_t = typename MemoryTraitSpecialization<Idx>::type;
-
-//--------------------------------------------------------------------------------------//
-//
-//                                      macros
-//
-//--------------------------------------------------------------------------------------//
-
-#define GET_FIRST_STRING(...)                         \
-  static std::string _value = []() {                  \
-    return std::get<0>(std::make_tuple(__VA_ARGS__)); \
-  }();                                                \
-  return _value
-
-#define GET_STRING_SET(...)                               \
-  static auto _value = []() {                             \
-    auto _ret = std::set<std::string>{};                  \
-    for (auto itr : std::set<std::string>{__VA_ARGS__}) { \
-      if (!itr.empty()) {                                 \
-        _ret.insert(itr);                                 \
-      }                                                   \
-    }                                                     \
-    return _ret;                                          \
-  }();                                                    \
-  return _value
-
-#define VIEW_DATA_DIMS(NUM, ...)        \
-  template <typename T>                 \
-  struct ViewDataTypeRepr<T, NUM - 1> { \
-    using type = __VA_ARGS__;           \
-  };
-
-#define VIEW_DATA_TYPE(TYPE, ENUM_ID, ...)                        \
-  template <>                                                     \
-  struct ViewDataTypeSpecialization<ENUM_ID> {                    \
-    using type = TYPE;                                            \
-    static std::string label() { GET_FIRST_STRING(__VA_ARGS__); } \
-    static const auto& labels() { GET_STRING_SET(__VA_ARGS__); }  \
-  };
-
-#define EXECUTION_SPACE_IDX(EXECUTION_SPACE, ENUM_ID) \
-  template <>                                         \
-  struct ExecutionSpaceIndex<EXECUTION_SPACE> {       \
-    static constexpr auto value = ENUM_ID;            \
-  };
-
-#define MEMORY_SPACE_IDX(SPACE, ENUM_ID)   \
-  template <>                              \
-  struct MemorySpaceIndex<SPACE> {         \
-    static constexpr auto value = ENUM_ID; \
-  };
-
-#define MEMORY_LAYOUT_IDX(LAYOUT, ENUM_ID) \
-  template <>                              \
-  struct MemoryLayoutIndex<LAYOUT> {       \
-    static constexpr auto value = ENUM_ID; \
-  };
-
-#define MEMORY_TRAIT_IDX(TRAIT, ENUM_ID)   \
-  template <>                              \
-  struct MemoryTraitIndex<TRAIT> {         \
-    static constexpr auto value = ENUM_ID; \
-  };
-
-#define EXECUTION_SPACE(SPACE, ENUM_ID, ...)                      \
-  template <>                                                     \
-  struct ExecutionSpaceSpecialization<ENUM_ID> {                  \
-    using type = SPACE;                                           \
-    static std::string label() { GET_FIRST_STRING(__VA_ARGS__); } \
-    static const auto& labels() { GET_STRING_SET(__VA_ARGS__); }  \
-  };                                                              \
-  EXECUTION_SPACE_IDX(SPACE, ENUM_ID)
-
-#define MEMORY_SPACE(SPACE, ENUM_ID, ...)                         \
-  template <>                                                     \
-  struct MemorySpaceSpecialization<ENUM_ID> {                     \
-    using type = SPACE;                                           \
-    static std::string label() { GET_FIRST_STRING(__VA_ARGS__); } \
-    static const auto& labels() { GET_STRING_SET(__VA_ARGS__); }  \
-  };                                                              \
-  MEMORY_SPACE_IDX(SPACE, ENUM_ID)
-
-#define MEMORY_LAYOUT(LAYOUT, ENUM_ID, LABEL)                 \
-  template <>                                                 \
-  struct MemoryLayoutSpecialization<ENUM_ID> {                \
-    using type = LAYOUT;                                      \
-    static std::string label() { return LABEL; }              \
-    static std::set<std::string> labels() { return {LABEL}; } \
-  };                                                          \
-  MEMORY_LAYOUT_IDX(LAYOUT, ENUM_ID)
-
-#define MEMORY_TRAIT(TRAIT, ENUM_ID, LABEL)                   \
-  template <>                                                 \
-  struct MemoryTraitSpecialization<ENUM_ID> {                 \
-    using type = TRAIT;                                       \
-    static std::string label() { return LABEL; }              \
-    static std::set<std::string> labels() { return {LABEL}; } \
-  };                                                          \
-  MEMORY_TRAIT_IDX(TRAIT, ENUM_ID)

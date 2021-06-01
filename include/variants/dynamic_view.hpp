@@ -43,6 +43,7 @@
 */
 
 #include "common.hpp"
+#include "concepts.hpp"
 #include "traits.hpp"
 #include "views.hpp"
 
@@ -50,6 +51,8 @@
 
 namespace Space {
 
+// this generates a binding for a dynamic rank view (i.e.
+// Kokkos::DynRankView<...>)
 template <size_t DataIdx, size_t SpaceIdx, size_t LayoutIdx, size_t TraitIdx>
 void generate_dynamic_view_variant(
     py::module &,
@@ -70,26 +73,31 @@ void generate_dynamic_view_variant(
   using Sp              = typename space_spec_t::type;
   using Lp              = typename layout_spec_t::type;
   using Mp              = typename trait_spec_t::type;
-  using View_t = typename view_type<Kokkos::DynRankView<Vp>, Lp, Sp, Mp>::type;
+  using ViewT           = view_type_t<Kokkos::DynRankView<Vp>, Lp, Sp, Mp>;
+  using UniformT        = uniform_view_type_t<ViewT>;
 
-  constexpr bool explicit_layout = !is_implicit<Lp>::value;
-  constexpr bool explicit_trait  = !is_implicit<Mp>::value;
+  constexpr bool explicit_trait = !is_implicit<Mp>::value;
 
-  auto name = construct_name(
-      "_", "KokkosDynRankView", data_spec_t::label(), space_spec_t::label(),
-      (explicit_layout) ? layout_spec_t::label() : std::string{},
-      (explicit_trait) ? trait_spec_t::label() : std::string{});
-  auto desc =
-      std::string{"Kokkos::DynRankView<"} +
-      construct_name(", ", demangle<Vp>(),
-                     (explicit_layout) ? demangle<Lp>() : std::string{},
-                     demangle<Sp>(),
-                     (explicit_trait) ? demangle<Mp>() : std::string{}) +
-      ">";
+  auto name = join("_", "KokkosDynRankView", data_spec_t::label(),
+                   space_spec_t::label(), layout_spec_t::label(),
+                   (explicit_trait) ? trait_spec_t::label() : std::string{});
 
+  // the Common::generate_view adds 1 so subtract one in order
+  // generate initializers and accessors for all rank dimensions
   constexpr auto nIdx = DimIdx - 1;
-  Common::generate_view<View_t, Sp, Tp, Lp, Mp, nIdx>(
-      _mod, name, desc, DimIdx, std::make_index_sequence<nIdx>{});
+  Common::generate_view<UniformT, Sp, Tp, Lp, Mp, nIdx>(
+      _mod, name, demangle<UniformT>(), DimIdx,
+      std::make_index_sequence<nIdx>{});
+
+#if !defined(ENABLE_LAYOUTS)
+  using MirrorT = uniform_view_type_t<typename UniformT::HostMirror>;
+
+  IF_CONSTEXPR(!std::is_same<UniformT, MirrorT>::value) {
+    Common::generate_view<MirrorT, Sp, Tp, Lp, Mp, nIdx>(
+        _mod, name + "_mirror", demangle<MirrorT>(), DimIdx,
+        std::make_index_sequence<nIdx>{});
+  }
+#endif
 }
 }  // namespace Space
 

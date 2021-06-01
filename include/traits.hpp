@@ -44,12 +44,14 @@
 
 #pragma once
 
-#include "Kokkos_Core_fwd.hpp"
-#include "Kokkos_Layout.hpp"
-#include "Kokkos_MemoryTraits.hpp"
-
 #include "common.hpp"
+#include "concepts.hpp"
+#include "defines.hpp"
 #include "fwd.hpp"
+
+#include <Kokkos_Core_fwd.hpp>
+#include <Kokkos_Layout.hpp>
+#include <Kokkos_MemoryTraits.hpp>
 
 //--------------------------------------------------------------------------------------//
 
@@ -97,8 +99,6 @@ MEMORY_LAYOUT(Kokkos::LayoutStride, Stride, "LayoutStride")
 DISABLE_TYPE(Kokkos::LayoutLeft)
 #endif
 DISABLE_TYPE(Kokkos::LayoutStride)
-
-ENABLE_IMPLICIT(Kokkos::LayoutRight)
 
 //--------------------------------------------------------------------------------------//
 // <data-type> <enum> <string identifiers>
