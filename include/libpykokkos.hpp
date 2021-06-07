@@ -46,6 +46,7 @@
 
 #include "common.hpp"
 
+// cast.h MUST be included before pybind11 or else NVCC will fail to compile
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
 

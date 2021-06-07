@@ -194,13 +194,13 @@ namespace Impl {
 template <typename ViewT, typename Up, size_t... Idx>
 auto get_init(const std::string &lbl, const Up &arr,
               std::index_sequence<Idx...>) {
-  return new ViewT{lbl, static_cast<const size_t>(std::get<Idx>(arr))...};
+  return new ViewT{lbl, static_cast<size_t>(std::get<Idx>(arr))...};
 }
 //
 template <typename ViewT, typename Up, typename Tp, size_t... Idx>
 auto get_unmanaged_init(const Up &arr, const Tp data,
                         std::index_sequence<Idx...>) {
-  return new ViewT{data, static_cast<const size_t>(std::get<Idx>(arr))...};
+  return new ViewT{data, static_cast<size_t>(std::get<Idx>(arr))...};
 }
 //
 }  // namespace Impl
