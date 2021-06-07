@@ -59,7 +59,7 @@ pipeline {
                         sh 'cmake --build build --target analyze-pykokkos-base-compile-time'
                         sh 'cmake --build build --target install --parallel ${BUILD_JOBS}'
                         sh 'cd build'
-                        sh 'PYTHONPATH=${PWD} python3 $(which pytest) .'
+                        sh 'PYTHONPATH=${PWD} python3 $(which pytest) -s .'
                         sh 'PYTHONPATH=${PWD} python3 ./ex-numpy.py'
                         sh 'cd /tmp && python3 -c "import kokkos; print(kokkos.__file__)"'
                     }
@@ -117,7 +117,7 @@ pipeline {
                         sh 'cmake --build build --target install --parallel ${BUILD_JOBS}'
                         sh 'cd build'
                         sh 'cat nvcc-compile-time.csv'
-                        sh 'PYTHONPATH=${PWD} python3 $(which pytest) .'
+                        sh 'PYTHONPATH=${PWD} python3 $(which pytest) -s .'
                         sh 'PYTHONPATH=${PWD} python3 ./ex-numpy.py'
                         sh 'cd /tmp && python3 -c "import kokkos; print(kokkos.__file__)"'
                     }
