@@ -116,6 +116,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
+            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+                continue
+
             self._print_info(_data)
 
             _data[0][_idx] = 1
@@ -139,6 +142,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             _kwargs = itr[3]
 
             _data = conf.generate_variant(_shape, **_kwargs)
+
+            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+                continue
 
             self._print_info(_data)
 
@@ -165,6 +171,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
+            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+                continue
+
             self._print_info(_data)
 
             _data[0][_idx] = 10
@@ -189,6 +198,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             _kwargs = itr[3]
 
             _data = conf.generate_variant(_shape, **_kwargs)
+
+            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+                continue
 
             self._print_info(_data)
 
@@ -217,6 +229,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
                 continue
 
             _data = conf.generate_variant(_shape, **_kwargs)
+
+            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+                continue
 
             self._print_info(_data)
 
@@ -252,6 +267,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             _kwargs = itr[3]
 
             _data = conf.generate_variant(_shape, **_kwargs)
+
+            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+                continue
 
             self._print_info(_data)
 
@@ -291,6 +309,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             _data = conf.generate_variant(_shape, **_kwargs)
 
             if _kwargs["trait"] in (kokkos.Unmanaged, None):
+                continue
+
+            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
                 continue
 
             self._print_info(_data)
