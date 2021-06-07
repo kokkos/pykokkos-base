@@ -1,18 +1,24 @@
-cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
 
-project(Kokkos-Python-Example LANGUAGES C CXX)
+PROJECT(Kokkos-Python-Example LANGUAGES C CXX)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+SET(CMAKE_INCLUDE_CURRENT_DIR      ON)
+SET(CMAKE_UNITY_BUILD              OFF)
 
-add_library(user SHARED user.cpp)
-target_link_libraries(user PUBLIC Kokkos::kokkos)
+ADD_LIBRARY(user SHARED user.cpp)
+TARGET_LINK_LIBRARIES(user PUBLIC Kokkos::kokkos)
+
+IF(TARGET libpykokkos-build-options)
+    GET_TARGET_PROPERTY(EXTRA_FLAGS libpykokkos-build-options INTERFACE_COMPILE_OPTIONS)
+    TARGET_COMPILE_OPTIONS(user PUBLIC ${EXTRA_FLAGS})
+endif()
 
 pybind11_add_module(ex_generate
     ${PROJECT_SOURCE_DIR}/ex-generate.cpp)
 
-target_link_libraries(ex_generate PRIVATE user)
-# target_compile_options(ex_generate PRIVATE -fvisibility=default)
-configure_file(${PROJECT_SOURCE_DIR}/ex-numpy.py
+TARGET_LINK_LIBRARIES(ex_generate PRIVATE user)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/ex-numpy.py
     ${CMAKE_BINARY_DIR}/ex-numpy.py @ONLY)

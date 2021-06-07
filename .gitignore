@@ -56,7 +56,3 @@ timing_report*
 
 # stashed source tree
 /.stash
-
-# generated workaround
-/include/KokkosExp_Interop.hpp
-/examples/KokkosExp_Interop.hpp
