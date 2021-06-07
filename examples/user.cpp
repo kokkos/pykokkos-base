@@ -36,13 +36,17 @@ view_type generate_view(size_t n) {
     std::cerr << "[user-bindings]> Initializing Kokkos..." << std::endl;
     Kokkos::initialize();
   }
+  std::cerr << "[user-bindings]> Generating View..." << std::flush;
   view_type _v("user_view", n, 2);
   Kokkos::RangePolicy<exec_space, int> range(0, n);
   Kokkos::parallel_for("generate_view", range, InitView{_v});
+  std::cerr << " Done." << std::endl;
   return _v;
 }
 
 void modify_view(view_type _v) {
+  std::cerr << "[user-bindings]> Modifying View..." << std::flush;
   Kokkos::RangePolicy<exec_space, int> range(0, _v.extent(1));
   Kokkos::parallel_for("modify_view", range, ModifyView{_v});
+  std::cerr << " Done." << std::endl;
 }

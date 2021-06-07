@@ -88,11 +88,23 @@ def from_numpy(args):
 
 
 if __name__ == "__main__":
-    kokkos.initialize()
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--ndim", default=10, help="X dimension", type=int)
-    args, argv = parser.parse_known_args()
-    user_bindings(args)
-    to_numpy(args)
-    from_numpy(args)
-    kokkos.finalize()
+    try:
+        kokkos.initialize()
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-n", "--ndim", default=10, help="X dimension", type=int)
+        args, argv = parser.parse_known_args()
+        print("Executing user bindings...")
+        user_bindings(args)
+        print("Executing to numpy...")
+        to_numpy(args)
+        print("Executing from numpy...")
+        from_numpy(args)
+        kokkos.finalize()
+    except Exception as e:
+        import sys
+        import traceback
+
+        print(f"{e}")
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback)
+        sys.exit(1)

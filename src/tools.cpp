@@ -406,45 +406,45 @@ void generate_tools(py::module& kokkos) {
   //--------------------------------------------------------------------//
 
 #if defined(__NVCC__)
-#define TOOL_SET_CALLBACK(NAME, FUNC, REF)                         \
-  _tools.def(                                                      \
-      #NAME,                                                       \
-      [](py::object _func) {                                       \
-        if (!callbacks) return;                                    \
-        pyfunction_wrapper(callbacks->REF, _func);                 \
-        if (_func.is_none()) {                                     \
-          Kokkos::Tools::Experimental::NAME(nullptr);              \
-        } else {                                                   \
-          Kokkos::Tools::Experimental::NAME(pykokkos_tools::FUNC); \
-        }                                                          \
-      },                                                           \
-      "");
+#  define TOOL_SET_CALLBACK(NAME, FUNC, REF)                         \
+    _tools.def(                                                      \
+        #NAME,                                                       \
+        [](py::object _func) {                                       \
+          if (!callbacks) return;                                    \
+          pyfunction_wrapper(callbacks->REF, _func);                 \
+          if (_func.is_none()) {                                     \
+            Kokkos::Tools::Experimental::NAME(nullptr);              \
+          } else {                                                   \
+            Kokkos::Tools::Experimental::NAME(pykokkos_tools::FUNC); \
+          }                                                          \
+        },                                                           \
+        "");
 #else
-#define TOOL_SET_CALLBACK(NAME, FUNC, REF)                         \
-  _tools.def(                                                      \
-      #NAME,                                                       \
-      [](py::object _func) {                                       \
-        if (!callbacks) return;                                    \
-        pyfunction_wrapper(callbacks->REF, _func);                 \
-        if (_func.is_none()) {                                     \
-          Kokkos::Tools::Experimental::NAME(nullptr);              \
-        } else {                                                   \
-          Kokkos::Tools::Experimental::NAME(pykokkos_tools::FUNC); \
-        }                                                          \
-      },                                                           \
-      "");                                                         \
-  _tools.def(                                                      \
-      #NAME,                                                       \
-      [](decltype(callbacks->REF) _func) {                         \
-        if (!callbacks) return;                                    \
-        cppfunction_wrapper(callbacks->REF, _func);                \
-        if (!_func) {                                              \
-          Kokkos::Tools::Experimental::NAME(nullptr);              \
-        } else {                                                   \
-          Kokkos::Tools::Experimental::NAME(pykokkos_tools::FUNC); \
-        }                                                          \
-      },                                                           \
-      "");
+#  define TOOL_SET_CALLBACK(NAME, FUNC, REF)                         \
+    _tools.def(                                                      \
+        #NAME,                                                       \
+        [](py::object _func) {                                       \
+          if (!callbacks) return;                                    \
+          pyfunction_wrapper(callbacks->REF, _func);                 \
+          if (_func.is_none()) {                                     \
+            Kokkos::Tools::Experimental::NAME(nullptr);              \
+          } else {                                                   \
+            Kokkos::Tools::Experimental::NAME(pykokkos_tools::FUNC); \
+          }                                                          \
+        },                                                           \
+        "");                                                         \
+    _tools.def(                                                      \
+        #NAME,                                                       \
+        [](decltype(callbacks->REF) _func) {                         \
+          if (!callbacks) return;                                    \
+          cppfunction_wrapper(callbacks->REF, _func);                \
+          if (!_func) {                                              \
+            Kokkos::Tools::Experimental::NAME(nullptr);              \
+          } else {                                                   \
+            Kokkos::Tools::Experimental::NAME(pykokkos_tools::FUNC); \
+          }                                                          \
+        },                                                           \
+        "");
 #endif
 
   TOOL_SET_CALLBACK(set_init_callback, init_library, init)
