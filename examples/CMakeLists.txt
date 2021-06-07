@@ -16,7 +16,7 @@ IF(TARGET libpykokkos-build-options)
     TARGET_COMPILE_OPTIONS(user PUBLIC ${EXTRA_FLAGS})
 endif()
 
-pybind11_add_module(ex_generate
+pybind11_add_module(ex_generate NO_EXTRAS
     ${PROJECT_SOURCE_DIR}/ex-generate.cpp)
 
 TARGET_LINK_LIBRARIES(ex_generate PRIVATE user)
