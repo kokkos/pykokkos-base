@@ -25,7 +25,7 @@ def print_data(label, name, space, data):
             label, type(data).__name__, data.ndim, data.shape
         )
     )
-    if space == kokkos.CudaSpace:
+    if space in (kokkos.CudaSpace, kokkos.HIPSpace):
         return
     # print the data
     if data.ndim == 1:
