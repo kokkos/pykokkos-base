@@ -122,6 +122,7 @@ pipeline {
                         sh 'PYTHONPATH=${PWD} python3 ./ex-numpy.py'
                         sh 'cd /tmp && python3 -c "import kokkos; print(kokkos.__file__)"'
                     }
+                }
             }
         }
     }
