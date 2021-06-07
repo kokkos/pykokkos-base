@@ -122,7 +122,6 @@ IF(_INTERNAL_KOKKOS)
         ADD_OPTION(Kokkos_ENABLE_CUDA "Build Kokkos submodule with CUDA support" ON)
         ADD_OPTION(Kokkos_ENABLE_CUDA_UVM "Build Kokkos submodule with CUDA UVM support" ON)
         ADD_OPTION(Kokkos_ENABLE_CUDA_LAMBDA "Build Kokkos submodule with CUDA lambda support" ON)
-        ADD_OPTION(Kokkos_ENABLE_CUDA_CONSTEXPR "Build Kokkos submodule with CUDA constexpr support" ON)
     ENDIF()
 
     ADD_SUBDIRECTORY(external)

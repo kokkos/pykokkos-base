@@ -99,7 +99,6 @@ Here are the steps when Kokkos is added as a submodule:
             - `Kokkos_ENABLE_CUDA=ON`
             - `Kokkos_ENABLE_CUDA_UVM=ON`
             - `Kokkos_ENABLE_CUDA_LAMBDA=ON`
-            - `Kokkos_ENABLE_CUDA_CONSTEXPR=ON`
 
 ### Configuring Options via CMake
 

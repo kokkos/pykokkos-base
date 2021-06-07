@@ -93,7 +93,6 @@ pipeline {
                                 -DKokkos_ENABLE_CUDA=ON \
                                 -DKokkos_ENABLE_CUDA_UVM=ON \
                                 -DKokkos_ENABLE_CUDA_LAMBDA=ON \
-                                -DKokkos_ENABLE_CUDA_CONSTEXPR=ON \
                                 -DBUILD_SHARED_LIBS=ON \
                                 /tmp/kokkos-source'''
                         sh 'cmake --build /tmp/kokkos-build --target all --parallel ${BUILD_JOBS}'
