@@ -51,6 +51,7 @@ jobs:
         cmake -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -DENABLE_LAYOUTS=OFF
+          -DENABLE_MEMORY_TRAITS=OFF
           -DENABLE_EXAMPLES=ON
           -DENABLE_WERROR=ON
           -DPython3_EXECUTABLE=$(which python)

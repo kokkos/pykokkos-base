@@ -335,7 +335,7 @@ void generate_view(py::module &_mod, const std::string &_name,
       [](ViewT &_v) {
         auto _m           = Kokkos::create_mirror(_v);
         using mirror_type = typename ViewT::HostMirror;
-        using cast_type   = uniform_view_type_t<mirror_type>;
+        using cast_type   = kokkos_python_view_type_t<mirror_type>;
         return static_cast<cast_type>(_m);
       },
       "Create a host mirror (always creates a new view)");
@@ -345,7 +345,7 @@ void generate_view(py::module &_mod, const std::string &_name,
       [](ViewT &_v) {
         auto _m           = Kokkos::create_mirror_view(_v);
         using mirror_type = typename ViewT::HostMirror;
-        using cast_type   = uniform_view_type_t<mirror_type>;
+        using cast_type   = kokkos_python_view_type_t<mirror_type>;
         return static_cast<cast_type>(_m);
       },
       "Create a host mirror view (only creates new view if this is not on "
@@ -364,6 +364,22 @@ void generate_view(py::module &_mod, const std::string &_name,
         return get_extents(m, std::make_index_sequence<DimIdx + 1>{});
       },
       "Get the shape of the array (extents)");
+
+  _view.def_property_readonly(
+      "ndim",
+      [](ViewT &m) {
+        auto &&_extents =
+            get_extents(m, std::make_index_sequence<DimIdx + 1>{});
+        if (Kokkos::is_dyn_rank_view<ViewT>::value) {
+          size_t _ndim = 0;
+          for (auto &&itr : _extents) {
+            if (itr > 1) ++_ndim;
+          }
+          return _ndim;
+        }
+        return _extents.size();
+      },
+      "Get the number of allocated ranks of the array");
 
   _view.def_property_readonly(
       "space", [](ViewT &) { return MemorySpaceIndex<Sp>::value; },

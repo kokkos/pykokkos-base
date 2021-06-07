@@ -20,7 +20,7 @@ exclude = '''
   | buck-out
   | build
   | dist
-  | pybind11
+  | external
   | scripts
   | _skbuild
   | __pycache__

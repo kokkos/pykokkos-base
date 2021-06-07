@@ -53,7 +53,7 @@ def add_arg_bool_option(lc_name, disp_name, default=None):
 # add options
 add_arg_bool_option("all", "ENABLE_ALL")
 add_arg_bool_option("experimental", "ENABLE_EXPERIMENTAL")
-add_arg_bool_option("layouts", "ENABLE_LAYOUTS")
+add_arg_bool_option("layouts", "ENABLE_LAYOUTS", default=True)
 add_arg_bool_option("memory-traits", "ENABLE_MEMORY_TRAITS")
 add_arg_bool_option("thin-lto", "ENABLE_THIN_LTO")
 add_arg_bool_option("werror", "ENABLE_WERROR")

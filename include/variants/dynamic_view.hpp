@@ -63,18 +63,18 @@ template <size_t DataIdx, size_t SpaceIdx, size_t LayoutIdx, size_t TraitIdx>
 void generate_dynamic_view_variant(
     py::module &_mod,
     std::enable_if_t<is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
-  constexpr auto DimIdx = ViewDataMaxDimensions;
-  using data_spec_t     = ViewDataTypeSpecialization<DataIdx>;
-  using space_spec_t    = MemorySpaceSpecialization<SpaceIdx>;
-  using layout_spec_t   = MemoryLayoutSpecialization<LayoutIdx>;
-  using trait_spec_t    = MemoryTraitSpecialization<TraitIdx>;
-  using Tp              = typename data_spec_t::type;
-  using Vp              = Tp;
-  using Sp              = typename space_spec_t::type;
-  using Lp              = typename layout_spec_t::type;
-  using Mp              = typename trait_spec_t::type;
-  using ViewT           = view_type_t<Kokkos::DynRankView<Vp>, Lp, Sp, Mp>;
-  using UniformT        = uniform_view_type_t<ViewT>;
+  constexpr size_t DimIdx = 7;
+  using data_spec_t       = ViewDataTypeSpecialization<DataIdx>;
+  using space_spec_t      = MemorySpaceSpecialization<SpaceIdx>;
+  using layout_spec_t     = MemoryLayoutSpecialization<LayoutIdx>;
+  using trait_spec_t      = MemoryTraitSpecialization<TraitIdx>;
+  using Tp                = typename data_spec_t::type;
+  using Vp                = Tp;
+  using Sp                = typename space_spec_t::type;
+  using Lp                = typename layout_spec_t::type;
+  using Mp                = typename trait_spec_t::type;
+  using ViewT             = view_type_t<Kokkos::DynRankView<Vp>, Lp, Sp, Mp>;
+  using UniformT          = kokkos_python_view_type_t<ViewT>;
 
   constexpr bool explicit_trait = !is_implicit<Mp>::value;
 
@@ -90,7 +90,7 @@ void generate_dynamic_view_variant(
       std::make_index_sequence<nIdx>{});
 
 #if !defined(ENABLE_LAYOUTS)
-  using MirrorT = uniform_view_type_t<typename UniformT::HostMirror>;
+  using MirrorT = kokkos_python_view_type_t<typename UniformT::HostMirror>;
 
   IF_CONSTEXPR(!std::is_same<UniformT, MirrorT>::value) {
     Common::generate_view<MirrorT, Sp, Tp, Lp, Mp, nIdx>(

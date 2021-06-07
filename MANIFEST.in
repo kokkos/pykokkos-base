@@ -19,7 +19,6 @@ recursive-include examples *
 recursive-include external *
 recursive-include include *
 recursive-include src *
-recursive-include pybind11 *
 recursive-include tests *
 recursive-include scripts *
 recursive-include .requirements *

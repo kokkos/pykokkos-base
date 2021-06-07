@@ -11,22 +11,17 @@ ELSE()
     SET(BUILD_EXAMPLES ${ENABLE_EXAMPLES})
 ENDIF()
 
-# default to ENABLE_ALL=ON
 SET(_ENABLE_ALL_DEFAULT ON)
 SET(_ENABLE_MEM_DEFAULT ON)
 SET(_ENABLE_LAY_DEFAULT ON)
 # unless ENABLE_LAYOUTS or ENABLE_MEMORY_TRAITS were set
-IF(DEFINED ENABLE_LAYOUTS OR DEFINED ENABLE_MEMORY_TRAITS)
+# or, NVCC is really, really slow so never default memory traits to ON
+IF(DEFINED ENABLE_LAYOUTS OR DEFINED ENABLE_MEMORY_TRAITS OR
+    ("CUDA" IN_LIST Kokkos_DEVICES AND NOT DEFINED ENABLE_ALL AND NOT ENABLE_ALL))
     SET(_ENABLE_ALL_DEFAULT OFF)
     # one or both of these will be ignored bc of existing cache values
     SET(_ENABLE_MEM_DEFAULT OFF)
-    SET(_ENABLE_LAY_DEFAULT OFF)
-ENDIF()
-# NVCC is really, really slow so never default to ON here
-IF("CUDA" IN_LIST Kokkos_DEVICES)
-    SET(_ENABLE_ALL_DEFAULT OFF)
-    SET(_ENABLE_MEM_DEFAULT OFF)
-    SET(_ENABLE_LAY_DEFAULT OFF)
+    SET(_ENABLE_LAY_DEFAULT ON)
 ENDIF()
 SET(_VIEW_RANK_MSG "Set this value to the max number of ranks needed for Kokkos::View<...>. E.g. value of 4 means Kokkos::View<int*****, Kokkos::HostSpace> cannot be returned to python")
 
@@ -49,9 +44,9 @@ ADD_OPTION(ENABLE_THIN_LTO "Pass THIN_LTO to pybind11_add_module instead of NO_E
 ADD_OPTION(ENABLE_ALL "Enable all build configurations (layouts, memory-traits, etc.)"
     ${_ENABLE_ALL_DEFAULT})
 ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)"
-    ${_ENABLE_MEM_DEFAULT})
-ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)"
     ${_ENABLE_LAY_DEFAULT})
+ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)"
+    ${_ENABLE_MEM_DEFAULT})
 ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ON)
 
 SET(CMAKE_UNITY_BUILD_BATCH_SIZE 5 CACHE STRING "Unity build batch size")
