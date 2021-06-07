@@ -54,3 +54,9 @@ RUN LLVM_VERSION=887c7660bdf3f300bd1997dcfd7ace91787c0584 && \
     echo "${LLVM_DIR}/lib" > /etc/ld.so.conf.d/llvm.conf && ldconfig && \
     rm -rf ${SCRATCH_DIR}
 ENV PATH=${LLVM_DIR}/bin:$PATH
+
+RUN git clone https://github.com/jrmadsen/compile-time-perf.git /tmp/ctp-source && \
+    cmake -B /tmp/ctp-build /tmp/ctp-source && \
+    cmake --build /tmp/ctp-build --target all && \
+    cmake --build /tmp/ctp-build --target install && \
+    rm -rf /tmp/ctp-source /tmp/ctp-build
