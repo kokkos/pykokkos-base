@@ -25,8 +25,15 @@ def print_data(label, name, space, data):
             label, type(data).__name__, data.ndim, data.shape
         )
     )
-    if space in (kokkos.CudaSpace, kokkos.HIPSpace):
+
+    if kokkos.get_host_accessible(space) is False:
+        print(
+            "Memory space {} is not accessible from the host".format(
+                type(space).__name__
+            )
+        )
         return
+
     # print the data
     if data.ndim == 1:
         for i in range(data.shape[0]):

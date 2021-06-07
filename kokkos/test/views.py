@@ -116,7 +116,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+            if kokkos.get_host_accessible(_kwargs["space"]) is False:
                 continue
 
             self._print_info(_data)
@@ -143,7 +143,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+            if kokkos.get_host_accessible(_kwargs["space"]) is False:
                 continue
 
             self._print_info(_data)
@@ -171,7 +171,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+            if kokkos.get_host_accessible(_kwargs["space"]) is False:
                 continue
 
             self._print_info(_data)
@@ -199,7 +199,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+            if kokkos.get_host_accessible(_kwargs["space"]) is False:
                 continue
 
             self._print_info(_data)
@@ -230,7 +230,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+            if kokkos.get_host_accessible(_kwargs["space"]) is False:
                 continue
 
             self._print_info(_data)
@@ -268,7 +268,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+            if kokkos.get_host_accessible(_kwargs["space"]) is False:
                 continue
 
             self._print_info(_data)
@@ -311,7 +311,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             if _kwargs["trait"] in (kokkos.Unmanaged, None):
                 continue
 
-            if _kwargs["space"] in (kokkos.CudaSpace, kokkos.HIPSpace):
+            if kokkos.get_host_accessible(_kwargs["space"]) is False:
                 continue
 
             self._print_info(_data)

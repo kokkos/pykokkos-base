@@ -173,7 +173,8 @@ try:
         "get_layout",
         "get_memory_space",
         "get_memory_trait",
-        "get_device_available",  # query build support
+        "get_host_accessible",  # query build support
+        "get_device_available",
         "get_layout_available",
         "get_memory_space_available",
         "get_memory_trait_available",
