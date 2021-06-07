@@ -38,6 +38,7 @@ pipeline {
                                 -DCMAKE_CXX_STANDARD=17 \
                                 -DKokkos_ENABLE_HIP=ON \
                                 -DKokkos_ENABLE_OPENMP=ON \
+                                -DBUILD_SHARED_LIBS=ON \
                                 /tmp/kokkos-source'''
                         sh 'cmake --build /tmp/kokkos-build --target all --parallel ${BUILD_JOBS}'
                         sh 'cmake --build /tmp/kokkos-build --target install --parallel ${BUILD_JOBS}'
