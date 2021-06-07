@@ -38,7 +38,7 @@ jobs:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
-          -DKokkos_ENABLE_OPENMP=ON
+          -DKokkos_ENABLE_OPENMP=OFF
           -DBUILD_SHARED_LIBS=ON
           /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&

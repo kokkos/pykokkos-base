@@ -1,0 +1,20 @@
+ARG BASE=rocm/dev-ubuntu-20.04:4.2
+FROM $BASE
+
+ARG ADDITIONAL_PACKAGES
+
+RUN apt-get update && apt-get install -y \
+    bc \
+    git \
+    wget \
+    ccache \
+    python3 \
+    python3-pip \
+    $ADDITIONAL_PACKAGES \
+    && \
+    apt-get --purge autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    python3 -m pip install 'cmake==3.18.4'
+
+ENV PATH=/opt/rocm/bin:$PATH
