@@ -8,7 +8,7 @@ INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 # if first time cmake is run and no external/internal preference is specified,
 # try to find already installed kokkos
 IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS)
-    FIND_PACKAGE(Kokkos)
+    FIND_PACKAGE(Kokkos COMPONENTS launch_compiler)
     # set the default cache value
     IF(Kokkos_FOUND)
         SET(_INTERNAL_KOKKOS OFF)
@@ -22,8 +22,7 @@ ENDIF()
 
 # force an error
 IF(NOT _INTERNAL_KOKKOS)
-    UNSET(FIND_PACKAGE_MESSAGE_DETAILS_Kokkos)
-    FIND_PACKAGE(Kokkos REQUIRED)
+    FIND_PACKAGE(Kokkos REQUIRED COMPONENTS launch_compiler)
     IF(NOT Kokkos_INCLUDE_DIR)
         GET_TARGET_PROPERTY(Kokkos_INCLUDE_DIR Kokkos::kokkoscore INTERFACE_INCLUDE_DIRECTORIES)
     ENDIF()

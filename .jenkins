@@ -48,7 +48,6 @@ pipeline {
                         sh '''cmake -B build \
                                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
                                 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-                                -DCMAKE_CXX_COMPILER=hipcc \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
                                 -DENABLE_EXAMPLES=ON \
