@@ -51,8 +51,8 @@
 #  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+#include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
-//
 #include <pybind11/stl.h>
 
 #if defined(__GNUC__)

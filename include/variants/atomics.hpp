@@ -44,7 +44,9 @@
 
 #pragma once
 
+#include <pybind11/cast.h>
 #include <pybind11/operators.h>
+#include <pybind11/pybind11.h>
 
 #include <type_traits>
 

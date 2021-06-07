@@ -47,6 +47,8 @@
 #include "fwd.hpp"
 #include "traits.hpp"
 
+#include <pybind11/cast.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 
 #include <cassert>
