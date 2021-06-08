@@ -41,7 +41,6 @@
 #
 
 from __future__ import absolute_import
-from kokkos.utility import create_mirror_view
 
 __author__ = "Jonathan R. Madsen"
 __copyright__ = (
