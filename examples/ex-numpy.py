@@ -53,7 +53,7 @@ def user_bindings(args):
     print_data("Modify View", "view", view.create_mirror_view())
 
     # wrap the buffer protocal as numpy array without copying the data
-    arr = np.array(view, copy=False)
+    arr = np.array(view.create_mirror_view(), copy=False)
     print_data("Numpy Array", "arr", arr)
 
 
@@ -63,7 +63,7 @@ def to_numpy(args):
         "python_allocated_view",
         [args.ndim],
         dtype=kokkos.double,
-        space=kokkos.HostSpace,
+        space=kokkos.DefaultHostMemorySpace,
     )
 
     for i in range(view.shape[0]):
@@ -92,12 +92,12 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser()
         parser.add_argument("-n", "--ndim", default=10, help="X dimension", type=int)
         args, argv = parser.parse_known_args()
-        print("Executing user bindings...")
-        user_bindings(args)
         print("Executing to numpy...")
         to_numpy(args)
         print("Executing from numpy...")
         from_numpy(args)
+        print("Executing user bindings...")
+        user_bindings(args)
         kokkos.finalize()
     except Exception as e:
         import sys

@@ -116,7 +116,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_access"""
 
         print("")
-        for itr in conf.get_variants():
+        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -145,7 +145,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_iadd"""
 
         print("")
-        for itr in conf.get_variants():
+        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -175,7 +175,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_isub"""
 
         print("")
-        for itr in conf.get_variants():
+        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -205,7 +205,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_imul"""
 
         print("")
-        for itr in conf.get_variants():
+        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -235,14 +235,11 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
     def test_view_create_mirror(self):
         """view_create_mirror"""
         print("")
-        for itr in conf.get_variants():
+        for itr in conf.get_variants(exclude=[kokkos.Atomic, kokkos.Unmanaged]):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
             _kwargs = itr[3]
-
-            if _kwargs["trait"] in (kokkos.Unmanaged, None):
-                continue
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
@@ -289,7 +286,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_create_mirror_view"""
 
         print("")
-        for itr in conf.get_variants():
+        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -347,7 +344,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
     def test_view_deep_copy(self):
         """view_deep_copy"""
         print("")
-        for itr in conf.get_variants():
+        for itr in conf.get_variants(exclude=[kokkos.Atomic, kokkos.Unmanaged]):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -356,9 +353,6 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
                 continue
 
             _data = conf.generate_variant(_shape, **_kwargs)
-
-            if _kwargs["trait"] in (kokkos.Unmanaged, None):
-                continue
 
             _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
 

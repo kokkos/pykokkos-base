@@ -134,7 +134,17 @@ void generate_enumeration(py::module &kokkos) {
   generate_enumeration<ExecutionSpaceSpecialization>(
       _device, std::make_index_sequence<ExecutionSpacesEnd>{});
 
-  kokkos.attr("device") = []() {
+  _device.value(
+      "DefaultExecutionSpace",
+      ExecutionSpaceIndex<
+          Kokkos::DefaultExecutionSpace>::value);
+  _device.value(
+      "DefaultHostExecutionSpace",
+      ExecutionSpaceIndex<
+          Kokkos::DefaultHostExecutionSpace>::value);
+  _device.export_values();
+
+  kokkos.attr("devices") = []() {
     return generate_enumeration_tuple<KokkosExecutionSpace>(
         std::make_index_sequence<ExecutionSpacesEnd>{});
   }();
@@ -176,6 +186,14 @@ void generate_enumeration(py::module &kokkos) {
                                          "View memory spaces");
   generate_enumeration<MemorySpaceSpecialization>(
       _memspace, std::make_index_sequence<MemorySpacesEnd>{});
+  _memspace.value(
+      "DefaultMemorySpace",
+      MemorySpaceIndex<
+          typename Kokkos::DefaultExecutionSpace::memory_space>::value);
+  _memspace.value(
+      "DefaultHostMemorySpace",
+      MemorySpaceIndex<
+          typename Kokkos::DefaultHostExecutionSpace::memory_space>::value);
   _memspace.export_values();
 
   kokkos.attr("memory_spaces") = []() {
