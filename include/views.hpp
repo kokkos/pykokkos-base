@@ -194,13 +194,13 @@ namespace Impl {
 template <typename ViewT, typename Up, size_t... Idx>
 auto get_init(const std::string &lbl, const Up &arr,
               std::index_sequence<Idx...>) {
-  return new ViewT{lbl, static_cast<const size_t>(std::get<Idx>(arr))...};
+  return new ViewT{lbl, static_cast<size_t>(std::get<Idx>(arr))...};
 }
 //
 template <typename ViewT, typename Up, typename Tp, size_t... Idx>
 auto get_unmanaged_init(const Up &arr, const Tp data,
                         std::index_sequence<Idx...>) {
-  return new ViewT{data, static_cast<const size_t>(std::get<Idx>(arr))...};
+  return new ViewT{data, static_cast<size_t>(std::get<Idx>(arr))...};
 }
 //
 }  // namespace Impl
@@ -330,26 +330,33 @@ void generate_view(py::module &_mod, const std::string &_name,
     );
   });
 
+  using mirror_type = typename ViewT::HostMirror;
+  using mirror_cast = kokkos_python_view_type_t<mirror_type>;
+
+  // if (!std::is_same<mirror_type, mirror_cast>::value) {
+  //  py::implicitly_convertible<mirror_type, mirror_cast>();
+  // }
+
   _view.def(
       "create_mirror",
-      [](ViewT &_v) {
-        auto _m           = Kokkos::create_mirror(_v);
-        using mirror_type = typename ViewT::HostMirror;
-        using cast_type   = uniform_view_type_t<mirror_type>;
-        return static_cast<cast_type>(_m);
+      [](ViewT &_v, bool _copy) {
+        auto _m = Kokkos::create_mirror(_v);
+        if (_copy) Kokkos::deep_copy(_m, _v);
+        return static_cast<mirror_cast>(_m);
       },
-      "Create a host mirror (always creates a new view)");
+      "Create a host mirror (always creates a new view)",
+      py::arg("copy") = true);
 
   _view.def(
       "create_mirror_view",
-      [](ViewT &_v) {
-        auto _m           = Kokkos::create_mirror_view(_v);
-        using mirror_type = typename ViewT::HostMirror;
-        using cast_type   = uniform_view_type_t<mirror_type>;
-        return static_cast<cast_type>(_m);
+      [](ViewT &_v, bool _copy) {
+        auto _m = Kokkos::create_mirror_view(_v);
+        if (_copy) Kokkos::deep_copy(_m, _v);
+        return static_cast<mirror_cast>(_m);
       },
       "Create a host mirror view (only creates new view if this is not on "
-      "host)");
+      "host)",
+      py::arg("copy") = true);
 
   using view_type_list_t =
       std::conditional_t<Kokkos::is_dyn_rank_view<ViewT>::value,
@@ -364,6 +371,22 @@ void generate_view(py::module &_mod, const std::string &_name,
         return get_extents(m, std::make_index_sequence<DimIdx + 1>{});
       },
       "Get the shape of the array (extents)");
+
+  _view.def_property_readonly(
+      "ndim",
+      [](ViewT &m) {
+        auto &&_extents =
+            get_extents(m, std::make_index_sequence<DimIdx + 1>{});
+        if (Kokkos::is_dyn_rank_view<ViewT>::value) {
+          size_t _ndim = 0;
+          for (auto &&itr : _extents) {
+            if (itr > 1) ++_ndim;
+          }
+          return _ndim;
+        }
+        return _extents.size();
+      },
+      "Get the number of allocated ranks of the array");
 
   _view.def_property_readonly(
       "space", [](ViewT &) { return MemorySpaceIndex<Sp>::value; },

@@ -55,6 +55,85 @@ __email__ = "jrmadsen@lbl.gov"
 __status__ = "Development"
 
 
+def convert_dtype(_dtype, _module=None):
+    """Converts kokkos data types into numpy dtype"""
+    if isinstance(_dtype, (str, int)):
+        _true_dtype = lib.get_dtype(_dtype)
+    else:
+        _true_dtype = lib.get_dtype(int(_dtype))
+    if _module is None:
+        import numpy as np
+
+        _module = np
+    return getattr(_module, _true_dtype)
+
+
+def read_dtype(_dtype):
+    """Converts generic dtype (from numpy for example) into kokkos dtype"""
+    # try calling library routine
+    if isinstance(_dtype, (str, int)):
+        try:
+            return getattr(lib, lib.get_dtype(_dtype))
+        except ValueError:
+            pass
+
+    # try numpy
+    try:
+        import numpy as np
+
+        if _dtype == np.int16:
+            return lib.int16
+        elif _dtype == np.int32:
+            return lib.int32
+        elif _dtype == np.int64:
+            return lib.int64
+        elif _dtype == np.uint16:
+            return lib.uint16
+        elif _dtype == np.uint32:
+            return lib.uint32
+        elif _dtype == np.uint64:
+            return lib.uint64
+        elif _dtype == np.float32:
+            return lib.float32
+        elif _dtype == np.float64:
+            return lib.float64
+    except ImportError:
+        pass
+
+    # just return the dtype
+    return _dtype
+
+
+def _determine_array_input(_inp, shape, label, array, dtype, layout):
+    """Determine whether first argument is shape, label, or array
+    and extract subsequent info"""
+    # support non-labeled variant
+    if isinstance(_inp, str) and label is None:
+        label = f"{_inp}"
+    elif isinstance(_inp, (list, tuple)) and shape is None:
+        shape = list(_inp)[:]
+    elif array is None:
+        array = _inp
+        try:
+            shape = array.shape
+            _order = array.order
+            if _order == "C":
+                layout = lib.LayoutRight
+            elif _order == "F":
+                layout = lib.LayoutLeft
+        except AttributeError:
+            pass
+
+    # if array has been passed in, try getting the dtype
+    if array is not None:
+        try:
+            dtype = read_dtype(array.dtype)
+        except AttributeError:
+            pass
+
+    return [shape, label, array, dtype, layout]
+
+
 def array(
     shape_label_or_array,
     shape=None,
@@ -67,22 +146,9 @@ def array(
     dynamic=False,
     order=None,
 ):
-    # support non-labeled variant
-    if isinstance(shape_label_or_array, str) and label is None:
-        label = f"{shape_label_or_array}"
-    elif isinstance(shape_label_or_array, (list, tuple)) and shape is None:
-        shape = list(shape_label_or_array)[:]
-    elif array is None:
-        array = shape_label_or_array
-        shape = array.shape
-        try:
-            _order = array.order
-            if _order == "C":
-                layout = lib.LayoutRight
-            elif _order == "F":
-                layout = lib.LayoutLeft
-        except AttributeError:
-            pass
+    [shape, label, array, dtype, layout] = _determine_array_input(
+        shape_label_or_array, shape, label, array, dtype, layout
+    )
 
     # layout was specified via numpy "order" field
     if order is not None and layout == lib.LayoutRight and isinstance(order, str):
@@ -102,6 +168,12 @@ def array(
     if dynamic:
         _dtype_str = "{}".format(_dtype)
     else:
+        if _ndim > lib.max_concrete_rank:
+            raise ValueError(
+                "pykokkos-base build only supports {} ranks. Requested {} ranks".format(
+                    lib.max_concrete_rank, _ndim
+                )
+            )
         _dtype_str = "{}{}".format(_dtype, "*" * _ndim)
 
     _name = f"{_prefix}_{_dtype}_{_space}_{_layout}"
@@ -130,27 +202,14 @@ def unmanaged_array(*_args, **_kwargs):
     return array(*_args, **_kwargs)
 
 
-def convert_dtype(_dtype, _module=None):
-    """Converts kokkos data types into numpy dtype"""
-    if isinstance(_dtype, (str, int)):
-        _true_dtype = lib.get_dtype(_dtype)
-    else:
-        _true_dtype = lib.get_dtype(int(_dtype))
-    if _module is None:
-        import numpy as np
-
-        _module = np
-    return getattr(_module, _true_dtype)
-
-
-def create_mirror(dst, src):
+def create_mirror(src, copy=False):
     """Performs Kokkos::create_mirror"""
-    return dst.create_mirror(src)
+    return src.create_mirror(copy)
 
 
-def create_mirror_view(dst, src):
+def create_mirror_view(src, copy=False):
     """Performs Kokkos::create_mirror_view"""
-    return dst.create_mirror_view(src)
+    return src.create_mirror_view(copy)
 
 
 def deep_copy(dst, src):

@@ -60,7 +60,7 @@ You can install this package via CMake or Python's `setup.py`. The important cma
 
 By default, CMake will enable the layouts and memory traits options if the Kokkos installation was not
 built with CUDA support.
-If Kokkos was built with CUDA support, these options will be disabled by default due to unreasonable
+If Kokkos was built with CUDA support, `ENABLE_MEMORY_TRAITS` will be disabled by default due to unreasonable
 compilation times (> 1 hour).
 The `ENABLE_VIEW_RANKS` option (defaults to a value of 4) is the max number of ranks for
 `Kokkos::View<...>` that can be returned to Python. For example, value of 4 means that
@@ -99,7 +99,6 @@ Here are the steps when Kokkos is added as a submodule:
             - `Kokkos_ENABLE_CUDA=ON`
             - `Kokkos_ENABLE_CUDA_UVM=ON`
             - `Kokkos_ENABLE_CUDA_LAMBDA=ON`
-            - `Kokkos_ENABLE_CUDA_CONSTEXPR=ON`
 
 ### Configuring Options via CMake
 

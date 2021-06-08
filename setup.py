@@ -13,8 +13,8 @@ if os.environ.get("CRAYPE_VERSION") is not None:
     os.environ["CRAYPE_LINK_TYPE"] = "dynamic"
 
 cmake_args = [
-    "-DPYTHON_EXECUTABLE:FILEPATH={}".format(sys.executable),
-    "-DPython3_EXECUTABLE:FILEPATH={}".format(sys.executable),
+    f"-DPYTHON_EXECUTABLE:FILEPATH={sys.executable}",
+    f"-DPython3_EXECUTABLE:FILEPATH={sys.executable}",
     "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=ON",
 ]
 
@@ -26,32 +26,31 @@ def set_cmake_bool_option(opt, enable_opt, disable_opt):
     global cmake_args
     try:
         if enable_opt:
-            cmake_args.append("-D{}:BOOL={}".format(opt, "ON"))
+            cmake_args.append(f"-D{opt}:BOOL=ON")
         if disable_opt:
-            cmake_args.append("-D{}:BOOL={}".format(opt, "OFF"))
+            cmake_args.append(f"-D{opt}:BOOL=OFF")
     except Exception as e:
-        print("Exception: {}".format(e))
+        print(f"Exception: {e}")
 
 
 def add_arg_bool_option(lc_name, disp_name, default=None):
     global parser
     # enable option
     parser.add_argument(
-        "--enable-{}".format(lc_name),
+        f"--enable-{lc_name}",
         action="store_true",
         default=default,
-        help="Explicitly enable {} build".format(disp_name),
+        help=f"Explicitly enable {disp_name} build",
     )
     # disable option
     parser.add_argument(
-        "--disable-{}".format(lc_name),
+        f"--disable-{lc_name}",
         action="store_true",
-        help="Explicitly disable {} build".format(disp_name),
+        help=f"Explicitly disable {disp_name} build",
     )
 
 
 # add options
-add_arg_bool_option("all", "ENABLE_ALL")
 add_arg_bool_option("experimental", "ENABLE_EXPERIMENTAL")
 add_arg_bool_option("layouts", "ENABLE_LAYOUTS")
 add_arg_bool_option("memory-traits", "ENABLE_MEMORY_TRAITS")
@@ -64,6 +63,13 @@ parser.add_argument(
     type=int,
     choices=[14, 17, 20],
     help="Set C++ language standard",
+)
+parser.add_argument(
+    "--enable-view-ranks",
+    default=None,
+    type=int,
+    choices=[1, 2, 3, 4, 5, 6, 7],
+    help="Maximum number of concrete view ranks",
 )
 parser.add_argument(
     "--kokkos-root",
@@ -79,7 +85,7 @@ parser.add_argument(
     help="{}{}{}".format(
         "Pass arguments to cmake. Use w/ pip installations",
         "and --install-option, e.g. --install-option=--cmake-args=",
-        '"-DENABLE_ALL=ON -DKokkos_DIR=/usr/local/lib/cmake/Kokkos"',
+        '"-DENABLE_LAYOUTS=ON -DKokkos_DIR=/usr/local/lib/cmake/Kokkos"',
     ),
 )
 
@@ -91,7 +97,6 @@ if args.help:
     left.append("--help")
 sys.argv = sys.argv[:1] + left
 
-set_cmake_bool_option("ENABLE_ALL", args.enable_all, args.disable_all)
 set_cmake_bool_option(
     "ENABLE_EXPERIMENTAL", args.enable_experimental, args.disable_experimental
 )
@@ -105,10 +110,13 @@ set_cmake_bool_option("ENABLE_THIN_LTO", args.enable_thin_lto, args.disable_thin
 set_cmake_bool_option("ENABLE_WERROR", args.enable_werror, args.disable_werror)
 set_cmake_bool_option("ENABLE_TIMING", args.enable_timing, args.disable_timing)
 
-cmake_args.append("-DCMAKE_CXX_STANDARD={}".format(args.cxx_standard))
+cmake_args.append(f"-DCMAKE_CXX_STANDARD={args.cxx_standard}")
 
 for itr in args.cmake_args:
     cmake_args += itr.split()
+
+if args.enable_view_ranks is not None:
+    cmake_args += [f"-DENABLE_VIEW_RANKS={args.enable_view_ranks}"]
 
 if args.kokkos_root is not None:
     os.environ["CMAKE_PREFIX_PATH"] = ":".join(
@@ -119,13 +127,13 @@ if platform.system() == "Darwin":
     # scikit-build will set this to 10.6 and C++ compiler check will fail
     darwin_version = platform.mac_ver()[0].split(".")
     darwin_version = ".".join([darwin_version[0], darwin_version[1]])
-    cmake_args += ["-DCMAKE_OSX_DEPLOYMENT_TARGET={}".format(darwin_version)]
+    cmake_args += [f"-DCMAKE_OSX_DEPLOYMENT_TARGET={darwin_version}"]
 
 # DO THIS LAST!
 # support PYKOKKOS_BASE_SETUP_ARGS environment variables because
 #  --install-option for pip is a pain to use
 # PYKOKKOS_BASE_SETUP_ARGS should be space-delimited set of cmake arguments, e.g.:
-#   export PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_ALL=OFF -DENABLE_MEMORY_TRAITS=ON"
+#   export PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_LAYOUTS=OFF -DENABLE_MEMORY_TRAITS=ON"
 env_cmake_args = os.environ.get("PYKOKKOS_BASE_SETUP_ARGS", None)
 if env_cmake_args is not None:
     cmake_args += env_cmake_args.split(" ")

@@ -1,0 +1,26 @@
+ARG BASE=rocm/dev-ubuntu-20.04:4.2
+FROM $BASE
+
+ARG ADDITIONAL_PACKAGES
+
+RUN apt-get update && apt-get install -y \
+    bc \
+    git \
+    wget \
+    ccache \
+    python3 \
+    python3-pip \
+    build-essential \
+    $ADDITIONAL_PACKAGES && \
+    apt-get --purge autoremove && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    python3 -m pip install 'cmake==3.18.4'
+
+ENV PATH=/opt/rocm/bin:$PATH
+
+RUN git clone https://github.com/jrmadsen/compile-time-perf.git /tmp/ctp-source && \
+    cmake -B /tmp/ctp-build /tmp/ctp-source && \
+    cmake --build /tmp/ctp-build --target all && \
+    cmake --build /tmp/ctp-build --target install && \
+    rm -rf /tmp/ctp-source /tmp/ctp-build

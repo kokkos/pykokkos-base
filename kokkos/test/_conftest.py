@@ -117,7 +117,7 @@ def generate_variant(*_args, **_kwargs):
     return [con_view, dyn_view, con_arr, dyn_arr]
 
 
-def get_variants():
+def get_variants(exclude=[]):
     """Return a list of all view variants"""
     _variants = []
     for _dims in range(1, get_max_concrete_dims()):
@@ -131,9 +131,17 @@ def get_variants():
             _idx.append((i + 1) % 2)
 
         for _dtype in get_dtypes():
+            if _dtype in exclude:
+                continue
             for _space in get_memory_spaces():
+                if _space in exclude:
+                    continue
                 for _layout in get_layouts():
+                    if _layout in exclude:
+                        continue
                     for _trait in get_memory_traits():
+                        if _trait in exclude:
+                            continue
                         _variant = {}
                         _variant["dtype"] = _dtype
                         _variant["space"] = _space

@@ -38,7 +38,7 @@ jobs:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
-          -DKokkos_ENABLE_OPENMP=ON
+          -DKokkos_ENABLE_OPENMP=OFF
           -DBUILD_SHARED_LIBS=ON
           /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
@@ -51,6 +51,7 @@ jobs:
         cmake -B ${{github.workspace}}/build
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -DENABLE_LAYOUTS=OFF
+          -DENABLE_MEMORY_TRAITS=OFF
           -DENABLE_EXAMPLES=ON
           -DENABLE_WERROR=ON
           -DPython3_EXECUTABLE=$(which python)
@@ -117,6 +118,7 @@ jobs:
         python -m pip install pytest &&
         python setup.py install
           --enable-layouts
+          --enable-view-ranks=5
           --disable-memory-traits
           --enable-werror
           -- -DENABLE_EXAMPLES=ON

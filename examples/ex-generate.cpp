@@ -42,6 +42,7 @@
 //@HEADER
 */
 
+#include "KokkosExp_InterOp.hpp"
 #include "user.hpp"
 
 #if defined(__GNUC__)
@@ -71,8 +72,19 @@ PYBIND11_MODULE(ex_generate, ex) {
   /// declared in user.hpp which returns a Kokkos::View. This function is called
   /// from ex-numpy.py
   ///
-  ex.def("generate_view", &generate_view, "Generate a random view",
-         py::arg("n") = 10);
+  ex.def(
+      "generate_view",
+      [](size_t n) {
+        return Kokkos::Experimental::as_python_type(generate_view(n));
+      },
+      "Generate view");
+
+  ex.def(
+      "modify_view",
+      [](Kokkos::Experimental::python_view_type_t<view_type> _v) {
+        modify_view(_v);
+      },
+      "Generate view");
 
   static auto _atexit = []() {
     if (Kokkos::is_initialized()) Kokkos::finalize();

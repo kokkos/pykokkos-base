@@ -44,6 +44,7 @@
 
 #pragma once
 
+#include "KokkosExp_InterOp.hpp"
 #include "common.hpp"
 #include "fwd.hpp"
 
@@ -152,49 +153,11 @@ template <typename... T>
 using view_type_t = typename view_type<T...>::type;
 
 //--------------------------------------------------------------------------------------//
-//  ensure that the uniform type does not include the default memory trait
+//  this is the standardization type
 //
-namespace Impl {
-template <typename, typename...>
-struct uniform_view_type;
+template <typename Tp>
+using kokkos_python_view_type = Kokkos::Experimental::python_view_type<Tp>;
 
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct uniform_view_type<ViewT<ValueT>, type_list<Types...>> {
-  using type = ViewT<ValueT, remove_device_t<Types>...>;
-};
-
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct uniform_view_type<ViewT<ValueT>, Types...>
-    : uniform_view_type<ViewT<ValueT>,
-                        gather_t<is_default_memory_trait, false, Types...>> {};
-
-template <template <typename...> class ViewT, typename ValueT,
-          typename... Types>
-struct uniform_view_type<ViewT<ValueT, Types...>>
-    : uniform_view_type<ViewT<ValueT>,
-                        gather_t<is_default_memory_trait, false, Types...>> {};
-
-template <typename... T>
-using uniform_view_type_t = typename uniform_view_type<T...>::type;
-}  // namespace Impl
-
-//--------------------------------------------------------------------------------------//
-//  this is used to extract the uniform type of a view
-//
-template <typename, typename...>
-struct uniform_view_type;
-
-template <typename ValueT, typename... Types>
-struct uniform_view_type<Kokkos::View<ValueT, Types...>> {
-  using type = Impl::uniform_view_type_t<Kokkos::View<ValueT, Types...>>;
-};
-
-template <typename ValueT, typename... Types>
-struct uniform_view_type<Kokkos::DynRankView<ValueT, Types...>> {
-  using type = Impl::uniform_view_type_t<Kokkos::DynRankView<ValueT, Types...>>;
-};
-
-template <typename... T>
-using uniform_view_type_t = typename uniform_view_type<T...>::type;
+template <typename Tp>
+using kokkos_python_view_type_t =
+    typename Kokkos::Experimental::python_view_type<Tp>::type;

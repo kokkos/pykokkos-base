@@ -55,14 +55,22 @@ ADD_SUBDIRECTORY(src)
 ADD_LIBRARY(libpykokkos-build-options INTERFACE)
 ADD_LIBRARY(libpykokkos::build-options ALIAS libpykokkos-build-options)
 TARGET_INCLUDE_DIRECTORIES(libpykokkos-build-options INTERFACE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>)
 
 PYKOKKOS_TARGET_FLAG(
     libpykokkos-build-options
     CHECK_FLAGS
     MODE        INTERFACE
-    FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations /bigobj -fvisibility=default
+    FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations -Wno-attributes -fvisibility=default /bigobj
     LANGUAGES   CXX)
+
+IF(NOT Kokkos_InterOp_Header)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/Templates/KokkosExp_InterOp.hpp
+        ${PROJECT_BINARY_DIR}/include/KokkosExp_InterOp.hpp COPYONLY)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/Templates/KokkosExp_InterOp.hpp
+        ${PROJECT_BINARY_DIR}/examples/KokkosExp_InterOp.hpp COPYONLY)
+ENDIF()
 
 TRY_COMPILE(ENABLE_DEMANGLE
     ${PROJECT_BINARY_DIR}
@@ -223,4 +231,11 @@ ENDIF()
 
 IF(NOT ENABLE_QUIET)
     PRINT_FEATURES()
+ENDIF()
+
+IF("CUDA" IN_LIST Kokkos_DEVICES AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    IF(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0 AND
+       CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+        MESSAGE(AUTHOR_WARNING "\nNVCC + GCC 8.x + PyBind11 has known compiler errors related to pybind11::detail::collect_arguments overloads\n")
+    ENDIF()
 ENDIF()

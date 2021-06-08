@@ -90,6 +90,65 @@ auto get_available(const std::string &str, std::index_sequence<Idx, Tail...>) {
 }
 
 //--------------------------------------------------------------------------------------//
+//                  HOST ACCESSIBLE
+
+template <typename Tp, bool Avail = is_available<Tp>::value>
+struct memory_space_access;
+
+template <typename Tp>
+struct memory_space_access<Tp, true> {
+  static constexpr bool value =
+      Kokkos::Impl::MemorySpaceAccess<Kokkos::HostSpace, Tp>::accessible;
+};
+
+template <typename Tp>
+struct memory_space_access<Tp, false> {
+  static constexpr bool value = false;
+};
+
+template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
+          enable_if_t<(sizeof...(Tail) == 0)> = 0>
+auto get_host_accessible(size_t i, std::index_sequence<Idx, Tail...>) {
+  if (i == Idx) return memory_space_access<typename SpecT<Idx>::type>::value;
+  std::stringstream ss;
+  ss << "Error! Index " << i << " does not match any known enumeration type";
+  throw std::runtime_error(ss.str());
+}
+
+template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
+          enable_if_t<(sizeof...(Tail) > 0)> = 0>
+auto get_host_accessible(size_t i, std::index_sequence<Idx, Tail...>) {
+  if (i == Idx)
+    return memory_space_access<typename SpecT<Idx>::type>::value;
+  else
+    return get_host_accessible<SpecT>(i, std::index_sequence<Tail...>{});
+}
+
+//--------------------------------------------------------------------------------------//
+
+template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
+          enable_if_t<(sizeof...(Tail) == 0)> = 0>
+auto get_host_accessible(const std::string &str,
+                         std::index_sequence<Idx, Tail...>) {
+  if (str == SpecT<Idx>::label())
+    return memory_space_access<typename SpecT<Idx>::type>::value;
+  std::stringstream ss;
+  ss << "Error! Identifier " << str
+     << " does not match any known enumeration type";
+  throw std::runtime_error(ss.str());
+}
+
+template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
+          enable_if_t<(sizeof...(Tail) > 0)> = 0>
+auto get_host_accessible(const std::string &str,
+                         std::index_sequence<Idx, Tail...>) {
+  if (str == SpecT<Idx>::label())
+    return memory_space_access<typename SpecT<Idx>::type>::value;
+  else
+    return get_host_accessible<SpecT>(str, std::index_sequence<Tail...>{});
+}
+
+//--------------------------------------------------------------------------------------//
 
 void generate_available(py::module &kokkos) {
   //----------------------------------------------------------------------------//
@@ -138,6 +197,19 @@ void generate_available(py::module &kokkos) {
              "Get whether the memory space is available");
   kokkos.def("get_memory_space_available", _get_memspace_idx,
              "Get whether the memory space is available");
+
+  auto _get_host_access_idx = [](int idx) {
+    return get_host_accessible<MemorySpaceSpecialization>(
+        idx, std::make_index_sequence<MemorySpacesEnd>{});
+  };
+  auto _get_host_access_name = [](std::string str) {
+    return get_host_accessible<MemorySpaceSpecialization>(
+        str, std::make_index_sequence<MemorySpacesEnd>{});
+  };
+  kokkos.def("get_host_accessible", _get_host_access_name,
+             "Get whether the memory space is accessible from the host");
+  kokkos.def("get_host_accessible", _get_host_access_idx,
+             "Get whether the memory space is accessible from the host");
 
   //----------------------------------------------------------------------------//
   //

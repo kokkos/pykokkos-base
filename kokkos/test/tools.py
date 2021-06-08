@@ -265,10 +265,36 @@ class PyKokkosBaseToolsTests(unittest.TestCase):
     def tearDownClass(self):
         global data
 
-        kokkos.finalize()
         print("")
         for key, item in data.items():
             print("{:30} : {}".format(key, item))
+
+        for itr in (
+            "parse_args",
+            "print_help",
+            "init",
+            "finalize",
+            "push_region",
+            "pop_region",
+            "allocate_data",
+            "deallocate_data",
+            "create_profile_section",
+            "start_profile_section",
+            "stop_profile_section",
+            "destroy_profile_section",
+            "begin_parallel_for",
+            "begin_parallel_reduce",
+            "begin_parallel_scan",
+            "begin_fence",
+            "begin_deep_copy",
+            "end_parallel_for",
+            "end_parallel_reduce",
+            "end_parallel_scan",
+            "end_fence",
+            "end_deep_copy",
+            "profile_event",
+        ):
+            getattr(kokkos.tools, f"set_{itr}_callback")(None)
 
     def setUp(self):
         pass

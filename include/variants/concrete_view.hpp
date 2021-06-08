@@ -66,7 +66,7 @@ void generate_concrete_view_variant(py::module &_mod) {
   using Lp            = typename layout_spec_t::type;
   using Mp            = typename trait_spec_t::type;
   using ViewT         = view_type_t<Kokkos::View<Vp>, Lp, Sp, Mp>;
-  using UniformT      = uniform_view_type_t<ViewT>;
+  using UniformT      = kokkos_python_view_type_t<ViewT>;
 
   constexpr bool explicit_trait = !is_implicit<Mp>::value;
 
@@ -79,7 +79,7 @@ void generate_concrete_view_variant(py::module &_mod) {
       _mod, name, demangle<UniformT>());
 
 #if !defined(ENABLE_LAYOUTS)
-  using MirrorT = uniform_view_type_t<typename ViewT::HostMirror>;
+  using MirrorT = kokkos_python_view_type_t<typename ViewT::HostMirror>;
 
   IF_CONSTEXPR(!std::is_same<UniformT, MirrorT>::value) {
     Common::generate_view<MirrorT, Sp, Tp, Lp, Mp, DimIdx, DimIdx>(

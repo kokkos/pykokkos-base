@@ -144,6 +144,7 @@ try:
         "array",  # helper functions
         "unmanaged_array",
         "convert_dtype",
+        "read_dtype",
         "initialize",  # bindings
         "finalize",
         "int16",  # data types
@@ -163,17 +164,30 @@ try:
         "unsigned_long",
         "float",
         "double",
+        "Serial",  # devices
+        "Threads",
+        "OpenMP",
+        "Cuda",
+        "HPX",
+        "HIP",
+        "SYCL",
+        "OpenMPTarget",
+        "DefaultExecutionSpace",
+        "DefaultHostExecutionSpace",
         "HostSpace",  # memory spaces
         "HBWSpace",
         "OpenMPTargetSpace",
         "HIPSpace",
         "CudaSpace",
         "CudaUVMSpace",
+        "DefaultMemorySpace",
+        "DefaultHostMemorySpace",
         "get_dtype",  # get enumeration from string or vice-versa
         "get_layout",
         "get_memory_space",
         "get_memory_trait",
-        "get_device_available",  # query build support
+        "get_host_accessible",  # query build support
+        "get_device_available",
         "get_layout_available",
         "get_memory_space_available",
         "get_memory_trait_available",

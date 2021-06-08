@@ -8,7 +8,7 @@ INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 # if first time cmake is run and no external/internal preference is specified,
 # try to find already installed kokkos
 IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS)
-    FIND_PACKAGE(Kokkos QUIET)
+    FIND_PACKAGE(Kokkos)
     # set the default cache value
     IF(Kokkos_FOUND)
         SET(_INTERNAL_KOKKOS OFF)
@@ -22,8 +22,29 @@ ENDIF()
 
 # force an error
 IF(NOT _INTERNAL_KOKKOS)
-    UNSET(FIND_PACKAGE_MESSAGE_DETAILS_Kokkos)
-    FIND_PACKAGE(Kokkos REQUIRED)
+    FIND_PACKAGE(Kokkos REQUIRED COMPONENTS launch_compiler)
+    kokkos_compilation(GLOBAL)
+    IF(NOT Kokkos_INCLUDE_DIR)
+        GET_TARGET_PROPERTY(Kokkos_INCLUDE_DIR Kokkos::kokkoscore INTERFACE_INCLUDE_DIRECTORIES)
+    ENDIF()
+
+    FIND_FILE(Kokkos_InterOp_Header
+        NO_DEFAULT_PATH
+        NAMES           Kokkos_InterOp.hpp KokkosExp_InterOp.hpp
+        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
+        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
+        DOC             "Path to Kokkos InterOp header"
+        PATH_SUFFIXES   include ../../../include)
+
+    ADD_FEATURE(Kokkos_CXX_COMPILER "Compiler used to build Kokkos")
+    ADD_FEATURE(Kokkos_CXX_COMPILER_ID "Compiler ID used to build Kokkos")
+ELSE()
+    FIND_FILE(Kokkos_InterOp_Header
+        NO_DEFAULT_PATH
+        NAMES           Kokkos_InterOp.hpp KokkosExp_InterOp.hpp
+        PATHS           ${PROJECT_SOURCE_DIR}/external/kokkos/core/src
+        HINTS           ${PROJECT_SOURCE_DIR}/external/kokkos/core/src
+        DOC             "Path to Kokkos InterOp header")
 ENDIF()
 
 #
@@ -104,7 +125,6 @@ IF(_INTERNAL_KOKKOS)
         ADD_OPTION(Kokkos_ENABLE_CUDA "Build Kokkos submodule with CUDA support" ON)
         ADD_OPTION(Kokkos_ENABLE_CUDA_UVM "Build Kokkos submodule with CUDA UVM support" ON)
         ADD_OPTION(Kokkos_ENABLE_CUDA_LAMBDA "Build Kokkos submodule with CUDA lambda support" ON)
-        ADD_OPTION(Kokkos_ENABLE_CUDA_CONSTEXPR "Build Kokkos submodule with CUDA constexpr support" ON)
     ENDIF()
 
     ADD_SUBDIRECTORY(external)

@@ -64,6 +64,7 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
   // Initialize kokkos
   auto _initialize = [&]() {
     if (Kokkos::is_initialized()) return false;
+    if (DEBUG_OUTPUT) std::cerr << "Initializing Kokkos..." << std::endl;
     // python system module
     py::module sys = py::module::import("sys");
     // get the arguments for python system module
@@ -89,6 +90,7 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
   // Finalize kokkos
   auto _finalize = []() {
     if (!Kokkos::is_initialized()) return false;
+    if (DEBUG_OUTPUT) std::cerr << "Finalizing Kokkos..." << std::endl;
     destroy_callbacks();
     Kokkos::Tools::Experimental::set_deallocate_data_callback(nullptr);
     py::module gc = py::module::import("gc");

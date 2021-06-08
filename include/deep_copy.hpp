@@ -274,8 +274,8 @@ struct PYKOKKOS_HIDDEN deep_copy {
 
   template <typename... RhsT>
   inline auto operator()(type_list<RhsT...>&&) {
-    FOLD_EXPRESSION(
-        sfinae<uniform_view_type_t<LhsT>, uniform_view_type_t<RhsT>>(0));
+    FOLD_EXPRESSION(sfinae<kokkos_python_view_type_t<LhsT>,
+                           kokkos_python_view_type_t<RhsT>>(0));
   }
 
  private:
