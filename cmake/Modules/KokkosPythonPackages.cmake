@@ -45,9 +45,13 @@ ADD_FEATURE(Python3_LIBRARY "Python library")
 
 # python binding library
 IF(ENABLE_INTERNAL_PYBIND11)
-    CHECKOUT_GIT_SUBMODULE(RECURSIVE
-    RELATIVE_PATH external/pybind11
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+    CHECKOUT_GIT_SUBMODULE(
+        RECURSIVE
+        RELATIVE_PATH     external/pybind11
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        TEST_FILE         CMakeLists.txt
+        REPO_URL          https://github.com/pybind/pybind11.git
+        REPO_BRANCH       master)
     ADD_SUBDIRECTORY(external/pybind11)
 ELSE()
     FIND_PACKAGE(pybind11 REQUIRED)
