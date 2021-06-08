@@ -143,14 +143,14 @@ def convert_dtype(_dtype, _module=None):
     return getattr(_module, _true_dtype)
 
 
-def create_mirror(dst, src):
+def create_mirror(src, copy=False):
     """Performs Kokkos::create_mirror"""
-    return dst.create_mirror(src)
+    return src.create_mirror(copy)
 
 
-def create_mirror_view(dst, src):
+def create_mirror_view(src, copy=False):
     """Performs Kokkos::create_mirror_view"""
-    return dst.create_mirror_view(src)
+    return src.create_mirror_view(copy)
 
 
 def deep_copy(dst, src):

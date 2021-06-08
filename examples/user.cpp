@@ -9,7 +9,10 @@ struct InitView {
   explicit InitView(view_type _v) : m_view(_v) {}
 
   KOKKOS_INLINE_FUNCTION
-  void operator()(const int i) const { m_view(i, i % 2) = i; }
+  void operator()(const int i) const {
+    m_view(i, 0) = -(i + 1);
+    m_view(i, 1) = (i + 1);
+  }
 
  private:
   view_type m_view;
@@ -19,7 +22,10 @@ struct ModifyView {
   explicit ModifyView(view_type _v) : m_view(_v) {}
 
   KOKKOS_INLINE_FUNCTION
-  void operator()(const int i) const { m_view(i, i % 2) *= 2; }
+  void operator()(const int i) const {
+    m_view(i, 0) *= 2;
+    m_view(i, 1) *= 2;
+  }
 
  private:
   view_type m_view;
@@ -46,7 +52,7 @@ view_type generate_view(size_t n) {
 
 void modify_view(view_type _v) {
   std::cerr << "[user-bindings]> Modifying View..." << std::flush;
-  Kokkos::RangePolicy<exec_space, int> range(0, _v.extent(1));
+  Kokkos::RangePolicy<exec_space, int> range(0, _v.extent(0));
   Kokkos::parallel_for("modify_view", range, ModifyView{_v});
   std::cerr << " Done." << std::endl;
 }

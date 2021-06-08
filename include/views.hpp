@@ -330,26 +330,33 @@ void generate_view(py::module &_mod, const std::string &_name,
     );
   });
 
+  using mirror_type = typename ViewT::HostMirror;
+  using mirror_cast = kokkos_python_view_type_t<mirror_type>;
+
+  // if (!std::is_same<mirror_type, mirror_cast>::value) {
+  //  py::implicitly_convertible<mirror_type, mirror_cast>();
+  // }
+
   _view.def(
       "create_mirror",
-      [](ViewT &_v) {
-        auto _m           = Kokkos::create_mirror(_v);
-        using mirror_type = typename ViewT::HostMirror;
-        using cast_type   = kokkos_python_view_type_t<mirror_type>;
-        return static_cast<cast_type>(_m);
+      [](ViewT &_v, bool _copy) {
+        auto _m = Kokkos::create_mirror(_v);
+        if (_copy) Kokkos::deep_copy(_m, _v);
+        return static_cast<mirror_cast>(_m);
       },
-      "Create a host mirror (always creates a new view)");
+      "Create a host mirror (always creates a new view)",
+      py::arg("copy") = true);
 
   _view.def(
       "create_mirror_view",
-      [](ViewT &_v) {
-        auto _m           = Kokkos::create_mirror_view(_v);
-        using mirror_type = typename ViewT::HostMirror;
-        using cast_type   = kokkos_python_view_type_t<mirror_type>;
-        return static_cast<cast_type>(_m);
+      [](ViewT &_v, bool _copy) {
+        auto _m = Kokkos::create_mirror_view(_v);
+        if (_copy) Kokkos::deep_copy(_m, _v);
+        return static_cast<mirror_cast>(_m);
       },
       "Create a host mirror view (only creates new view if this is not on "
-      "host)");
+      "host)",
+      py::arg("copy") = true);
 
   using view_type_list_t =
       std::conditional_t<Kokkos::is_dyn_rank_view<ViewT>::value,
