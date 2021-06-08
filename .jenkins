@@ -35,7 +35,7 @@ pipeline {
                         sh 'git status && git submodule update --init external'
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
-                                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                                -DCMAKE_BUILD_TYPE=Release \
                                 -DCMAKE_CXX_COMPILER=hipcc \
                                 -DCMAKE_CXX_STANDARD=14 \
                                 -DKokkos_ENABLE_SERIAL=ON \
@@ -47,7 +47,7 @@ pipeline {
                         sh 'python3 -m pip install -r requirements.txt'
                         sh 'python3 -m pip install pytest'
                         sh '''cmake -B build \
-                                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                                -DCMAKE_BUILD_TYPE=Release \
                                 -DCMAKE_UNITY_BUILD=OFF \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
@@ -85,7 +85,7 @@ pipeline {
                         sh 'git status && git submodule update --init external'
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
-                                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                                -DCMAKE_BUILD_TYPE=Release \
                                 -DCMAKE_CXX_COMPILER=g++ \
                                 -DCMAKE_CXX_STANDARD=14 \
                                 -DKokkos_ENABLE_SERIAL=ON \
@@ -99,7 +99,7 @@ pipeline {
                         sh 'python3 -m pip install -r requirements.txt'
                         sh 'python3 -m pip install pytest'
                         sh '''cmake -B build \
-                                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                                -DCMAKE_BUILD_TYPE=Release \
                                 -DCMAKE_UNITY_BUILD=OFF \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
@@ -139,7 +139,7 @@ pipeline {
                         sh 'git status && git submodule update --init external'
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
-                                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                                -DCMAKE_BUILD_TYPE=Release \
                                 -DCMAKE_CXX_COMPILER=g++ \
                                 -DCMAKE_CXX_STANDARD=14 \
                                 -DKokkos_ENABLE_SERIAL=ON \
@@ -153,7 +153,7 @@ pipeline {
                         sh 'python3 -m pip install -r requirements.txt'
                         sh 'python3 -m pip install pytest'
                         sh '''cmake -B build \
-                                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                                -DCMAKE_BUILD_TYPE=Release \
                                 -DCMAKE_UNITY_BUILD=OFF \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
@@ -162,7 +162,7 @@ pipeline {
                                 -DENABLE_WERROR=OFF \
                                 -DENABLE_CTP=ON \
                                 -DPython3_EXECUTABLE=$(which python3)'''
-                        sh 'cmake --build build --target all --parallel ${BUILD_JOBS} -- VERBOSE=1'
+                        sh 'cmake --build build --target all --parallel $((${BUILD_JOBS}/2)) -- VERBOSE=1'
                         sh 'cmake --build build --target analyze-pykokkos-base-compile-time'
                         sh 'cmake --build build --target install --parallel ${BUILD_JOBS}'
                         sh 'cd build && cat nvcc-compile-time.csv'
