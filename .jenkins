@@ -75,7 +75,7 @@ pipeline {
                         OMP_NUM_THREADS = 8
                         OMP_PLACES = 'threads'
                         OMP_PROC_BIND = 'spread'
-                        NVCC_WRAPPER_DEFAULT_COMPILER = 'g++-8'
+                        NVCC_WRAPPER_DEFAULT_COMPILER = 'g++-7'
                         PYTHONPATH = '/usr/local/lib/python3.8/site-packages'
                     }
                     steps {
@@ -84,8 +84,8 @@ pipeline {
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
                                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-                                -DCMAKE_CXX_COMPILER=g++-8 \
-                                -DCMAKE_CXX_STANDARD=17 \
+                                -DCMAKE_CXX_COMPILER=g++-7 \
+                                -DCMAKE_CXX_STANDARD=14 \
                                 -DKokkos_ENABLE_OPENMP=ON \
                                 -DKokkos_ENABLE_CUDA=ON \
                                 -DKokkos_ENABLE_CUDA_UVM=ON \
@@ -98,9 +98,9 @@ pipeline {
                         sh 'python3 -m pip install pytest'
                         sh '''cmake -B build \
                                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-                                -DCMAKE_C_COMPILER=gcc-8 \
-                                -DCMAKE_CXX_COMPILER=g++-8 \
-                                -DCMAKE_CXX_STANDARD=17 \
+                                -DCMAKE_C_COMPILER=gcc-7 \
+                                -DCMAKE_CXX_COMPILER=g++-7 \
+                                -DCMAKE_CXX_STANDARD=14 \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
                                 -DENABLE_EXAMPLES=ON \
