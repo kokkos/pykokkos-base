@@ -378,14 +378,14 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
             self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
-            _mirror_data = conf.generate_variant(_shape, **_kwargs)
-            kokkos.deep_copy(_mirror_data[0], _data[0])
-            kokkos.deep_copy(_mirror_data[1], _data[1])
+            _copied_data = conf.generate_variant(_shape, **_kwargs)
+            kokkos.deep_copy(_copied_data[0], _data[0])
+            kokkos.deep_copy(_copied_data[1], _data[1])
 
-            self.assertEqual(_mirror_data[0][_zeros], 0)
-            self.assertEqual(_mirror_data[1][_zeros], 0)
-            self.assertEqual(_mirror_data[0][_idx], 3)
-            self.assertEqual(_mirror_data[1][_idx], 6)
+            self.assertEqual(_copied_data[0].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_copied_data[1].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_copied_data[0].create_mirror_view()[_idx], 3)
+            self.assertEqual(_copied_data[1].create_mirror_view()[_idx], 6)
 
 
 # main runner
