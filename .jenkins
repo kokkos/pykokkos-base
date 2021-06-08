@@ -32,6 +32,7 @@ pipeline {
                         sh 'echo "/opt/rocm/llvm/lib" > /etc/ld.so.conf.d/llvm.conf && ldconfig'
                         sh 'ccache --zero-stats'
                         sh 'rm -rf build /tmp/kokkos-build /tmp/kokkos-source'
+                        sh 'git submodule update --init external'
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
                                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -81,6 +82,7 @@ pipeline {
                     steps {
                         sh 'ccache --zero-stats'
                         sh 'rm -rf build /tmp/kokkos-build /tmp/kokkos-source'
+                        sh 'git submodule update --init external'
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
                                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -134,6 +136,7 @@ pipeline {
                     steps {
                         sh 'ccache --zero-stats'
                         sh 'rm -rf build /tmp/kokkos-build /tmp/kokkos-source'
+                        sh 'git submodule update --init external'
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
                                 -DCMAKE_BUILD_TYPE=RelWithDebInfo \
