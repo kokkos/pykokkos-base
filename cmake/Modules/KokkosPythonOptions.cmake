@@ -11,14 +11,17 @@ ELSE()
     SET(BUILD_EXAMPLES ${ENABLE_EXAMPLES})
 ENDIF()
 
-SET(_ENABLE_ALL_DEFAULT ON)
+# default UNITY_BUILD to ON except when compiling CUDA
+SET(_UNITY_BUILD ON)
+IF("CUDA" IN_LIST Kokkos_DEVICES)
+    SET(_UNITY_BUILD OFF)
+ENDIF()
+
 SET(_ENABLE_MEM_DEFAULT ON)
 SET(_ENABLE_LAY_DEFAULT ON)
 # unless ENABLE_LAYOUTS or ENABLE_MEMORY_TRAITS were set
 # or, NVCC is really, really slow so never default memory traits to ON
-IF(DEFINED ENABLE_LAYOUTS OR DEFINED ENABLE_MEMORY_TRAITS OR
-    ("CUDA" IN_LIST Kokkos_DEVICES AND NOT DEFINED ENABLE_ALL AND NOT ENABLE_ALL))
-    SET(_ENABLE_ALL_DEFAULT OFF)
+IF("CUDA" IN_LIST Kokkos_DEVICES)
     # one or both of these will be ignored bc of existing cache values
     SET(_ENABLE_MEM_DEFAULT OFF)
     SET(_ENABLE_LAY_DEFAULT ON)
@@ -41,13 +44,11 @@ ADD_OPTION(ENABLE_EXAMPLES "Build the examples" ${BUILD_EXAMPLES})
 ADD_OPTION(ENABLE_EXPERIMENTAL "Build the experimental code" OFF)
 ADD_OPTION(ENABLE_THIN_LTO "Pass THIN_LTO to pybind11_add_module instead of NO_EXTRAS" OFF)
 # these affect which Kokkos::View and Kokkos::DynRankView templates that are instantiated
-ADD_OPTION(ENABLE_ALL "Enable all build configurations (layouts, memory-traits, etc.)"
-    ${_ENABLE_ALL_DEFAULT})
 ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)"
     ${_ENABLE_LAY_DEFAULT})
 ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)"
     ${_ENABLE_MEM_DEFAULT})
-ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ON)
+ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ${_UNITY_BUILD})
 
 SET(CMAKE_UNITY_BUILD_BATCH_SIZE 5 CACHE STRING "Unity build batch size")
 IF(CMAKE_UNITY_BUILD)
@@ -59,11 +60,6 @@ IF(ENABLE_VIEW_RANKS LESS 0 OR ENABLE_VIEW_RANKS GREATER 7)
     MESSAGE(FATAL_ERROR "ENABLE_VIEW_RANKS (=${ENABLE_VIEW_RANKS}) must be in range: [0, 7]")
 ENDIF()
 ADD_FEATURE(ENABLE_VIEW_RANKS "${_VIEW_RANK_MSG}")
-
-IF(ENABLE_ALL AND (NOT ENABLE_MEMORY_TRAITS OR NOT ENABLE_LAYOUTS))
-    MESSAGE(WARNING "ENABLE_ALL option was set to ON but either/both ENABLE_LAYOUTS and ENABLE_MEMORY_TRAITS were already cached to OFF")
-    MESSAGE(FATAL_ERROR "ENABLE_ALL is invalid with existing CMakeCache.txt")
-ENDIF()
 
 IF(Kokkos_DIR)
     STRING(REGEX REPLACE "/lib(|..)/cmake/.*" "" Kokkos_INSTALL_DIR "${Kokkos_DIR}")

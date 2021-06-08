@@ -51,7 +51,6 @@ def add_arg_bool_option(lc_name, disp_name, default=None):
 
 
 # add options
-add_arg_bool_option("all", "ENABLE_ALL")
 add_arg_bool_option("experimental", "ENABLE_EXPERIMENTAL")
 add_arg_bool_option("layouts", "ENABLE_LAYOUTS", default=True)
 add_arg_bool_option("memory-traits", "ENABLE_MEMORY_TRAITS")
@@ -79,7 +78,7 @@ parser.add_argument(
     help="{}{}{}".format(
         "Pass arguments to cmake. Use w/ pip installations",
         "and --install-option, e.g. --install-option=--cmake-args=",
-        '"-DENABLE_ALL=ON -DKokkos_DIR=/usr/local/lib/cmake/Kokkos"',
+        '"-DENABLE_LAYOUTS=ON -DKokkos_DIR=/usr/local/lib/cmake/Kokkos"',
     ),
 )
 
@@ -91,7 +90,6 @@ if args.help:
     left.append("--help")
 sys.argv = sys.argv[:1] + left
 
-set_cmake_bool_option("ENABLE_ALL", args.enable_all, args.disable_all)
 set_cmake_bool_option(
     "ENABLE_EXPERIMENTAL", args.enable_experimental, args.disable_experimental
 )
@@ -125,7 +123,7 @@ if platform.system() == "Darwin":
 # support PYKOKKOS_BASE_SETUP_ARGS environment variables because
 #  --install-option for pip is a pain to use
 # PYKOKKOS_BASE_SETUP_ARGS should be space-delimited set of cmake arguments, e.g.:
-#   export PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_ALL=OFF -DENABLE_MEMORY_TRAITS=ON"
+#   export PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_LAYOUTS=OFF -DENABLE_MEMORY_TRAITS=ON"
 env_cmake_args = os.environ.get("PYKOKKOS_BASE_SETUP_ARGS", None)
 if env_cmake_args is not None:
     cmake_args += env_cmake_args.split(" ")
