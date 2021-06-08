@@ -134,14 +134,10 @@ void generate_enumeration(py::module &kokkos) {
   generate_enumeration<ExecutionSpaceSpecialization>(
       _device, std::make_index_sequence<ExecutionSpacesEnd>{});
 
-  _device.value(
-      "DefaultExecutionSpace",
-      ExecutionSpaceIndex<
-          Kokkos::DefaultExecutionSpace>::value);
-  _device.value(
-      "DefaultHostExecutionSpace",
-      ExecutionSpaceIndex<
-          Kokkos::DefaultHostExecutionSpace>::value);
+  _device.value("DefaultExecutionSpace",
+                ExecutionSpaceIndex<Kokkos::DefaultExecutionSpace>::value);
+  _device.value("DefaultHostExecutionSpace",
+                ExecutionSpaceIndex<Kokkos::DefaultHostExecutionSpace>::value);
   _device.export_values();
 
   kokkos.attr("devices") = []() {
