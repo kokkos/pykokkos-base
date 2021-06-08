@@ -10,6 +10,16 @@ ELSEIF(PYTHON_EXECUTABLE)
     SET(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
 ENDIF()
 
+# cache the include directory if provided via old python find-package
+IF(PYTHON_INCLUDE_DIR AND NOT Python3_INCLUDE_DIR)
+    SET(Python3_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}" CACHE PATH "PYTHON_INCLUDE_DIR")
+ENDIF()
+
+# cache the library if provided via old python find-package
+IF(PYTHON_LIBRARY AND NOT Python3_LIBRARY)
+    SET(Python3_LIBRARY "${PYTHON_LIBRARY}" CACHE FILEPATH "PYTHON_LIBRARY")
+ENDIF()
+
 # basically just used to get Python3_SITEARCH for installation
 FIND_PACKAGE(Python3 REQUIRED COMPONENTS Interpreter Development)
 
@@ -30,6 +40,8 @@ SET(PYBIND11_PYTHON_VERSION "${PYTHON_VERSION_STRING}" CACHE STRING "Python vers
 ADD_FEATURE(PYBIND11_PYTHON_VERSION "Python version used by PyBind11")
 ADD_FEATURE(PYTHON_VERSION_STRING "Python version found")
 ADD_FEATURE(Python3_EXECUTABLE "Python interpreter")
+ADD_FEATURE(Python3_INCLUDE_DIR "Python include directory")
+ADD_FEATURE(Python3_LIBRARY "Python library")
 
 # python binding library
 IF(ENABLE_INTERNAL_PYBIND11)

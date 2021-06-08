@@ -35,6 +35,9 @@ IF(NOT _INTERNAL_KOKKOS)
         HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
         DOC             "Path to Kokkos InterOp header"
         PATH_SUFFIXES   include ../../../include)
+
+    ADD_FEATURE(Kokkos_CXX_COMPILER "Compiler used to build Kokkos")
+    ADD_FEATURE(Kokkos_CXX_COMPILER_ID "Compiler ID used to build Kokkos")
 ELSE()
     FIND_FILE(Kokkos_InterOp_Header
         NO_DEFAULT_PATH

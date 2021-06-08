@@ -62,7 +62,7 @@ PYKOKKOS_TARGET_FLAG(
     libpykokkos-build-options
     CHECK_FLAGS
     MODE        INTERFACE
-    FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations /bigobj -fvisibility=default
+    FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations -Wno-attributes -fvisibility=default /bigobj
     LANGUAGES   CXX)
 
 IF(NOT Kokkos_InterOp_Header)
