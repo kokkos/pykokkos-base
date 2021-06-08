@@ -92,16 +92,24 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
     def _print_data(self, _data, _zero, _idx):
         print(
-            "[{}]> concrete zero  : {}".format(self.shortDescription(), _data[0][_zero])
+            "[{}]> concrete zero  : {}".format(
+                self.shortDescription(), _data[0].create_mirror_view()[_zero]
+            )
         )
         print(
-            "[{}]> concrete value : {}".format(self.shortDescription(), _data[0][_idx])
+            "[{}]> concrete value : {}".format(
+                self.shortDescription(), _data[0].create_mirror_view()[_idx]
+            )
         )
         print(
-            "[{}]> dynamic zero   : {}".format(self.shortDescription(), _data[1][_zero])
+            "[{}]> dynamic zero   : {}".format(
+                self.shortDescription(), _data[1].create_mirror_view()[_zero]
+            )
         )
         print(
-            "[{}]> dynamic value  : {}".format(self.shortDescription(), _data[1][_idx])
+            "[{}]> dynamic value  : {}".format(
+                self.shortDescription(), _data[1].create_mirror_view()[_idx]
+            )
         )
 
     def test_view_access(self):
@@ -116,20 +124,22 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if kokkos.get_host_accessible(_kwargs["space"]) is False:
-                continue
+            _host = [_data[0].create_mirror(), _data[1].create_mirror()]
 
             self._print_info(_data)
 
-            _data[0][_idx] = 1
-            _data[1][_idx] = 2
+            _host[0][_idx] = 1
+            _host[1][_idx] = 2
+
+            _data[0].deep_copy(_host[0])
+            _data[1].deep_copy(_host[1])
 
             self._print_data(_data, _zeros, _idx)
 
-            self.assertEqual(_data[0][_zeros], 0)
-            self.assertEqual(_data[1][_zeros], 0)
-            self.assertEqual(_data[0][_idx], 1)
-            self.assertEqual(_data[1][_idx], 2)
+            self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[0].create_mirror_view()[_idx], 1)
+            self.assertEqual(_data[1].create_mirror_view()[_idx], 2)
 
     def test_view_iadd(self):
         """view_iadd"""
@@ -143,21 +153,23 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if kokkos.get_host_accessible(_kwargs["space"]) is False:
-                continue
+            _host = [_data[0].create_mirror(), _data[1].create_mirror()]
 
             self._print_info(_data)
 
-            _data[0][_idx] = 1
-            _data[1][_idx] = 2
+            _host[0][_idx] = 1
+            _host[1][_idx] = 2
 
-            _data[0][_idx] += 3
-            _data[1][_idx] += 3
+            _host[0][_idx] += 3
+            _host[1][_idx] += 3
 
-            self.assertEqual(_data[0][_zeros], 0)
-            self.assertEqual(_data[1][_zeros], 0)
-            self.assertEqual(_data[0][_idx], 4)
-            self.assertEqual(_data[1][_idx], 5)
+            _data[0].deep_copy(_host[0])
+            _data[1].deep_copy(_host[1])
+
+            self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[0].create_mirror_view()[_idx], 4)
+            self.assertEqual(_data[1].create_mirror_view()[_idx], 5)
 
     def test_view_isub(self):
         """view_isub"""
@@ -171,21 +183,23 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if kokkos.get_host_accessible(_kwargs["space"]) is False:
-                continue
+            _host = [_data[0].create_mirror(), _data[1].create_mirror()]
 
             self._print_info(_data)
 
-            _data[0][_idx] = 10
-            _data[1][_idx] = 20
+            _host[0][_idx] = 10
+            _host[1][_idx] = 20
 
-            _data[0][_idx] -= 3
-            _data[1][_idx] -= 3
+            _host[0][_idx] -= 3
+            _host[1][_idx] -= 3
 
-            self.assertEqual(_data[0][_zeros], 0)
-            self.assertEqual(_data[1][_zeros], 0)
-            self.assertEqual(_data[0][_idx], 7)
-            self.assertEqual(_data[1][_idx], 17)
+            _data[0].deep_copy(_host[0])
+            _data[1].deep_copy(_host[1])
+
+            self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[0].create_mirror_view()[_idx], 7)
+            self.assertEqual(_data[1].create_mirror_view()[_idx], 17)
 
     def test_view_imul(self):
         """view_imul"""
@@ -199,21 +213,23 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if kokkos.get_host_accessible(_kwargs["space"]) is False:
-                continue
+            _host = [_data[0].create_mirror(), _data[1].create_mirror()]
 
             self._print_info(_data)
 
-            _data[0][_idx] = 1
-            _data[1][_idx] = 2
+            _host[0][_idx] = 1
+            _host[1][_idx] = 2
 
-            _data[0][_idx] *= 3
-            _data[1][_idx] *= 3
+            _host[0][_idx] *= 3
+            _host[1][_idx] *= 3
 
-            self.assertEqual(_data[0][_zeros], 0)
-            self.assertEqual(_data[1][_zeros], 0)
-            self.assertEqual(_data[0][_idx], 3)
-            self.assertEqual(_data[1][_idx], 6)
+            _data[0].deep_copy(_host[0])
+            _data[1].deep_copy(_host[1])
+
+            self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
+            self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
     #
     def test_view_create_mirror(self):
@@ -230,21 +246,23 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if kokkos.get_host_accessible(_kwargs["space"]) is False:
-                continue
+            _host = [_data[0].create_mirror(), _data[1].create_mirror()]
 
             self._print_info(_data)
 
-            _data[0][_idx] = 1
-            _data[1][_idx] = 2
+            _host[0][_idx] = 1
+            _host[1][_idx] = 2
 
-            _data[0][_idx] *= 3
-            _data[1][_idx] *= 3
+            _host[0][_idx] *= 3
+            _host[1][_idx] *= 3
 
-            self.assertEqual(_data[0][_zeros], 0)
-            self.assertEqual(_data[1][_zeros], 0)
-            self.assertEqual(_data[0][_idx], 3)
-            self.assertEqual(_data[1][_idx], 6)
+            _data[0].deep_copy(_host[0])
+            _data[1].deep_copy(_host[1])
+
+            self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
+            self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
             _mirror_data = [_data[0].create_mirror(), _data[1].create_mirror()]
             kokkos.deep_copy(_mirror_data[0], _data[0])
@@ -268,21 +286,23 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            if kokkos.get_host_accessible(_kwargs["space"]) is False:
-                continue
+            _host = [_data[0].create_mirror(), _data[1].create_mirror()]
 
             self._print_info(_data)
 
-            _data[0][_idx] = 1
-            _data[1][_idx] = 2
+            _host[0][_idx] = 1
+            _host[1][_idx] = 2
 
-            _data[0][_idx] *= 3
-            _data[1][_idx] *= 3
+            _host[0][_idx] *= 3
+            _host[1][_idx] *= 3
 
-            self.assertEqual(_data[0][_zeros], 0)
-            self.assertEqual(_data[1][_zeros], 0)
-            self.assertEqual(_data[0][_idx], 3)
-            self.assertEqual(_data[1][_idx], 6)
+            _data[0].deep_copy(_host[0])
+            _data[1].deep_copy(_host[1])
+
+            self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
+            self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
             _mirror_data = [
                 _data[0].create_mirror_view(),
@@ -311,21 +331,23 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             if _kwargs["trait"] in (kokkos.Unmanaged, None):
                 continue
 
-            if kokkos.get_host_accessible(_kwargs["space"]) is False:
-                continue
+            _host = [_data[0].create_mirror(), _data[1].create_mirror()]
 
             self._print_info(_data)
 
-            _data[0][_idx] = 1
-            _data[1][_idx] = 2
+            _host[0][_idx] = 1
+            _host[1][_idx] = 2
 
-            _data[0][_idx] *= 3
-            _data[1][_idx] *= 3
+            _host[0][_idx] *= 3
+            _host[1][_idx] *= 3
 
-            self.assertEqual(_data[0][_zeros], 0)
-            self.assertEqual(_data[1][_zeros], 0)
-            self.assertEqual(_data[0][_idx], 3)
-            self.assertEqual(_data[1][_idx], 6)
+            _data[0].deep_copy(_host[0])
+            _data[1].deep_copy(_host[1])
+
+            self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
+            self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
+            self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
             _mirror_data = conf.generate_variant(_shape, **_kwargs)
             kokkos.deep_copy(_mirror_data[0], _data[0])

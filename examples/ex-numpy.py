@@ -18,21 +18,13 @@ from ex_generate import generate_view, modify_view
 import kokkos
 
 
-def print_data(label, name, space, data):
+def print_data(label, name, data):
     # write the type info
     print(
         "{:12} : {} (ndim={}, shape={})".format(
             label, type(data).__name__, data.ndim, data.shape
         )
     )
-
-    if kokkos.get_host_accessible(space) is False:
-        print(
-            "Memory space {} is not accessible from the host".format(
-                type(space).__name__
-            )
-        )
-        return
 
     # print the data
     if data.ndim == 1:
@@ -54,15 +46,15 @@ def print_data(label, name, space, data):
 def user_bindings(args):
     # get the kokkos view
     view = generate_view(args.ndim)
-    print_data("Kokkos View", "view", view.space, view)
+    print_data("Kokkos View", "view", view.create_mirror_view())
 
     # modify view (verify that casting works)
     modify_view(view)
-    print_data("Modify View", "view", view.space, view)
+    print_data("Modify View", "view", view.create_mirror_view())
 
     # wrap the buffer protocal as numpy array without copying the data
     arr = np.array(view, copy=False)
-    print_data("Numpy Array", "arr", view.space, arr)
+    print_data("Numpy Array", "arr", arr)
 
 
 def to_numpy(args):
@@ -76,11 +68,11 @@ def to_numpy(args):
 
     for i in range(view.shape[0]):
         view[i] = i * (i % 2)
-    print_data("Kokkos View", "view", view.space, view)
+    print_data("Kokkos View", "view", view)
 
     # wrap the buffer protocal as numpy array without copying the data
     arr = np.array(view, copy=False)
-    print_data("Numpy Array", "arr", view.space, arr)
+    print_data("Numpy Array", "arr", arr)
 
 
 def from_numpy(args):
@@ -88,10 +80,10 @@ def from_numpy(args):
     for i in range(args.ndim):
         arr[i, i] = 0
 
-    print_data("Numpy Array", "arr", kokkos.HostSpace, arr)
+    print_data("Numpy Array", "arr", arr)
 
     view = kokkos.array(arr, dtype=kokkos.int32, dynamic=True)
-    print_data("Kokkos View", "view", kokkos.HostSpace, view)
+    print_data("Kokkos View", "view", view)
 
 
 if __name__ == "__main__":
