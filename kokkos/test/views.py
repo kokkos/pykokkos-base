@@ -80,8 +80,8 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
     def _print_info(self, _data):
         print(
-            "[{}]> concrete type  : {}".format(
-                self.shortDescription(), type(_data[0]).__name__
+            "[{}]> concrete type  : {}{}".format(
+                self.shortDescription(), " " * 7, type(_data[0]).__name__
             )
         )
         print(
@@ -116,7 +116,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_access"""
 
         print("")
-        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
+        for itr in conf.get_variants({"memory_traits": [kokkos.Atomic]}):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -124,9 +124,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
-
             self._print_info(_data)
+
+            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
 
             _host[0][_idx] = 1
             _host[1][_idx] = 2
@@ -145,7 +145,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_iadd"""
 
         print("")
-        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
+        for itr in conf.get_variants({"memory_traits": [kokkos.Atomic]}):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -153,9 +153,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
-
             self._print_info(_data)
+
+            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
 
             _host[0][_idx] = 1
             _host[1][_idx] = 2
@@ -175,7 +175,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_isub"""
 
         print("")
-        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
+        for itr in conf.get_variants({"memory_traits": [kokkos.Atomic]}):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -183,9 +183,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
-
             self._print_info(_data)
+
+            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
 
             _host[0][_idx] = 10
             _host[1][_idx] = 20
@@ -205,7 +205,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_imul"""
 
         print("")
-        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
+        for itr in conf.get_variants({"memory_traits": [kokkos.Atomic]}):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -213,9 +213,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
-
             self._print_info(_data)
+
+            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
 
             _host[0][_idx] = 1
             _host[1][_idx] = 2
@@ -235,7 +235,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
     def test_view_create_mirror(self):
         """view_create_mirror"""
         print("")
-        for itr in conf.get_variants(exclude=[kokkos.Atomic, kokkos.Unmanaged]):
+        for itr in conf.get_variants(
+            {"memory_traits": [kokkos.Atomic], "layouts": [kokkos.Unmanaged]}
+        ):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -243,9 +245,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
-
             self._print_info(_data)
+
+            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
 
             _host[0][_idx] = 1
             _host[1][_idx] = 2
@@ -286,7 +288,7 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
         """view_create_mirror_view"""
 
         print("")
-        for itr in conf.get_variants(exclude=[kokkos.Atomic]):
+        for itr in conf.get_variants({"memory_traits": [kokkos.Atomic]}):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -294,9 +296,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
-
             self._print_info(_data)
+
+            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
 
             _host[0][_idx] = 1
             _host[1][_idx] = 2
@@ -344,7 +346,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
     def test_view_deep_copy(self):
         """view_deep_copy"""
         print("")
-        for itr in conf.get_variants(exclude=[kokkos.Atomic, kokkos.Unmanaged]):
+        for itr in conf.get_variants(
+            {"memory_traits": [kokkos.Atomic], "layouts": [kokkos.Unmanaged]}
+        ):
             _shape = itr[0]
             _idx = itr[1]
             _zeros = itr[2]
@@ -354,9 +358,9 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             _data = conf.generate_variant(_shape, **_kwargs)
 
-            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
-
             self._print_info(_data)
+
+            _host = [_data[0].create_mirror_view(), _data[1].create_mirror_view()]
 
             _host[0][_idx] = 1
             _host[1][_idx] = 2
