@@ -203,17 +203,17 @@ pipeline {
                         PYTHONPATH = '/usr/local/lib/python3.8/site-packages'
                     }
                     steps {
+                        sh 'echo "/opt/rocm/llvm/lib" > /etc/ld.so.conf.d/llvm.conf && ldconfig'
                         sh 'ccache --zero-stats'
                         sh 'rm -rf build /tmp/kokkos-build /tmp/kokkos-source'
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
                                 -DCMAKE_BUILD_TYPE=Debug \
                                 -DCMAKE_CXX_COMPILER=clang++ \
-                                -DCMAKE_CXX_FLAGS="-Wno-unknown-cuda-version -Werror -Wno-undefined-internal -Wno-pass-failed" \
                                 -DCMAKE_CXX_STANDARD=17 \
                                 -DKokkos_ENABLE_SERIAL=ON \
                                 -DKokkos_ENABLE_OPENMPTARGET=ON \
-                                -DKokkos_ARCH_VOLTA70=ON \
+                                -DKokkos_ARCH_VEGA906=ON \
                                 -DBUILD_SHARED_LIBS=ON \
                                 /tmp/kokkos-source'''
                         sh 'cmake --build /tmp/kokkos-build --target all --parallel ${BUILD_JOBS}'
@@ -222,7 +222,6 @@ pipeline {
                         sh 'python3 -m pip install pytest'
                         sh '''cmake -B build \
                                 -DCMAKE_BUILD_TYPE=Debug \
-                                -DCMAKE_CXX_FLAGS="-Wno-unknown-cuda-version -Werror -Wno-undefined-internal -Wno-pass-failed" \
                                 -DCMAKE_UNITY_BUILD=OFF \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
