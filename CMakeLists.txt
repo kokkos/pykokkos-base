@@ -17,6 +17,9 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 ENDIF()
 
+# ensure always PIC
+SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 INCLUDE(KokkosPythonKokkos)         # find external Kokkos or add submodule
 INCLUDE(KokkosPythonFormat)         # format target
 INCLUDE(KokkosPythonCompilers)      # compiler identification
