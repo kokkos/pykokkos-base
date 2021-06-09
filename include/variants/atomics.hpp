@@ -83,7 +83,7 @@ void generate_atomic_variant(py::module &_mod) {
            demangle<Mp>()) +
       ">>";
 
-  if (DEBUG_OUTPUT)
+  if (debug_output())
     std::cerr << "Registering " << desc << " as python class '" << name
               << "'..." << std::endl;
 

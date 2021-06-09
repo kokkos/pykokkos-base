@@ -3,6 +3,8 @@
 #   Kokkos submodule
 #----------------------------------------------------------------------------------------#
 
+INCLUDE_GUARD(GLOBAL)
+
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
 # if first time cmake is run and no external/internal preference is specified,
@@ -129,4 +131,5 @@ IF(_INTERNAL_KOKKOS)
 
     ADD_SUBDIRECTORY(external)
 
+    SET(Kokkos_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/external/kokkos/core/src)
 ENDIF()

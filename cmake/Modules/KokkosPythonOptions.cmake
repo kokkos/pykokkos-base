@@ -48,10 +48,11 @@ ADD_OPTION(ENABLE_LAYOUTS "Build support for layouts (long NVCC compile times)"
     ${_ENABLE_LAY_DEFAULT})
 ADD_OPTION(ENABLE_MEMORY_TRAITS "Build support for memory traits (long NVCC compile times)"
     ${_ENABLE_MEM_DEFAULT})
+ADD_OPTION(ENABLE_PRECOMPILED_HEADERS "Enable precompiling kokkos and pybind11 headers" OFF)
 ADD_OPTION(CMAKE_UNITY_BUILD "Enable unity build" ${_UNITY_BUILD})
 
-SET(CMAKE_UNITY_BUILD_BATCH_SIZE 5 CACHE STRING "Unity build batch size")
 IF(CMAKE_UNITY_BUILD)
+    SET(CMAKE_UNITY_BUILD_BATCH_SIZE 8 CACHE STRING "Unity build batch size")
     ADD_FEATURE(CMAKE_UNITY_BUILD_BATCH_SIZE "Unity build batch size")
 ENDIF()
 

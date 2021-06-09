@@ -151,7 +151,7 @@ using python_view_type_t = typename python_view_type<T...>::type;
 
 }  // namespace Impl
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //  this is used to extract the uniform type of a view
 //
 template <typename ViewT>

@@ -47,7 +47,7 @@
 #include "fwd.hpp"
 #include "traits.hpp"
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
           enable_if_t<(sizeof...(Tail) == 0)> = 0>
@@ -67,7 +67,7 @@ auto get_available(size_t i, std::index_sequence<Idx, Tail...>) {
     return get_available<SpecT>(i, std::index_sequence<Tail...>{});
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
           enable_if_t<(sizeof...(Tail) == 0)> = 0>
@@ -89,7 +89,7 @@ auto get_available(const std::string &str, std::index_sequence<Idx, Tail...>) {
     return get_available<SpecT>(str, std::index_sequence<Tail...>{});
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //                  HOST ACCESSIBLE
 
 template <typename Tp, bool Avail = is_available<Tp>::value>
@@ -124,7 +124,7 @@ auto get_host_accessible(size_t i, std::index_sequence<Idx, Tail...>) {
     return get_host_accessible<SpecT>(i, std::index_sequence<Tail...>{});
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
           enable_if_t<(sizeof...(Tail) == 0)> = 0>
@@ -148,7 +148,7 @@ auto get_host_accessible(const std::string &str,
     return get_host_accessible<SpecT>(str, std::index_sequence<Tail...>{});
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 void generate_available(py::module &kokkos) {
   //----------------------------------------------------------------------------//

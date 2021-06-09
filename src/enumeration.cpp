@@ -52,13 +52,13 @@
 
 #include <cassert>
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <template <size_t> class SpecT, typename Tp, size_t... Idx>
 auto generate_enumeration(py::enum_<Tp> &_enum, std::index_sequence<Idx...>) {
   auto _generate = [&_enum](const auto &_labels, Tp _idx) {
     for (const auto &itr : _labels) {
-      if (DEBUG_OUTPUT)
+      if (debug_output())
         std::cerr << "Registering " << demangle<Tp>() << " enumeration entry "
                   << itr << " to index " << _idx << "..." << std::endl;
 
@@ -69,14 +69,14 @@ auto generate_enumeration(py::enum_<Tp> &_enum, std::index_sequence<Idx...>) {
   FOLD_EXPRESSION(_generate(SpecT<Idx>::labels(), static_cast<Tp>(Idx)));
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename Tp, size_t... Idx>
 auto generate_enumeration_tuple(std::index_sequence<Idx...>) {
   return std::make_tuple(static_cast<Tp>(Idx)...);
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
           enable_if_t<(sizeof...(Tail) == 0)> = 0>
@@ -96,7 +96,7 @@ auto get_enumeration(size_t i, std::index_sequence<Idx, Tail...>) {
     return get_enumeration<SpecT>(i, std::index_sequence<Tail...>{});
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <template <size_t> class SpecT, size_t Idx, size_t... Tail,
           enable_if_t<(sizeof...(Tail) == 0)> = 0>
@@ -121,7 +121,7 @@ auto get_enumeration(const std::string &str,
     return get_enumeration<SpecT>(str, std::index_sequence<Tail...>{});
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 void generate_enumeration(py::module &kokkos) {
   //----------------------------------------------------------------------------//

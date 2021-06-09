@@ -1,6 +1,8 @@
 # pykokkos-base
 
-> Extended Documentation can be found in [Wiki](https://github.com/kokkos/pykokkos-base/wiki)
+> Additional Documentation can be found in [Wiki](https://github.com/kokkos/pykokkos-base/wiki)
+
+## Overview
 
 This package contains the minimal set of bindings for [Kokkos](https://github.com/kokkos/kokkos)
 interoperability with Python:
@@ -42,8 +44,6 @@ view = kokkos.array([2, 2], dtype=kokkos.double, space=kokkos.CudaUVMSpace,
 
 arr = np.array(view, copy=False)
 ```
-
-> This package depends on a pre-existing installation of Kokkos
 
 ## Writing Kokkos in Python
 
@@ -103,7 +103,7 @@ Here are the steps when Kokkos is added as a submodule:
 ### Configuring Options via CMake
 
 ```console
-cmake -DENABLE_LAYOUTS=ON -DENABLE_MEMORY_TRAITS=OFF /path/to/source`
+cmake -DENABLE_LAYOUTS=ON -DENABLE_MEMORY_TRAITS=OFF /path/to/source
 ```
 
 ### Configuring Options via `setup.py`
@@ -139,6 +139,105 @@ pip install pykokkos-base --install-option={--,-DENABLE_LAYOUTS=ON,-DENABLE_MEMO
 > `pip install pykokkos-base` will build against the latest release in the PyPi repository.
 > In order to pip install from this repository, use `pip install --user -e .`
 
+## Differences vs. Kokkos C++
+
+### Deep Copy and Host Mirror
+
+If you are not familiar with `Kokkos::deep_copy(...)`, `Kokkos::create_mirror(...)`, `Kokkos::create_mirror_view(...)`, read this
+[Kokkos Wiki entry](https://github.com/kokkos/kokkos/wiki/View#643-deep-copy-and-hostmirror).
+
+When Kokkos views are allocated on a non-host memory space, this data is not directly accessible in Python. Any
+attempt to read or modify the data will result in a fatal error. In C++, Kokkos developers usually
+perform two distinct operations: create a mirror or mirror-view and then execute a deep-copy, e.g.:
+
+```cpp
+// assume MemorySpace is Kokkos::Cuda or similar
+Kokkos::View<int*, MemorySpace> a ("a", 10);
+
+// Allocate a view in HostSpace with the layout and padding of a
+auto b = create_mirror(a);
+// This is always a memcopy
+Kokkos::deep_copy (b, a);
+
+// This may not allocate a new view if a is in host space
+auto c = Kokkos::create_mirror_view(a);
+// This is a no-op if MemorySpace is HostSpace
+Kokkos::deep_copy (c, a)
+```
+
+The python equivalent is available via standalone functions:
+
+```python
+# assume MemorySpace is kokkos.CudaSpace or similar
+a = kokkos.array("a", shape=[10], space=MemorySpace)
+
+# Allocate a view in HostSpace with the layout and padding of a
+b = kokkos.create_mirror(a)
+# copy memory
+kokkos.deep_copy(b, a)
+
+# This may not allocate a new view if a is in host space
+c = kokkos.create_mirror_view(a)
+# This is a no-op if MemorySpace is HostSpace
+kokkos.deep_copy(c, a)
+```
+
+However, this makes it cumbersome to print data in python:
+
+```python
+# assume MemorySpace is kokkos.CudaSpace or similar
+a = kokkos.array("a", shape=[10], space=MemorySpace)
+
+def print_data(inp):
+    v = kokkos.create_mirror_view(inp)
+    kokkos.deep_copy(v, inp)
+    for i in range(v.shape[0]):
+        print(f"v({i}) = {v[i]}")
+
+print_data(a)
+```
+
+Thus, the _member functions_ `create_mirror()` and `create_mirror_view()` accept a boolean
+`copy` argument which **defaults to True**, e.g.:
+
+```python
+a = kokkos.array("a", shape=[10], space=MemorySpace)
+
+# this:
+b = a.create_mirror()
+
+# is implicitly:
+b = a.create_mirror(copy=True)
+```
+
+Thus, our `print_data` function above does not need handle mirror creation because
+we can replace `print_data(a)` with `print_data(a.create_mirror())` or `print_data(a.create_mirror_view())`:
+
+```python
+# assume MemorySpace is kokkos.CudaSpace or similar
+a = kokkos.array("a", shape=[10], space=MemorySpace)
+
+def print_data(v):
+    for i in range(v.shape[0]):
+        print(f"v({i}) = {v[i]}")
+
+print_data(a.create_mirror_view())
+```
+
+In fact, the free-standing `kokkos.create_mirror(...)` and `kokkoos.create_mirror_view(...)` simply use this member function
+and default the `copy` argument to `False`:
+
+```python
+def create_mirror(src, copy=False):
+    """Performs Kokkos::create_mirror"""
+    return src.create_mirror(copy)
+
+
+def create_mirror_view(src, copy=False):
+    """Performs Kokkos::create_mirror_view"""
+    return src.create_mirror_view(copy)
+```
+
 ## Example
 
 ### Overview
@@ -161,8 +260,9 @@ This example is designed to emulate a work-flow where the user has code using Ko
 #### ex-numpy.py
 
 ```python
+#!/usr/bin/env python
+
 import argparse
-import gc
 import numpy as np
 
 #
@@ -170,7 +270,7 @@ import numpy as np
 # The declaration and definition of generate_view are in user.hpp and user.cpp
 # The generate_view function will return a Kokkos::View and will be converted
 # to a numpy array
-from ex_generate import generate_view
+from ex_generate import generate_view, modify_view
 
 #
 # Importing this module is necessary to call kokkos init/finalize and
@@ -180,29 +280,95 @@ from ex_generate import generate_view
 import kokkos
 
 
-def main(args):
+def print_data(label, name, data):
+    # write the type info
+    print(
+        "{:12} : {} (ndim={}, shape={})".format(
+            label, type(data).__name__, data.ndim, data.shape
+        )
+    )
+
+    # print the data
+    if data.ndim == 1:
+        for i in range(data.shape[0]):
+            print("{:8}({}) = {}".format(name, i, data[i]))
+    elif data.ndim == 2:
+        for i in range(data.shape[0]):
+            print(
+                "{:8}({}) = [{}]".format(
+                    name,
+                    i,
+                    " ".join("{}".format(data[i, j]) for j in range(data.shape[1])),
+                )
+            )
+    else:
+        raise ValueError("only 2 dimensions are supported")
+
+
+def user_bindings(args):
     # get the kokkos view
     view = generate_view(args.ndim)
-    # verify the type id
-    print("Kokkos View : {}".format(type(view).__name__))
+    print_data("Kokkos View", "view", view.create_mirror_view())
+
+    # modify view (verify that casting works)
+    modify_view(view)
+    print_data("Modify View", "view", view.create_mirror_view())
+
+    # wrap the buffer protocal as numpy array without copying the data
+    arr = np.array(view.create_mirror_view(), copy=False)
+    print_data("Numpy Array", "arr", arr)
+
+
+def to_numpy(args):
+    # get the kokkos view
+    view = kokkos.array(
+        "python_allocated_view",
+        [args.ndim],
+        dtype=kokkos.double,
+        space=kokkos.DefaultHostMemorySpace,
+    )
+
+    for i in range(view.shape[0]):
+        view[i] = i * (i % 2)
+    print_data("Kokkos View", "view", view)
+
     # wrap the buffer protocal as numpy array without copying the data
     arr = np.array(view, copy=False)
-    # verify type id
-    print("Numpy Array : {} (shape={})".format(type(arr).__name__, arr.shape))
-    # demonstrate the data is the same as what was printed by generate_view
-    for i in range(arr.shape[0]):
-        print("    view({}) = {}".format(i, arr[i]))
+    print_data("Numpy Array", "arr", arr)
+
+
+def from_numpy(args):
+    arr = np.ones([args.ndim, args.ndim], dtype=np.int32)
+    for i in range(args.ndim):
+        arr[i, i] = 0
+
+    print_data("Numpy Array", "arr", arr)
+
+    view = kokkos.array(arr, dtype=kokkos.int32, dynamic=True)
+    print_data("Kokkos View", "view", view)
+
 
 if __name__ == "__main__":
-    kokkos.initialize()
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--ndim", default=10,
-                        help="X dimension", type=int)
-    args = parser.parse_args()
-    main(args)
-    # make sure all views are garbage collected
-    gc.collect()
-    kokkos.finalize()
+    try:
+        kokkos.initialize()
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-n", "--ndim", default=10, help="X dimension", type=int)
+        args, argv = parser.parse_known_args()
+        print("Executing to numpy...")
+        to_numpy(args)
+        print("Executing from numpy...")
+        from_numpy(args)
+        print("Executing user bindings...")
+        user_bindings(args)
+        kokkos.finalize()
+    except Exception as e:
+        import sys
+        import traceback
+
+        print(f"{e}")
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exception(exc_type, exc_value, exc_traceback)
+        sys.exit(1)
 ```
 
 ### Build and Run
@@ -218,29 +384,86 @@ python ./ex-numpy.py
 ### Expected Output
 
 ```console
-    view(0) =  0  0
-    view(1) =  0  1
-    view(2) =  2  0
-    view(3) =  0  3
-    view(4) =  4  0
-    view(5) =  0  5
-    view(6) =  6  0
-    view(7) =  0  7
-    view(8) =  8  0
-    view(9) =  0  9
-Sum of view: 45
-extent(0): 10
-stride(0): 2
-Kokkos View : KokkosView_HostSpace_double_2
-Numpy Array : ndarray (shape=(10, 2))
-    view(0) = [0. 0.]
-    view(1) = [0. 1.]
-    view(2) = [2. 0.]
-    view(3) = [0. 3.]
-    view(4) = [4. 0.]
-    view(5) = [0. 5.]
-    view(6) = [6. 0.]
-    view(7) = [0. 7.]
-    view(8) = [8. 0.]
-    view(9) = [0. 9.]
+[user-bindings]> Generating View... Done.
+[user-bindings]> Modifying View... Done.
+Executing to numpy...
+Kokkos View  : KokkosView_float64_HostSpace_LayoutRight_1 (ndim=1, shape=[10])
+view    (0) = 0.0
+view    (1) = 1.0
+view    (2) = 0.0
+view    (3) = 3.0
+view    (4) = 0.0
+view    (5) = 5.0
+view    (6) = 0.0
+view    (7) = 7.0
+view    (8) = 0.0
+view    (9) = 9.0
+Numpy Array  : ndarray (ndim=1, shape=(10,))
+arr     (0) = 0.0
+arr     (1) = 1.0
+arr     (2) = 0.0
+arr     (3) = 3.0
+arr     (4) = 0.0
+arr     (5) = 5.0
+arr     (6) = 0.0
+arr     (7) = 7.0
+arr     (8) = 0.0
+arr     (9) = 9.0
+Executing from numpy...
+Numpy Array  : ndarray (ndim=2, shape=(10, 10))
+arr     (0) = [0 1 1 1 1 1 1 1 1 1]
+arr     (1) = [1 0 1 1 1 1 1 1 1 1]
+arr     (2) = [1 1 0 1 1 1 1 1 1 1]
+arr     (3) = [1 1 1 0 1 1 1 1 1 1]
+arr     (4) = [1 1 1 1 0 1 1 1 1 1]
+arr     (5) = [1 1 1 1 1 0 1 1 1 1]
+arr     (6) = [1 1 1 1 1 1 0 1 1 1]
+arr     (7) = [1 1 1 1 1 1 1 0 1 1]
+arr     (8) = [1 1 1 1 1 1 1 1 0 1]
+arr     (9) = [1 1 1 1 1 1 1 1 1 0]
+Kokkos View  : KokkosDynRankView_int32_HostSpace_LayoutRight (ndim=2, shape=[10, 10, 1, 1, 1, 1, 1])
+view    (0) = [0 1 1 1 1 1 1 1 1 1]
+view    (1) = [1 0 1 1 1 1 1 1 1 1]
+view    (2) = [1 1 0 1 1 1 1 1 1 1]
+view    (3) = [1 1 1 0 1 1 1 1 1 1]
+view    (4) = [1 1 1 1 0 1 1 1 1 1]
+view    (5) = [1 1 1 1 1 0 1 1 1 1]
+view    (6) = [1 1 1 1 1 1 0 1 1 1]
+view    (7) = [1 1 1 1 1 1 1 0 1 1]
+view    (8) = [1 1 1 1 1 1 1 1 0 1]
+view    (9) = [1 1 1 1 1 1 1 1 1 0]
+Executing user bindings...
+Kokkos View  : KokkosView_float64_HostSpace_LayoutRight_2 (ndim=2, shape=[10, 2])
+view    (0) = [-1.0 1.0]
+view    (1) = [-2.0 2.0]
+view    (2) = [-3.0 3.0]
+view    (3) = [-4.0 4.0]
+view    (4) = [-5.0 5.0]
+view    (5) = [-6.0 6.0]
+view    (6) = [-7.0 7.0]
+view    (7) = [-8.0 8.0]
+view    (8) = [-9.0 9.0]
+view    (9) = [-10.0 10.0]
+Modify View  : KokkosView_float64_HostSpace_LayoutRight_2 (ndim=2, shape=[10, 2])
+view    (0) = [-2.0 2.0]
+view    (1) = [-4.0 4.0]
+view    (2) = [-6.0 6.0]
+view    (3) = [-8.0 8.0]
+view    (4) = [-10.0 10.0]
+view    (5) = [-12.0 12.0]
+view    (6) = [-14.0 14.0]
+view    (7) = [-16.0 16.0]
+view    (8) = [-18.0 18.0]
+view    (9) = [-20.0 20.0]
+Numpy Array  : ndarray (ndim=2, shape=(10, 2))
+arr     (0) = [-2.0 2.0]
+arr     (1) = [-4.0 4.0]
+arr     (2) = [-6.0 6.0]
+arr     (3) = [-8.0 8.0]
+arr     (4) = [-10.0 10.0]
+arr     (5) = [-12.0 12.0]
+arr     (6) = [-14.0 14.0]
+arr     (7) = [-16.0 16.0]
+arr     (8) = [-18.0 18.0]
+arr     (9) = [-20.0 20.0]
 ```

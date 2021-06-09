@@ -53,11 +53,11 @@
 #include <Kokkos_Layout.hpp>
 #include <Kokkos_MemoryTraits.hpp>
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 DISABLE_TYPE(type_list<>)
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 /// \todo Reduce (or make it configurable) the number of dimensions supported by
 /// concrete views. Currently, we instantiate up to 8 dimensions but we could
 /// theoretically just say that python only supports up to 3 dimensions and if
@@ -72,7 +72,7 @@ VIEW_DATA_DIMS(6, T ******)
 VIEW_DATA_DIMS(7, T *******)
 VIEW_DATA_DIMS(8, T ********)
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // <data-type> <enum> <string identifiers>
 //  the first string identifier is the "canonical name" (i.e. what gets encoded)
 //  and the remaining string entries are used to generate aliases
@@ -86,7 +86,7 @@ VIEW_DATA_TYPE(uint64_t, Uint64, "uint64", "unsigned_long")
 VIEW_DATA_TYPE(float, Float32, "float32", "float")
 VIEW_DATA_TYPE(double, Float64, "float64", "double")
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // <data-type> <enum> <string identifiers>
 //  the first string identifier is the "canonical name" (i.e. what gets encoded)
 //  and the remaining string entries are used to generate aliases
@@ -100,7 +100,7 @@ DISABLE_TYPE(Kokkos::LayoutLeft)
 #endif
 DISABLE_TYPE(Kokkos::LayoutStride)
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // <data-type> <enum> <string identifiers>
 //  the first string identifier is the "canonical name" (i.e. what gets encoded)
 //  and the remaining string entries are used to generate aliases
@@ -125,7 +125,7 @@ DISABLE_TYPE(Kokkos::MemoryTraits<Kokkos::Restrict>)
 
 ENABLE_IMPLICIT(Kokkos::MemoryTraits<0>)
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 // provides a mapping from an execution space to the memory space enumeration
 //
 EXECUTION_SPACE(Kokkos::Serial, Serial_Backend, "Serial")
@@ -179,7 +179,7 @@ DISABLE_TYPE(Kokkos::Experimental::SYCL)
 DISABLE_TYPE(Kokkos::Experimental::OpenMPTarget)
 #endif
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //  declare any spaces that might not be available and mark them as unavailable
 //  we declare these so that we can map the enum value to the type along with a
 //  label
