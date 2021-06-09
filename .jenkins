@@ -191,7 +191,7 @@ pipeline {
                         sh 'rm -rf build /tmp/kokkos-build /tmp/kokkos-source'
                         sh 'git clone -b develop https://github.com/kokkos/kokkos.git /tmp/kokkos-source'
                         sh '''cmake -B /tmp/kokkos-build \
-                                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                                -DCMAKE_BUILD_TYPE=Debug \
                                 -DCMAKE_CXX_COMPILER=clang++ \
                                 -DCMAKE_CXX_FLAGS="-Wno-unknown-cuda-version -Werror -Wno-undefined-internal -Wno-pass-failed" \
                                 -DCMAKE_CXX_STANDARD=17 \
@@ -205,7 +205,7 @@ pipeline {
                         sh 'python3 -m pip install -r requirements.txt'
                         sh 'python3 -m pip install pytest'
                         sh '''cmake -B build \
-                                -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+                                -DCMAKE_BUILD_TYPE=Debug \
                                 -DCMAKE_CXX_FLAGS="-Wno-unknown-cuda-version -Werror -Wno-undefined-internal -Wno-pass-failed" \
                                 -DCMAKE_UNITY_BUILD=OFF \
                                 -DENABLE_LAYOUTS=ON \
