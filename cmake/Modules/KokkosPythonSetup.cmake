@@ -3,6 +3,8 @@
 #   versioning
 #----------------------------------------------------------------------------------------#
 
+INCLUDE_GUARD(DIRECTORY)
+
 FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" FULL_VERSION_STRING LIMIT_COUNT 1)
 STRING(REGEX REPLACE "(\n|\r)" "" FULL_VERSION_STRING "${FULL_VERSION_STRING}")
 STRING(REGEX REPLACE

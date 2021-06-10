@@ -17,15 +17,18 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 ENDIF()
 
-INCLUDE(KokkosPythonKokkos)     # find external Kokkos or add submodule
-INCLUDE(KokkosPythonFormat)     # format target
-INCLUDE(KokkosPythonCompilers)  # compiler identification
-INCLUDE(KokkosPythonOptions)    # cache options and various variable settings
-INCLUDE(KokkosPythonPackages)   # Python Interp
+# ensure always PIC
+SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-SET(PYBIND11_EXTRAS NO_EXTRAS)
+INCLUDE(KokkosPythonKokkos)         # find external Kokkos or add submodule
+INCLUDE(KokkosPythonFormat)         # format target
+INCLUDE(KokkosPythonCompilers)      # compiler identification
+INCLUDE(KokkosPythonOptions)        # cache options and various variable settings
+INCLUDE(KokkosPythonPackages)       # Python Interp
+INCLUDE(KokkosPythonBuildOptions)   # build-options interface library
+
 IF(ENABLE_THIN_LTO)
-    SET(PYBIND11_EXTRAS THIN_LTO)
+    SET(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 ENDIF()
 
 SET(libpykokkos_SOURCES
@@ -33,6 +36,7 @@ SET(libpykokkos_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/backend_version.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/enumeration.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/available.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/common.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tools.cpp)
 
 SET(libpykokkos_HEADERS
@@ -45,83 +49,27 @@ SET(libpykokkos_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/views.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/fwd.hpp)
 
-PYBIND11_ADD_MODULE(libpykokkos MODULE ${PYBIND11_EXTRAS}
+ADD_LIBRARY(libpykokkos-core OBJECT
     ${libpykokkos_SOURCES}
     ${libpykokkos_HEADERS})
 
+TARGET_LINK_LIBRARIES(libpykokkos-core PUBLIC
+    pybind11::pybind11
+    Kokkos::kokkos
+    libpykokkos::precompiled-headers
+    libpykokkos::build-options)
+
+PYBIND11_ADD_MODULE(libpykokkos MODULE NO_EXTRAS
+    $<TARGET_OBJECTS:libpykokkos-core>)
+
 ADD_SUBDIRECTORY(src)
 
-# add extra build properties to this target
-ADD_LIBRARY(libpykokkos-build-options INTERFACE)
-ADD_LIBRARY(libpykokkos::build-options ALIAS libpykokkos-build-options)
-TARGET_INCLUDE_DIRECTORIES(libpykokkos-build-options INTERFACE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>)
-
-PYKOKKOS_TARGET_FLAG(
-    libpykokkos-build-options
-    CHECK_FLAGS
-    MODE        INTERFACE
-    FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations -Wno-attributes -fvisibility=default /bigobj
-    LANGUAGES   CXX)
-
-IF(NOT Kokkos_InterOp_Header)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/Templates/KokkosExp_InterOp.hpp
-        ${PROJECT_BINARY_DIR}/include/KokkosExp_InterOp.hpp COPYONLY)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/Templates/KokkosExp_InterOp.hpp
-        ${PROJECT_BINARY_DIR}/examples/KokkosExp_InterOp.hpp COPYONLY)
-ENDIF()
-
-TRY_COMPILE(ENABLE_DEMANGLE
-    ${PROJECT_BINARY_DIR}
-    ${PROJECT_SOURCE_DIR}/cmake/Templates/demangle.cpp
-    OUTPUT_VARIABLE ENABLE_DEMANGLE_OUTPUT)
-
-IF(ENABLE_DEMANGLE)
-    TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_DEMANGLE)
-ENDIF()
-
-IF(ENABLE_EXPERIMENTAL)
-    TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_EXPERIMENTAL)
-ENDIF()
-
-IF(ENABLE_LAYOUTS)
-    TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_LAYOUTS)
-ENDIF()
-
-IF(ENABLE_MEMORY_TRAITS)
-    TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_MEMORY_TRAITS)
-ENDIF()
-
-TARGET_COMPILE_DEFINITIONS(libpykokkos-build-options INTERFACE ENABLE_VIEW_RANKS=${ENABLE_VIEW_RANKS})
-
-PYKOKKOS_TARGET_FLAG(
-    libpykokkos-build-options
-    CHECK_FLAGS
-    MODE        INTERFACE
-    FLAGS       -Werror
-    LANGUAGES   CXX
-    OPTION_NAME ENABLE_WERROR)
-
-IF(ENABLE_TIMING AND CMAKE_CXX_COMPILER_IS_NVCC_WRAPPER)
-    PYKOKKOS_TARGET_FLAG(
-        libpykokkos-build-options
-        MODE        INTERFACE
-        FLAGS       -time=${PROJECT_BINARY_DIR}/nvcc-compile-time.csv
-        LANGUAGES   CXX)
-ELSE()
-    PYKOKKOS_TARGET_FLAG(
-        libpykokkos-build-options
-        CHECK_FLAGS
-        BREAK_ON_SUCCESS
-        MODE        INTERFACE
-        FLAGS       -ftime-trace -ftime-report
-        LANGUAGES   CXX
-        OPTION_NAME ENABLE_TIMING)
-ENDIF()
-
 # link to kokkos and the custom build properties
-TARGET_LINK_LIBRARIES(libpykokkos PRIVATE Kokkos::kokkos libpykokkos-build-options)
+TARGET_LINK_LIBRARIES(libpykokkos PRIVATE
+    pybind11::pybind11
+    Kokkos::kokkos
+    libpykokkos::precompiled-headers
+    libpykokkos::build-options)
 
 IF(SKBUILD)
     SET(Kokkos_INSTALL_PYTHONDIR ${CMAKE_INSTALL_PREFIX})

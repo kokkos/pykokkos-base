@@ -60,7 +60,7 @@ pipeline {
                         sh 'cmake --build build --target install --parallel ${BUILD_JOBS}'
                         sh 'cd build && PYTHONPATH=${PWD} python3 $(which pytest) -s .'
                         sh 'cd build && PYTHONPATH=${PWD} python3 ./ex-numpy.py'
-                        sh 'cd /tmp && python3 -c "import kokkos; print(kokkos.__file__)"'
+                        sh 'cd /tmp && DEBUG_OUTPUT=ON python3 -c "import kokkos; print(kokkos.__file__)"'
                     }
                     post {
                         always {
@@ -120,7 +120,7 @@ pipeline {
                         sh 'cd build && mv nvcc-compile-time.csv ${STAGE_NAME}-nvcc-compile-time.csv && cat ${STAGE_NAME}-nvcc-compile-time.csv'
                         sh 'cd build && PYTHONPATH=${PWD} python3 $(which pytest) -s .'
                         sh 'cd build && PYTHONPATH=${PWD} python3 ./ex-numpy.py'
-                        sh 'cd /tmp && python3 -c "import kokkos; print(kokkos.__file__)"'
+                        sh 'cd /tmp && DEBUG_OUTPUT=ON python3 -c "import kokkos; print(kokkos.__file__)"'
                     }
                     post {
                         always {
@@ -181,7 +181,7 @@ pipeline {
                         sh 'cd build && mv nvcc-compile-time.csv ${STAGE_NAME}-nvcc-compile-time.csv && cat ${STAGE_NAME}-nvcc-compile-time.csv'
                         sh 'cd build && PYTHONPATH=${PWD} python3 $(which pytest) -s .'
                         sh 'cd build && PYTHONPATH=${PWD} python3 ./ex-numpy.py'
-                        sh 'cd /tmp && python3 -c "import kokkos; print(kokkos.__file__)"'
+                        sh 'cd /tmp && DEBUG_OUTPUT=ON python3 -c "import kokkos; print(kokkos.__file__)"'
                     }
                     post {
                         always {
@@ -237,7 +237,7 @@ pipeline {
                         sh 'cmake --build build --target install --parallel ${BUILD_JOBS}'
                         sh 'cd build && PYTHONPATH=${PWD} python3 $(which pytest) -s .'
                         sh 'cd build && PYTHONPATH=${PWD} python3 ./ex-numpy.py'
-                        sh 'cd /tmp && python3 -c "import kokkos; print(kokkos.__file__)"'
+                        sh 'cd /tmp && DEBUG_OUTPUT=ON python3 -c "import kokkos; print(kokkos.__file__)"'
                     }
                     post {
                         always {

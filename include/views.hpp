@@ -55,7 +55,7 @@
 #include <Kokkos_DynRankView.hpp>
 #include <Kokkos_View.hpp>
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename Tp, size_t... Idx,
           typename RetT = std::array<size_t, sizeof...(Idx)>>
@@ -87,7 +87,7 @@ RetT get_stride(Tp &m, std::index_sequence<Idx...>) {
   return RetT{(sizeof(Up) * get_stride<Idx>(m))...};
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 namespace Impl {
 template <typename Tp, typename... Args>
@@ -187,7 +187,7 @@ struct get_item {
   }
 };
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 namespace Impl {
 //
@@ -235,7 +235,7 @@ auto get_init(Vp &_view, enable_if_t<!ViewT::traits::is_managed, int> = 0) {
   _view.def(py::init(get_unmanaged_init<ViewT, Idx, Tp>()));
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 namespace Common {
 // creates overloads for data access from python
@@ -290,11 +290,11 @@ void generate_view_access(py::class_<ViewT> &_view, std::index_sequence<Idx...>,
       "Set the element");
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //
 //                          Primary View generation function
 //
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 // generic function to generate a view once the view type has been specified
 template <typename ViewT, typename Sp, typename Tp, typename Lp, typename Mp,
@@ -304,7 +304,7 @@ void generate_view(py::module &_mod, const std::string &_name,
   // some mirror views will instantiate types that were added already
   if (!add_pyclass<ViewT>()) return;
 
-  if (DEBUG_OUTPUT)
+  if (debug_output())
     std::cerr << "Registering " << _msg << " as python class '" << _name
               << "'..." << std::endl;
 

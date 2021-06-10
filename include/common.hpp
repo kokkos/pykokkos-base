@@ -70,7 +70,7 @@ namespace py = pybind11;
 #  include <cxxabi.h>
 #endif
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <bool B, typename T = int>
 using enable_if_t = typename std::enable_if<B, T>::type;
@@ -78,61 +78,42 @@ using enable_if_t = typename std::enable_if<B, T>::type;
 template <typename Tp>
 using decay_t = typename std::decay<Tp>::type;
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename...>
 struct type_list {};
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename... Args>
 void consume_parameters(Args &&...) {}
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
-inline std::string demangle(const char *_cstr) {
-#if defined(ENABLE_DEMANGLE)
-  // demangling a string when delimiting
-  int _ret      = 0;
-  char *_demang = abi::__cxa_demangle(_cstr, 0, 0, &_ret);
-  if (_demang && _ret == 0)
-    return std::string{const_cast<const char *>(_demang)};
-  else
-    return _cstr;
-#else
-  return _cstr;
-#endif
-}
+namespace Impl {
+// replaces type_list<CONTENTS> with CONTENTS
+std::string remove_type_list_wrapper(std::string);
+}  // namespace Impl
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
-inline std::string demangle(const std::string &_str) {
-  return demangle(_str.c_str());
-}
+std::string demangle(const char *_cstr);
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+
+std::string demangle(const std::string &_str);
+
+//----------------------------------------------------------------------------//
 
 template <typename Tp>
 inline std::string demangle() {
   // static because a type demangle will always be the same
-  static auto _val = []() {
-    // wrap the type in type_list and then extract ... from type_list<...>
-    auto _tmp = demangle(typeid(type_list<Tp>).name());
-    auto _key = std::string{"type_list"};
-    auto _idx = _tmp.find(_key);
-    _idx      = _tmp.find("<", _idx);
-    _tmp      = _tmp.substr(_idx + 1);
-    _idx      = _tmp.find_last_of(">");
-    _tmp      = _tmp.substr(0, _idx);
-    // strip trailing whitespaces
-    while ((_idx = _tmp.find_last_of(" ")) == _tmp.length() - 1)
-      _tmp = _tmp.substr(0, _idx);
-    return _tmp;
-  }();
+  static auto _val =
+      Impl::remove_type_list_wrapper(demangle(typeid(type_list<Tp>).name()));
   return _val;
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename... Args>
 std::string join(const std::string &delim, Args &&... args) {
@@ -147,14 +128,11 @@ std::string join(const std::string &delim, Args &&... args) {
   return ss.str().substr(delim.length());
 }
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
-inline auto &get_existing_pyclass_names() {
-  static std::set<std::string> _instance{};
-  return _instance;
-}
+std::set<std::string> &get_existing_pyclass_names();
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename Tp>
 inline auto add_pyclass() {
@@ -162,3 +140,7 @@ inline auto add_pyclass() {
   get_existing_pyclass_names().insert(demangle<Tp>());
   return true;
 }
+
+//----------------------------------------------------------------------------//
+
+bool debug_output();

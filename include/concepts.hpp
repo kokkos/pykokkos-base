@@ -44,11 +44,12 @@
 
 #pragma once
 
-#include "KokkosExp_InterOp.hpp"
 #include "common.hpp"
 #include "fwd.hpp"
 
-//--------------------------------------------------------------------------------------//
+#include <KokkosExp_InterOp.hpp>
+
+//----------------------------------------------------------------------------//
 
 // default definition
 template <typename... T>
@@ -68,7 +69,7 @@ struct concat<type_list<T...>, type_list<U...>, Tail...>
 template <typename... T>
 using concat_t = typename concat<T...>::type;
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <template <typename> class PredicateT, bool ValueT, typename... T>
 struct gather {
@@ -79,7 +80,7 @@ struct gather {
 template <template <typename> class PredicateT, bool ValueT, typename... T>
 using gather_t = typename gather<PredicateT, ValueT, T...>::type;
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename...>
 struct concrete_view_type_list;
@@ -90,19 +91,19 @@ struct dynamic_view_type_list;
 template <size_t Idx>
 struct index_val;
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //  this is used to mark memory spaces as unavailable
 //
 template <typename Tp>
 struct is_available : std::true_type {};
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //  this is used to mark template parameters as implicit
 //
 template <typename Tp>
 struct is_implicit : std::false_type {};
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //  this is used to convert Kokkos::Device<ExecSpace, MemSpace> to MemSpace
 //
 template <typename Tp>
@@ -118,7 +119,7 @@ struct remove_device<Kokkos::Device<ExecT, MemT>> {
 template <typename Tp>
 using remove_device_t = typename remove_device<Tp>::type;
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //  this is used to convert Kokkos::Device<ExecSpace, MemSpace> to MemSpace
 //
 template <typename Tp>
@@ -127,7 +128,7 @@ struct is_default_memory_trait : std::false_type {};
 template <>
 struct is_default_memory_trait<Kokkos::MemoryTraits<0>> : std::true_type {};
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //  this is used to get the view type without the device/execution space
 //
 template <typename, typename...>
@@ -152,7 +153,7 @@ struct view_type<ViewT<ValueT, Types...>>
 template <typename... T>
 using view_type_t = typename view_type<T...>::type;
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 //  this is the standardization type
 //
 template <typename Tp>

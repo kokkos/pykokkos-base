@@ -1,6 +1,9 @@
+#-----------------------------------------------------------------------
 #
 #   Finds the Packages
 #
+#-----------------------------------------------------------------------
+
 INCLUDE(KokkosPythonUtilities)
 
 # synchronize Python3_EXECUTABLE and PYTHON_EXECUTABLE
@@ -53,6 +56,61 @@ IF(ENABLE_INTERNAL_PYBIND11)
         REPO_URL          https://github.com/pybind/pybind11.git
         REPO_BRANCH       master)
     ADD_SUBDIRECTORY(external/pybind11)
+    SET(pybind11_INCLUDE_DIR external/pybind11/include)
 ELSE()
     FIND_PACKAGE(pybind11 REQUIRED)
+ENDIF()
+
+IF(TARGET pybind11 AND NOT TARGET pybind11::pybind11)
+    ADD_LIBRARY(pybind11::pybind11 ALIAS pybind11)
+ENDIF()
+
+#-----------------------------------------------------------------------
+#           precompiled headers
+#-----------------------------------------------------------------------
+
+ADD_LIBRARY(libpykokkos-precompiled-headers INTERFACE)
+ADD_LIBRARY(libpykokkos::precompiled-headers ALIAS libpykokkos-precompiled-headers)
+
+IF(ENABLE_PRECOMPILED_HEADERS)
+    # STL headers
+    TARGET_PRECOMPILE_HEADERS(libpykokkos-precompiled-headers
+        INTERFACE
+            <string>
+            <sstream>
+            <iostream>
+            <regex>
+            <type_traits>
+            <map>
+            <set>
+            <vector>
+            <unordered_map>
+            <cstdlib>
+            <cstdint>
+            <cstdio>
+    )
+
+    # Kokkos headers
+    TARGET_PRECOMPILE_HEADERS(libpykokkos-precompiled-headers
+        INTERFACE
+            <Kokkos_Core.hpp>
+            <Kokkos_View.hpp>
+            <Kokkos_Layout.hpp>
+            <Kokkos_Core_fwd.hpp>
+            <Kokkos_DynRankView.hpp>
+            <Kokkos_MemoryTraits.hpp>
+    )
+
+    # pybind11 headers
+    TARGET_PRECOMPILE_HEADERS(libpykokkos-precompiled-headers
+        INTERFACE
+            <pybind11/pybind11.h>
+            <pybind11/operators.h>
+            <pybind11/pytypes.h>
+            <pybind11/stl.h>
+    )
+
+    TARGET_LINK_LIBRARIES(libpykokkos-precompiled-headers INTERFACE
+        Kokkos::kokkos
+        pybind11::pybind11)
 ENDIF()

@@ -53,7 +53,7 @@
 #include <Kokkos_DynRankView.hpp>
 #include <Kokkos_View.hpp>
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx,
           size_t TraitIdx>
@@ -133,7 +133,7 @@ struct concrete_view_type_list<> {
       std::make_index_sequence<ViewDataTypesEnd>())>::type>>;
 };
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <size_t DataIdx, size_t SpaceIdx, size_t LayoutIdx, size_t TraitIdx>
 struct dynamic_view_type_list<index_val<DataIdx>, index_val<SpaceIdx>,
@@ -199,12 +199,12 @@ struct dynamic_view_type_list<> {
       std::make_index_sequence<ViewDataTypesEnd>())>::type>>;
 };
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 using concrete_view_type_list_t = typename concrete_view_type_list<>::type;
 using dynamic_view_type_list_t  = typename dynamic_view_type_list<>::type;
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename LhsT, typename RhsT>
 struct deep_copy_compatible {
@@ -263,7 +263,7 @@ struct deep_copy_compatible {
        !(is_dynamic<LhsT>(0) && !is_dynamic<RhsT>(0)));
 };
 
-//--------------------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 template <typename LhsT>
 struct PYKOKKOS_HIDDEN deep_copy {

@@ -54,6 +54,7 @@ jobs:
           -DENABLE_MEMORY_TRAITS=OFF
           -DENABLE_EXAMPLES=ON
           -DENABLE_WERROR=ON
+          -DENABLE_PRECOMPILED_HEADERS=ON
           -DPython3_EXECUTABLE=$(which python)
 
     - name: Build
@@ -67,7 +68,7 @@ jobs:
         mkdir -p scratch &&
         cd scratch &&
         export PYTHONPATH=/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
-        python -c "import kokkos; print(kokkos.__file__)"
+        DEBUG_OUTPUT=ON python -c "import kokkos; print(kokkos.__file__)"
 
     - name: Test
       working-directory: ${{github.workspace}}/build
@@ -127,7 +128,7 @@ jobs:
       run:
         mkdir -p scratch &&
         cd scratch &&
-        python -c "import kokkos; print(kokkos.__file__)" &&
+        DEBUG_OUTPUT=ON python -c "import kokkos; print(kokkos.__file__)" &&
         pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))
 
     - name: Test
@@ -184,7 +185,7 @@ jobs:
       run:
         mkdir -p scratch &&
         cd scratch &&
-        python -c "import kokkos; print(kokkos.__file__)"
+        DEBUG_OUTPUT=ON python -c "import kokkos; print(kokkos.__file__)"
 
     - name: Test
       working-directory: ${{github.workspace}}/scratch

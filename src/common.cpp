@@ -42,74 +42,75 @@
 //@HEADER
 */
 
-#include "libpykokkos.hpp"
 #include "common.hpp"
-#include "defines.hpp"
-#include "fwd.hpp"
-#include "traits.hpp"
 
-#include <Kokkos_Core.hpp>
+#include <regex>
 
 //----------------------------------------------------------------------------//
-//
-//        The python module
-//
+
+std::string demangle(const char *_cstr) {
+#if defined(ENABLE_DEMANGLE)
+  // demangling a string when delimiting
+  int _ret      = 0;
+  char *_demang = abi::__cxa_demangle(_cstr, 0, 0, &_ret);
+  if (_demang && _ret == 0)
+    return std::string{const_cast<const char *>(_demang)};
+  else
+    return _cstr;
+#else
+  return _cstr;
+#endif
+}
+
 //----------------------------------------------------------------------------//
 
-PYBIND11_MODULE(libpykokkos, kokkos) {
-  kokkos.doc() =
-      "Python bindings to critical Kokkos functions, Kokkos data strucures, "
-      "and tools";
+std::string demangle(const std::string &_str) { return demangle(_str.c_str()); }
 
-  // Initialize kokkos
-  auto _initialize = [&]() {
-    if (Kokkos::is_initialized()) return false;
-    if (debug_output()) std::cerr << "Initializing Kokkos..." << std::endl;
-    // python system module
-    py::module sys = py::module::import("sys");
-    // get the arguments for python system module
-    py::object args = sys.attr("argv");
-    auto argv       = args.cast<py::list>();
-    int _argc       = argv.size();
-    char** _argv    = new char*[argv.size()];
-    for (int i = 0; i < _argc; ++i) {
-      auto _args = argv[i].cast<std::string>();
-      if (_args == "--") {
-        for (int j = i; j < _argc; ++j) _argv[i] = nullptr;
-        _argc = i;
-        break;
-      }
-      _argv[i] = strdup(_args.c_str());
+//----------------------------------------------------------------------------//
+
+std::string Impl::remove_type_list_wrapper(std::string _tmp) {
+  auto _key = std::string{"type_list"};
+  auto _idx = _tmp.find(_key);
+  _idx      = _tmp.find("<", _idx);
+  _tmp      = _tmp.substr(_idx + 1);
+  _idx      = _tmp.find_last_of(">");
+  _tmp      = _tmp.substr(0, _idx);
+  // strip trailing whitespaces
+  while ((_idx = _tmp.find_last_of(" ")) == _tmp.length() - 1)
+    _tmp = _tmp.substr(0, _idx);
+  return _tmp;
+}
+
+//----------------------------------------------------------------------------//
+
+std::set<std::string> &get_existing_pyclass_names() {
+  static std::set<std::string> _instance{};
+  return _instance;
+}
+
+//----------------------------------------------------------------------------//
+
+bool debug_output() {
+  static auto _value = []() {
+#if !defined(NDEBUG) || defined(DEBUG)
+    bool val = true;
+#else
+    bool val = false;
+#endif
+    auto _env_value = std::getenv("DEBUG_OUTPUT");
+    if (_env_value) {
+      auto var = std::string{_env_value};
+      if (var.find_first_not_of("0123456789") == std::string::npos) {
+        val = (std::stoi(var) == 0) ? false : true;
+      } else if (std::regex_match(var,
+                                  std::regex("^(off|false|no|n|f)$",
+                                             std::regex_constants::icase))) {
+        val = false;
+      } else if (std::regex_match(var, std::regex("^(on|true|yes|y|t)$",
+                                                  std::regex_constants::icase)))
+        val = true;
     }
-    Kokkos::initialize(_argc, _argv);
-    for (int i = 0; i < _argc; ++i) free(_argv[i]);
-    delete[] _argv;
-    return true;
-  };
-
-  // Finalize kokkos
-  auto _finalize = []() {
-    if (!Kokkos::is_initialized()) return false;
-    if (debug_output()) std::cerr << "Finalizing Kokkos..." << std::endl;
-    destroy_callbacks();
-    Kokkos::Tools::Experimental::set_deallocate_data_callback(nullptr);
-    py::module gc = py::module::import("gc");
-    gc.attr("collect")();
-    Kokkos::finalize();
-    return true;
-  };
-
-  std::atexit(destroy_callbacks);
-
-  kokkos.def("is_initialized", &Kokkos::is_initialized,
-             "Query initialization state");
-  kokkos.def("initialize", _initialize, "Initialize Kokkos");
-  kokkos.def("finalize", _finalize, "Finalize Kokkos");
-
-  generate_tools(kokkos);
-  generate_available(kokkos);
-  generate_enumeration(kokkos);
-  generate_view_variants(kokkos);
-  generate_atomic_variants(kokkos);
-  generate_backend_versions(kokkos);
+    return val;
+  }();
+  return _value;
 }
