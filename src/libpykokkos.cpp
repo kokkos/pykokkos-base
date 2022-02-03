@@ -112,4 +112,5 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
   generate_view_variants(kokkos);
   generate_atomic_variants(kokkos);
   generate_backend_versions(kokkos);
+  generate_pool_variants(kokkos);
 }

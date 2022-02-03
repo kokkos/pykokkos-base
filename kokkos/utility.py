@@ -215,3 +215,23 @@ def create_mirror_view(src, copy=False):
 def deep_copy(dst, src):
     """Performs Kokkos::deep_copy"""
     return dst.deep_copy(src)
+
+
+def random_pool(state, space, seed=None):
+    """Create a Random_XorShift Pool"""
+
+    if state not in {64, 1024}:
+        raise ValueError(f"State size {state} not supported, only 64 and 1024.")
+
+    if seed is not None and not isinstance(seed, int):
+        raise ValueError(f"Seed must be either None or of type int")
+
+    _space = lib.get_memory_space(space)
+    _name = f"KokkosXorShift{state}Pool_{_space}"
+
+    _cons = getattr(lib, _name)
+
+    if seed is None:
+        return _cons()
+
+    return _cons(seed)

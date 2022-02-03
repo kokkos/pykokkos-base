@@ -45,16 +45,49 @@
 #pragma once
 
 #include "common.hpp"
+#include "concepts.hpp"
+#include "pools.hpp"
+#include "traits.hpp"
 
-#include <pybind11/pybind11.h>
+namespace Space {
+namespace SpaceDim {
 
-namespace py = pybind11;
+template <size_t SpaceIdx>
+void generate_XorShift64_pool_variant(py::module &_mod) {
+  using space_spec_t  = MemorySpaceSpecialization<SpaceIdx>;
+  using Sp            = typename space_spec_t::type;
+  using UniformT      = Kokkos::Random_XorShift64_Pool<Sp>;
 
-void generate_tools(py::module& kokkos);
-void generate_available(py::module& kokkos);
-void generate_enumeration(py::module& kokkos);
-void generate_view_variants(py::module& kokkos);
-void generate_atomic_variants(py::module& kokkos);
-void generate_backend_versions(py::module& kokkos);
-void generate_pool_variants(py::module& kokkos);
-void destroy_callbacks();
+  auto name = join("_", "KokkosXorShift64Pool", space_spec_t::label());
+
+  Common::generate_pool<UniformT, Sp>(_mod, name, demangle<UniformT>());
+
+}
+}
+
+template <size_t SpaceIdx>
+void generate_XorShift64_pool_variant(
+    py::module &,
+    std::enable_if_t<!is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
+}
+
+template <size_t SpaceIdx>
+void generate_XorShift64_pool_variant(
+    py::module &_mod,
+    std::enable_if_t<is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
+  // FOLD_EXPRESSION(
+  //     SpaceDim::generate_XorShift64_pool_variant<SpaceIdx>(_mod));
+
+    SpaceDim::generate_XorShift64_pool_variant<SpaceIdx>(_mod);
+
+}
+}
+
+namespace {
+// generate data-type, memory-space buffers for concrete dimension
+template <size_t... SpaceIdx>
+void generate_XorShift64_pool_variant(py::module &_mod,
+                                    std::index_sequence<SpaceIdx...>) {
+  FOLD_EXPRESSION(Space::generate_XorShift64_pool_variant<SpaceIdx>(_mod));
+}
+}  // namespace
