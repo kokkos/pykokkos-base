@@ -54,7 +54,7 @@ namespace SpaceDim {
 
 template <size_t SpaceIdx>
 void generate_XorShift64_pool_variant(py::module &_mod) {
-  using space_spec_t  = MemorySpaceSpecialization<SpaceIdx>;
+  using space_spec_t  = ExecutionSpaceSpecialization<SpaceIdx>;
   using Sp            = typename space_spec_t::type;
   using UniformT      = Kokkos::Random_XorShift64_Pool<Sp>;
 
@@ -68,15 +68,13 @@ void generate_XorShift64_pool_variant(py::module &_mod) {
 template <size_t SpaceIdx>
 void generate_XorShift64_pool_variant(
     py::module &,
-    std::enable_if_t<!is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
+    std::enable_if_t<!is_available<execution_space_t<SpaceIdx>>::value, int> = 0) {
 }
 
 template <size_t SpaceIdx>
 void generate_XorShift64_pool_variant(
     py::module &_mod,
-    std::enable_if_t<is_available<memory_space_t<SpaceIdx>>::value, int> = 0) {
-  // FOLD_EXPRESSION(
-  //     SpaceDim::generate_XorShift64_pool_variant<SpaceIdx>(_mod));
+    std::enable_if_t<is_available<execution_space_t<SpaceIdx>>::value, int> = 0) {
 
     SpaceDim::generate_XorShift64_pool_variant<SpaceIdx>(_mod);
 

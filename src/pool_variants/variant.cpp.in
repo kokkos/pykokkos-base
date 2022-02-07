@@ -5,5 +5,5 @@
 
 void @FUNC@(py::module &kokkos) {
   generate_@TYPE_VARIANT@_pool_variant<@ENUM@>(
-      kokkos, std::make_index_sequence<MemorySpacesEnd>{});
+      kokkos, std::make_index_sequence<ExecutionSpacesEnd>{});
 }

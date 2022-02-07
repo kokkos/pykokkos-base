@@ -226,7 +226,7 @@ def random_pool(state, space, seed=None):
     if seed is not None and not isinstance(seed, int):
         raise ValueError("Seed must be either None or of type int")
 
-    _space = lib.get_memory_space(space)
+    _space = lib.get_execution_space(space)
     _name = f"KokkosXorShift{state}Pool_{_space}"
 
     _cons = getattr(lib, _name)

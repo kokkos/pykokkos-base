@@ -184,6 +184,7 @@ try:
         "DefaultHostMemorySpace",
         "get_dtype",  # get enumeration from string or vice-versa
         "get_layout",
+        "get_execution_space",
         "get_memory_space",
         "get_memory_trait",
         "get_host_accessible",  # query build support
