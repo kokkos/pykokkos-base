@@ -308,23 +308,23 @@ class PyKokkosBaseToolsTests(unittest.TestCase):
     def test_routines(self):
         """cxx_routines"""
 
-        self.assertEqual(data["begin_cxx_parallel_for"], 1)
-        self.assertEqual(data["begin_cxx_parallel_reduce"], 2)
-        self.assertEqual(data["begin_cxx_parallel_scan"], 3)
+        self.assertTrue("begin_cxx_parallel_for" in data)
+        self.assertTrue("begin_cxx_parallel_reduce" in data)
+        self.assertTrue("begin_cxx_parallel_scan" in data)
 
-        self.assertEqual(data["end_cxx_parallel_for"], 1)
-        self.assertEqual(data["end_cxx_parallel_reduce"], 2)
-        self.assertEqual(data["end_cxx_parallel_scan"], 3)
+        self.assertTrue("end_cxx_parallel_for" in data)
+        self.assertTrue("end_cxx_parallel_reduce" in data)
+        self.assertTrue("end_cxx_parallel_scan" in data)
 
-        self.assertEqual(data["create_cxx_created_section"], 4)
-        self.assertEqual(data["start_cxx_created_section"], 4)
-        self.assertEqual(data["stop_cxx_created_section"], 4)
-        self.assertEqual(data["destroy_cxx_created_section"], 4)
+        self.assertTrue("create_cxx_created_section" in data)
+        self.assertTrue("start_cxx_created_section" in data)
+        self.assertTrue("stop_cxx_created_section" in data)
+        self.assertTrue("destroy_cxx_created_section" in data)
 
-        self.assertEqual(data["create_python_profile_section"], 5)
-        self.assertEqual(data["start_python_profile_section"], 5)
-        self.assertEqual(data["stop_python_profile_section"], 5)
-        self.assertEqual(data["destroy_python_profile_section"], 5)
+        self.assertTrue("create_python_profile_section" in data)
+        self.assertTrue("start_python_profile_section" in data)
+        self.assertTrue("stop_python_profile_section" in data)
+        self.assertTrue("destroy_python_profile_section" in data)
 
         self.assertCountEqual(data["begin_cxx_target/Host/dst"], [40, True, True])
         self.assertCountEqual(data["begin_cxx_source/Host/src"], [40, True, True])
