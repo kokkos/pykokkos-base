@@ -47,7 +47,7 @@
 #include "common.hpp"
 #include "defines.hpp"
 
-#include <Kokkos_Core_fwd.hpp>
+#include <Kokkos_Core.hpp>
 #include <Kokkos_Layout.hpp>
 #include <Kokkos_MemoryTraits.hpp>
 
