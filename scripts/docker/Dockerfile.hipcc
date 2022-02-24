@@ -1,4 +1,4 @@
-ARG BASE=rocm/dev-ubuntu-20.04:4.2
+ARG BASE=rocm/dev-ubuntu-20.04:4.5
 FROM $BASE
 
 ARG ADDITIONAL_PACKAGES
@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     ccache \
     python3 \
     python3-pip \
+    libpython3-dev \
     build-essential \
     $ADDITIONAL_PACKAGES && \
     apt-get --purge autoremove && \
