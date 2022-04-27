@@ -47,7 +47,7 @@ ADD_FEATURE(Python3_INCLUDE_DIR "Python include directory")
 ADD_FEATURE(Python3_LIBRARY "Python library")
 
 # python binding library
-IF(ENABLE_INTERNAL_PYBIND11)
+IF(ENABLE_INTERNAL_PYBIND11 AND NOT TARGET pybind11::pybind11)
     CHECKOUT_GIT_SUBMODULE(
         RECURSIVE
         RELATIVE_PATH     external/pybind11
@@ -57,7 +57,7 @@ IF(ENABLE_INTERNAL_PYBIND11)
         REPO_BRANCH       master)
     ADD_SUBDIRECTORY(external/pybind11)
     SET(pybind11_INCLUDE_DIR external/pybind11/include)
-ELSE()
+ELSEIF(NOT TARGET pybind11::pybind11)
     FIND_PACKAGE(pybind11 REQUIRED)
 ENDIF()
 

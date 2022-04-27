@@ -9,6 +9,12 @@ PROJECT(
     LANGUAGES   C CXX
     VERSION     ${pykokkos-base_VERSION})
 
+IF("${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
+    SET(PYKOKKOS_BASE_MAIN_PROJECT ON)
+ELSE()
+    SET(PYKOKKOS_BASE_MAIN_PROJECT OFF)
+ENDIF()
+
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
 ADD_OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
