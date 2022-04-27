@@ -109,6 +109,7 @@ pipeline {
                                 -DCMAKE_UNITY_BUILD=OFF \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
+                                -DENABLE_VIEW_RANKS=2 \
                                 -DENABLE_EXAMPLES=ON \
                                 -DENABLE_WERROR=OFF \
                                 -DENABLE_CTP=ON \
