@@ -6,8 +6,10 @@ if [ ${PWD} = ${BASH_SOURCE[0]} ]; then
     cd ..
 fi
 
+: ${PYTHON_EXECUTABLE:=python3}
+
 rm -rf .eggs *.egg-info _skbuild dist
-python setup.py sdist
+${PYTHON_EXECUTABLE} setup.py sdist
 cd dist
 sha256sum *
 gpg --detach-sign -a *
