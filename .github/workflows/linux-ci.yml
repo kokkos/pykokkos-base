@@ -167,7 +167,7 @@ jobs:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
-          -DKokkos_ENABLE_PTHREAD=ON
+          -DKokkos_ENABLE_THREADS=ON
           -DCMAKE_CXX_STANDARD=17
           -DCMAKE_POSITION_INDEPENDENT_CODE=ON
           /tmp/kokkos-source &&
@@ -178,7 +178,7 @@ jobs:
       run:
         python -m pip install -r requirements.txt &&
         python -m pip install pytest &&
-        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=ON -DENABLE_LAYOUTS=ON -DCMAKE_CXX_STANDARD=17 -DKokkos_ENABLE_PTHREAD=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
+        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=ON -DENABLE_LAYOUTS=ON -DCMAKE_CXX_STANDARD=17 -DKokkos_ENABLE_THREADS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
           python -m pip install -v --user --no-deps -e .
 
     - name: Import Test

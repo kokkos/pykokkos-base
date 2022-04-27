@@ -92,7 +92,7 @@ Here are the steps when Kokkos is added as a submodule:
         - **YES**: set `Kokkos_ENABLE_OPENMP=ON`
         - **NO**: `find_package(Threads)`
             - Was Threads found?
-                - **YES**: set `Kokkos_ENABLE_PTHREADS=ON` (if not Windows)
+                - **YES**: set `Kokkos_ENABLE_THREADS=ON` (if not Windows)
 - `find_package(CUDA)`
     - Was CUDA found?
         - **YES**: set:
