@@ -8,8 +8,11 @@ INCLUDE_GUARD(GLOBAL)
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
 # if first time cmake is run and no external/internal preference is specified,
-# try to find already installed kokkos
-IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
+# try to find already installed kokkos unless (A) the Kokkos targets already
+# exist or (B) pykokkos-base is being build via scikit-build. In the case
+# of scikit-build, we want to prefer the internal kokkos because it is
+# unlikely the user will see or kokkos which kokkos is found
+IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore AND NOT SKBUILD)
     FIND_PACKAGE(Kokkos)
     # set the default cache value
     IF(Kokkos_FOUND)
@@ -19,6 +22,8 @@ IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
     ENDIF()
 ELSEIF(TARGET Kokkos::kokkoscore)
     SET(_INTERNAL_KOKKOS OFF)
+ELSEIF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND SKBUILD)
+    set(_INTERNAL_KOKKOS ON)
 ELSE()
     # make sure ADD_OPTION in KokkosPythonOptions has a value
     SET(_INTERNAL_KOKKOS ${ENABLE_INTERNAL_KOKKOS})
