@@ -17,6 +17,8 @@ IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore AND NOT 
     # set the default cache value
     IF(Kokkos_FOUND)
         SET(_INTERNAL_KOKKOS OFF)
+        # force using same compiler as kokkos
+        kokkos_compilation(GLOBAL)
     ELSE()
         SET(_INTERNAL_KOKKOS ON)
     ENDIF()
@@ -50,7 +52,6 @@ IF(NOT _INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
     ADD_FEATURE(Kokkos_CXX_COMPILER "Compiler used to build Kokkos")
     ADD_FEATURE(Kokkos_CXX_COMPILER_ID "Compiler ID used to build Kokkos")
 ELSEIF(TARGET Kokkos::kokkoscore)
-    kokkos_compilation(GLOBAL)
 
     IF(NOT Kokkos_INCLUDE_DIR)
         GET_TARGET_PROPERTY(Kokkos_INCLUDE_DIR Kokkos::kokkoscore INTERFACE_INCLUDE_DIRECTORIES)
