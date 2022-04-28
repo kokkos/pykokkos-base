@@ -13,7 +13,7 @@ INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 # of scikit-build, we want to prefer the internal kokkos because it is
 # unlikely the user will see or kokkos which kokkos is found
 IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore AND NOT SKBUILD)
-    FIND_PACKAGE(Kokkos)
+    FIND_PACKAGE(Kokkos COMPONENTS launch_compiler)
     # set the default cache value
     IF(Kokkos_FOUND)
         SET(_INTERNAL_KOKKOS OFF)
@@ -31,7 +31,9 @@ ENDIF()
 
 # force an error
 IF(NOT _INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
-    FIND_PACKAGE(Kokkos REQUIRED COMPONENTS launch_compiler)
+    IF(NOT Kokkos_FOUND)
+        FIND_PACKAGE(Kokkos REQUIRED COMPONENTS launch_compiler)
+    ENDIF()
     kokkos_compilation(GLOBAL)
     IF(NOT Kokkos_INCLUDE_DIR)
         GET_TARGET_PROPERTY(Kokkos_INCLUDE_DIR Kokkos::kokkoscore INTERFACE_INCLUDE_DIRECTORIES)
