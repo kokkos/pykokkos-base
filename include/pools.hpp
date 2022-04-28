@@ -44,17 +44,31 @@
 
 #pragma once
 
-#include "common.hpp"
+#include <Kokkos_Core.hpp>
+#include <Kokkos_Random.hpp>
 
-#include <pybind11/pybind11.h>
+namespace Common {
+template <typename PoolT, typename Sp>
+void generate_pool(py::module &_mod, const std::string &_name,
+                   const std::string &_msg) {
+  if (debug_output())
+    std::cerr << "Registering " << _msg << " as python class '" << _name
+              << "'..." << std::endl;
 
-namespace py = pybind11;
+  // using PoolT = Kokkos::Random_XorShift64_Pool<Kokkos::Cuda>;
+  // class decl
+  py::class_<PoolT> _pool(_mod, _name.c_str());
 
-void generate_tools(py::module& kokkos);
-void generate_available(py::module& kokkos);
-void generate_enumeration(py::module& kokkos);
-void generate_view_variants(py::module& kokkos);
-void generate_atomic_variants(py::module& kokkos);
-void generate_backend_versions(py::module& kokkos);
-void generate_pool_variants(py::module& kokkos);
-void destroy_callbacks();
+  // default initializer
+  _pool.def(py::init([]() { return new PoolT{}; }));
+
+  _pool.def(py::init([](uint64_t seed) { return new PoolT{seed}; }));
+
+  _pool.def(
+      "init",
+      [](PoolT &_p, uint64_t _seed, int _num_states) {
+        _p.init(_seed, _num_states);
+      },
+      "Initialize the random pool");
+}
+}  // namespace Common
