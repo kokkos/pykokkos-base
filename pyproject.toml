@@ -1,8 +1,12 @@
 [build-system]
 requires = [
-    "scikit-build",
-    "cmake>=3.16",
+    "setuptools >= 40.0.4",
+    "setuptools_scm >= 2.0.0",
+    "wheel >= 0.29.0",
+    "scikit-build >= 0.8.0",
+    "cmake >= 3.16.0",
 ]
+build-backend = 'setuptools.build_meta'
 
 [tool.black]
 line-length = 88

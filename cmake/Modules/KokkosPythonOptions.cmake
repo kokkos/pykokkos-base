@@ -13,7 +13,7 @@ ENDIF()
 
 # default UNITY_BUILD to ON except when compiling CUDA
 SET(_UNITY_BUILD ON)
-IF("CUDA" IN_LIST Kokkos_DEVICES)
+IF("CUDA" IN_LIST Kokkos_DEVICES OR ENABLE_CUDA OR Kokkos_ENABLE_CUDA)
     SET(_UNITY_BUILD OFF)
 ENDIF()
 
@@ -21,7 +21,7 @@ SET(_ENABLE_MEM_DEFAULT ON)
 SET(_ENABLE_LAY_DEFAULT ON)
 # unless ENABLE_LAYOUTS or ENABLE_MEMORY_TRAITS were set
 # or, NVCC is really, really slow so never default memory traits to ON
-IF("CUDA" IN_LIST Kokkos_DEVICES)
+IF("CUDA" IN_LIST Kokkos_DEVICES OR ENABLE_CUDA OR Kokkos_ENABLE_CUDA)
     # one or both of these will be ignored bc of existing cache values
     SET(_ENABLE_MEM_DEFAULT OFF)
     SET(_ENABLE_LAY_DEFAULT ON)

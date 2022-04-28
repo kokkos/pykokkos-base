@@ -42,7 +42,7 @@ pipeline {
                                 -DKokkos_ENABLE_HIP=ON \
                                 -DBUILD_SHARED_LIBS=ON \
                                 /tmp/kokkos-source'''
-                        sh 'cmake --build /tmp/kokkos-build --target all --parallel ${BUILD_JOBS}'
+                        sh 'cmake --build /tmp/kokkos-build --target all --parallel ${BUILD_JOBS} -- VERBOSE=1'
                         sh 'cmake --build /tmp/kokkos-build --target install --parallel ${BUILD_JOBS}'
                         sh 'python3 -m pip install -r requirements.txt'
                         sh 'python3 -m pip install pytest'
@@ -109,6 +109,7 @@ pipeline {
                                 -DCMAKE_UNITY_BUILD=OFF \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
+                                -DENABLE_VIEW_RANKS=2 \
                                 -DENABLE_EXAMPLES=ON \
                                 -DENABLE_WERROR=OFF \
                                 -DENABLE_CTP=ON \
@@ -167,7 +168,7 @@ pipeline {
                         sh '''cmake -B build \
                                 -DCMAKE_BUILD_TYPE=Release \
                                 -DCMAKE_UNITY_BUILD=OFF \
-                                -DENABLE_VIEW_RANKS=3 \
+                                -DENABLE_VIEW_RANKS=2 \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
                                 -DENABLE_EXAMPLES=ON \

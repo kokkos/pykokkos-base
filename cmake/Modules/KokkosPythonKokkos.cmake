@@ -8,17 +8,24 @@ INCLUDE_GUARD(GLOBAL)
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
 # if first time cmake is run and no external/internal preference is specified,
-# try to find already installed kokkos
-IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
+# try to find already installed kokkos unless (A) the Kokkos targets already
+# exist or (B) pykokkos-base is being build via scikit-build. In the case
+# of scikit-build, we want to prefer the internal kokkos because it is
+# unlikely the user will see or kokkos which kokkos is found
+IF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore AND NOT SKBUILD)
     FIND_PACKAGE(Kokkos)
     # set the default cache value
     IF(Kokkos_FOUND)
         SET(_INTERNAL_KOKKOS OFF)
+        # force using same compiler as kokkos
+        kokkos_compilation(GLOBAL)
     ELSE()
         SET(_INTERNAL_KOKKOS ON)
     ENDIF()
 ELSEIF(TARGET Kokkos::kokkoscore)
     SET(_INTERNAL_KOKKOS OFF)
+ELSEIF(NOT DEFINED ENABLE_INTERNAL_KOKKOS AND SKBUILD)
+    set(_INTERNAL_KOKKOS ON)
 ELSE()
     # make sure ADD_OPTION in KokkosPythonOptions has a value
     SET(_INTERNAL_KOKKOS ${ENABLE_INTERNAL_KOKKOS})
@@ -27,7 +34,9 @@ ENDIF()
 # force an error
 IF(NOT _INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
     FIND_PACKAGE(Kokkos REQUIRED COMPONENTS launch_compiler)
+
     kokkos_compilation(GLOBAL)
+
     IF(NOT Kokkos_INCLUDE_DIR)
         GET_TARGET_PROPERTY(Kokkos_INCLUDE_DIR Kokkos::kokkoscore INTERFACE_INCLUDE_DIRECTORIES)
     ENDIF()
@@ -43,6 +52,7 @@ IF(NOT _INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
     ADD_FEATURE(Kokkos_CXX_COMPILER "Compiler used to build Kokkos")
     ADD_FEATURE(Kokkos_CXX_COMPILER_ID "Compiler ID used to build Kokkos")
 ELSEIF(TARGET Kokkos::kokkoscore)
+
     IF(NOT Kokkos_INCLUDE_DIR)
         GET_TARGET_PROPERTY(Kokkos_INCLUDE_DIR Kokkos::kokkoscore INTERFACE_INCLUDE_DIRECTORIES)
     ENDIF()
@@ -74,11 +84,11 @@ IF(_INTERNAL_KOKKOS)
     SET(Threads_FOUND OFF)
     SET(CUDA_FOUND OFF)
 
-    IF(NOT Kokkos_ENABLE_PTHREAD)
+    IF(NOT Kokkos_ENABLE_THREADS)
         FIND_PACKAGE(OpenMP QUIET)
     ENDIF()
 
-    IF(NOT DEFINED Kokkos_ENABLE_PTHREAD AND NOT OpenMP_FOUND)
+    IF(NOT DEFINED Kokkos_ENABLE_THREADS AND NOT OpenMP_FOUND)
         FIND_PACKAGE(Threads QUIET)
     ENDIF()
 
@@ -91,9 +101,9 @@ IF(_INTERNAL_KOKKOS)
     ADD_OPTION(ENABLE_THREADS "Enable Pthreads when building Kokkos submodule" ${Threads_FOUND})
     ADD_OPTION(ENABLE_CUDA "Enable CUDA when building Kokkos submodule" ${CUDA_FOUND})
 
-    # if OpenMP defaulted to ON but Kokkos_ENABLE_PTHREAD was explicitly set,
+    # if OpenMP defaulted to ON but Kokkos_ENABLE_THREADS was explicitly set,
     # disable OpenMP defaulting to ON
-    IF(ENABLE_OPENMP AND Kokkos_ENABLE_PTHREAD)
+    IF(ENABLE_OPENMP AND Kokkos_ENABLE_THREADS)
         SET(ENABLE_OPENMP OFF)
         SET(Kokkos_ENABLE_OPENMP OFF)
     ENDIF()
@@ -101,7 +111,7 @@ IF(_INTERNAL_KOKKOS)
     # always disable pthread backend since pthreads are not supported on Windows
     IF(WIN32)
         SET(ENABLE_THREADS OFF)
-        SET(Kokkos_ENABLE_PTHREAD OFF)
+        SET(Kokkos_ENABLE_THREADS OFF)
     ENDIF()
 
     # make sure this pykokkos-base option is synced to Kokkos option
@@ -115,8 +125,8 @@ IF(_INTERNAL_KOKKOS)
     ENDIF()
 
     # make sure this pykokkos-base option is synced to Kokkos option
-    IF(DEFINED Kokkos_ENABLE_PTHREAD)
-        SET(ENABLE_THREADS ${Kokkos_ENABLE_PTHREAD})
+    IF(DEFINED Kokkos_ENABLE_THREADS)
+        SET(ENABLE_THREADS ${Kokkos_ENABLE_THREADS})
     ENDIF()
 
     # make sure this pykokkos-base option is synced to Kokkos option
@@ -136,7 +146,7 @@ IF(_INTERNAL_KOKKOS)
 
     # define the kokkos option as default and/or get it to display
     IF(ENABLE_THREADS)
-        ADD_OPTION(Kokkos_ENABLE_PTHREAD "Build Kokkos submodule with Pthread support" ON)
+        ADD_OPTION(Kokkos_ENABLE_THREADS "Build Kokkos submodule with Pthread support" ON)
     ENDIF()
 
     # define the kokkos option as default and/or get it to display
