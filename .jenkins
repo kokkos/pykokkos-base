@@ -168,7 +168,7 @@ pipeline {
                         sh '''cmake -B build \
                                 -DCMAKE_BUILD_TYPE=Release \
                                 -DCMAKE_UNITY_BUILD=OFF \
-                                -DENABLE_VIEW_RANKS=3 \
+                                -DENABLE_VIEW_RANKS=2 \
                                 -DENABLE_LAYOUTS=ON \
                                 -DENABLE_MEMORY_TRAITS=OFF \
                                 -DENABLE_EXAMPLES=ON \
