@@ -153,9 +153,10 @@ void generate_enumeration(py::module &kokkos) {
     return get_enumeration<ViewDataTypeSpecialization>(
         str, std::make_index_sequence<ExecutionSpacesEnd>{});
   };
-  kokkos.def("get_execution_space", _get_execspace_name, "Get the execution space");
-  kokkos.def("get_execution_space", _get_execspace_idx, "Get the execution space");
-
+  kokkos.def("get_execution_space", _get_execspace_name,
+             "Get the execution space");
+  kokkos.def("get_execution_space", _get_execspace_idx,
+             "Get the execution space");
 
   //----------------------------------------------------------------------------//
   //

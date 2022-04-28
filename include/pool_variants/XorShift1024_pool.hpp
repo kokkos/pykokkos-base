@@ -54,37 +54,36 @@ namespace SpaceDim {
 
 template <size_t SpaceIdx>
 void generate_XorShift1024_pool_variant(py::module &_mod) {
-  using space_spec_t  = ExecutionSpaceSpecialization<SpaceIdx>;
-  using Sp            = typename space_spec_t::type;
-  using UniformT      = Kokkos::Random_XorShift1024_Pool<Sp>;
+  using space_spec_t = ExecutionSpaceSpecialization<SpaceIdx>;
+  using Sp           = typename space_spec_t::type;
+  using UniformT     = Kokkos::Random_XorShift1024_Pool<Sp>;
 
   auto name = join("_", "KokkosXorShift1024Pool", space_spec_t::label());
 
   Common::generate_pool<UniformT, Sp>(_mod, name, demangle<UniformT>());
-
 }
-}
+}  // namespace SpaceDim
 
 template <size_t SpaceIdx>
 void generate_XorShift1024_pool_variant(
     py::module &,
-    std::enable_if_t<!is_available<execution_space_t<SpaceIdx>>::value, int> = 0) {
-}
+    std::enable_if_t<!is_available<execution_space_t<SpaceIdx>>::value, int> =
+        0) {}
 
 template <size_t SpaceIdx>
 void generate_XorShift1024_pool_variant(
     py::module &_mod,
-    std::enable_if_t<is_available<execution_space_t<SpaceIdx>>::value, int> = 0) {
-
-    SpaceDim::generate_XorShift1024_pool_variant<SpaceIdx>(_mod);
+    std::enable_if_t<is_available<execution_space_t<SpaceIdx>>::value, int> =
+        0) {
+  SpaceDim::generate_XorShift1024_pool_variant<SpaceIdx>(_mod);
 }
-}
+}  // namespace Space
 
 namespace {
 // generate data-type, memory-space buffers for concrete dimension
 template <size_t... SpaceIdx>
 void generate_XorShift1024_pool_variant(py::module &_mod,
-                                    std::index_sequence<SpaceIdx...>) {
+                                        std::index_sequence<SpaceIdx...>) {
   FOLD_EXPRESSION(Space::generate_XorShift1024_pool_variant<SpaceIdx>(_mod));
 }
 }  // namespace
