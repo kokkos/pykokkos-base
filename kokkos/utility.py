@@ -81,6 +81,8 @@ def read_dtype(_dtype):
     try:
         import numpy as np
 
+        if _dtype == np.int8:
+            return lib.int8
         if _dtype == np.int16:
             return lib.int16
         elif _dtype == np.int32:

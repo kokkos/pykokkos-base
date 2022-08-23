@@ -147,7 +147,8 @@ try:
         "read_dtype",
         "initialize",  # bindings
         "finalize",
-        "int16",  # data types
+        "int8",  # data types
+        "int16",
         "int32",
         "int64",
         "uint16",
