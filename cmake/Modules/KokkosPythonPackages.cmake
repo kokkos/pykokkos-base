@@ -94,11 +94,7 @@ IF(ENABLE_PRECOMPILED_HEADERS)
     TARGET_PRECOMPILE_HEADERS(libpykokkos-precompiled-headers
         INTERFACE
             <Kokkos_Core.hpp>
-            <Kokkos_View.hpp>
-            <Kokkos_Layout.hpp>
-            <Kokkos_Core_fwd.hpp>
             <Kokkos_DynRankView.hpp>
-            <Kokkos_MemoryTraits.hpp>
     )
 
     # pybind11 headers
