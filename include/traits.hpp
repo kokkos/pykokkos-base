@@ -75,7 +75,7 @@ VIEW_DATA_DIMS(8, T ********)
 //  the first string identifier is the "canonical name" (i.e. what gets encoded)
 //  and the remaining string entries are used to generate aliases
 //
-VIEW_DATA_TYPE(int8_t, Int8, "int8", "short_short")
+VIEW_DATA_TYPE(int8_t, Int8, "int8", "signed_char")
 VIEW_DATA_TYPE(int16_t, Int16, "int16", "short")
 VIEW_DATA_TYPE(int32_t, Int32, "int32", "int")
 VIEW_DATA_TYPE(int64_t, Int64, "int64", "long")
