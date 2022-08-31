@@ -45,12 +45,8 @@
 #ifndef KOKKOS_CORE_EXP_INTEROP_HPP
 #define KOKKOS_CORE_EXP_INTEROP_HPP
 
-#include <Kokkos_Core_fwd.hpp>
-#include <Kokkos_Layout.hpp>
-#include <Kokkos_MemoryTraits.hpp>
-#include <Kokkos_View.hpp>
+#include <Kokkos_Core.hpp>
 #include <Kokkos_DynRankView.hpp>
-#include <impl/Kokkos_Utilities.hpp>
 #include <type_traits>
 
 namespace Kokkos {

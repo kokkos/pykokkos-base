@@ -53,7 +53,6 @@
 
 #include <Kokkos_Core.hpp>
 #include <Kokkos_DynRankView.hpp>
-#include <Kokkos_View.hpp>
 
 //----------------------------------------------------------------------------//
 

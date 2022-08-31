@@ -48,8 +48,6 @@
 #include "defines.hpp"
 
 #include <Kokkos_Core.hpp>
-#include <Kokkos_Layout.hpp>
-#include <Kokkos_MemoryTraits.hpp>
 
 #include <set>
 #include <string>

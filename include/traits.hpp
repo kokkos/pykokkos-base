@@ -49,9 +49,7 @@
 #include "defines.hpp"
 #include "fwd.hpp"
 
-#include <Kokkos_Core_fwd.hpp>
-#include <Kokkos_Layout.hpp>
-#include <Kokkos_MemoryTraits.hpp>
+#include <Kokkos_Core.hpp>
 
 //----------------------------------------------------------------------------//
 
