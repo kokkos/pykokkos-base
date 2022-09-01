@@ -89,6 +89,8 @@ def read_dtype(_dtype):
             return lib.int32
         elif _dtype == np.int64:
             return lib.int64
+        elif _dtype == np.uint8:
+            return lib.uint8
         elif _dtype == np.uint16:
             return lib.uint16
         elif _dtype == np.uint32:

@@ -11,6 +11,7 @@ import pytest
         (kokkos.int16, np.int16),
         (kokkos.int32, np.int32),
         (kokkos.int64, np.int64),
+        (kokkos.uint8, np.uint8),
         (kokkos.uint16, np.uint16),
         (kokkos.uint32, np.uint32),
         (kokkos.uint64, np.uint64),
