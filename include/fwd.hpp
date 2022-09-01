@@ -123,7 +123,8 @@ struct Device;
 //----------------------------------------------------------------------------//
 
 enum KokkosViewDataType {
-  Int16 = 0,
+  Int8 = 0,
+  Int16,
   Int32,
   Int64,
   Uint16,
