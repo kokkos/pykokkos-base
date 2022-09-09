@@ -61,3 +61,6 @@ timing_report*
 
 # stashed source tree
 /.stash
+
+# multi gpu directories
+/gpu*

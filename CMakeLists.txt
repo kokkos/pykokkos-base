@@ -18,6 +18,19 @@ ENDIF()
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
 ADD_OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
+SET(ENABLE_MULTI_GPU "0" CACHE STRING "Build multiple copies to enable multi GPU")
+SET(GPU_DIR_LIST "")
+
+IF(${ENABLE_MULTI_GPU} GREATER 2)
+    ADD_COMPILE_DEFINITIONS(ENABLE_MULTI_GPU)
+    MATH(EXPR LAST_GPU_ID "${ENABLE_MULTI_GPU} - 1")
+    FILE(GLOB TO_COPY "${CMAKE_CURRENT_LIST_DIR}/kokkos/*")
+    FOREACH(_GPU_ID RANGE ${LAST_GPU_ID})
+        LIST(APPEND GPU_DIR_LIST "gpu${_GPU_ID}")
+        FILE(COPY ${TO_COPY} DESTINATION "${CMAKE_CURRENT_LIST_DIR}/gpu${_GPU_ID}")
+    ENDFOREACH()
+ENDIF()
+
 # force to release if not specified
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -77,12 +90,20 @@ TARGET_LINK_LIBRARIES(libpykokkos PRIVATE
     libpykokkos::precompiled-headers
     libpykokkos::build-options)
 
+SET(Kokkos_GPU_INSTALL_LIBDIRS "")
+
 IF(SKBUILD)
     SET(Kokkos_INSTALL_PYTHONDIR ${CMAKE_INSTALL_PREFIX})
     SET(Kokkos_INSTALL_LIBDIR    ${CMAKE_INSTALL_PREFIX}/kokkos)
+    FOREACH(_GPU_DIR ${GPU_DIR_LIST})
+        LIST(APPEND Kokkos_GPU_INSTALL_LIBDIRS "${CMAKE_INSTALL_PREFIX}/${_GPU_DIR}")
+    ENDFOREACH()
 ELSE()
     SET(Kokkos_INSTALL_PYTHONDIR ${Python3_SITEARCH}/kokkos)
     SET(Kokkos_INSTALL_LIBDIR    ${Python3_SITEARCH}/kokkos)
+    FOREACH(_GPU_DIR ${GPU_DIR_LIST})
+        LIST(APPEND Kokkos_GPU_INSTALL_LIBDIRS "${Python3_SITEARCH}/${_GPU_DIR}")
+    ENDFOREACH()
 ENDIF()
 
 # figure out if we can install to Python3_SITEARCH
@@ -153,6 +174,11 @@ ENDIF()
 INSTALL(TARGETS libpykokkos
     DESTINATION ${Kokkos_INSTALL_LIBDIR})
 
+FOREACH(_FILE ${Kokkos_GPU_INSTALL_LIBDIRS})
+    INSTALL(TARGETS libpykokkos
+        DESTINATION ${_FILE})
+ENDFOREACH()
+
 INSTALL(FILES ${PROJECT_BINARY_DIR}/kokkos/__init__.py
     DESTINATION ${Kokkos_INSTALL_PYTHONDIR})
 
@@ -160,7 +186,7 @@ INSTALL(FILES ${PROJECT_BINARY_DIR}/pytest.ini
     DESTINATION ${Kokkos_INSTALL_PYTHONDIR})
 
 # glob any python package files
-FILE(GLOB_RECURSE PYPACKAGE_FILES ${CMAKE_CURRENT_LIST_DIR}/kokkos/*.py*)
+FILE(GLOB_RECURSE PYPACKAGE_FILES ${CMAKE_CURRENT_LIST_DIR}/kokkos/*.py* ${CMAKE_CURRENT_LIST_DIR}/gpu*/*.py*)
 FOREACH(_FILE ${PYPACKAGE_FILES})
     # make it a relative path
     STRING(REPLACE "${CMAKE_CURRENT_LIST_DIR}/" "" _OUT_NAME "${_FILE}")

@@ -107,7 +107,9 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
   kokkos.def("initialize", _initialize, "Initialize Kokkos");
   kokkos.def("finalize", _finalize, "Finalize Kokkos");
 
+#ifndef ENABLE_MULTI_GPU
   generate_tools(kokkos);
+#endif
   generate_available(kokkos);
   generate_enumeration(kokkos);
   generate_view_variants(kokkos);

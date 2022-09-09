@@ -313,6 +313,7 @@ void internal_setup();
 //
 void destroy_callbacks() { callbacks.reset(); }
 
+#ifndef ENABLE_MULTI_GPU
 void generate_tools(py::module& kokkos) {
   //--------------------------------------------------------------------//
   //
@@ -529,3 +530,4 @@ void internal_test() {
   get_src_view().reset();
   get_dst_view().reset();
 }
+#endif
