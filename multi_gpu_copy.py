@@ -66,6 +66,7 @@ for package in package_paths:
         so_name = so_name.split(".")
         lib_name = so_name[0]
         suffix = so_name[1:]
+        suffix = [s.strip() for s in suffix]
         suffix = ".".join(suffix)
 
         new_so_name = f"{lib_name}_{package_id}.{suffix}"
