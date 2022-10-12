@@ -123,6 +123,7 @@ jobs:
           --disable-memory-traits
           --enable-werror
           -- -DENABLE_EXAMPLES=ON
+          -- -j1
 
     - name: Import Test
       run:
