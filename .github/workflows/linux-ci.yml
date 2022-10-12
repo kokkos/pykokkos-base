@@ -119,10 +119,11 @@ jobs:
         python -m pip install pytest &&
         python setup.py install
           --enable-layouts
-          --enable-view-ranks=5
+          --enable-view-ranks=4
           --disable-memory-traits
           --enable-werror
           -- -DENABLE_EXAMPLES=ON
+          -- -j1
 
     - name: Import Test
       run:

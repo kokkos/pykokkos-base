@@ -103,6 +103,7 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
 
   kokkos.def("is_initialized", &Kokkos::is_initialized,
              "Query initialization state");
+  kokkos.def("is_finalized", &Kokkos::is_finalized, "Query finalization state");
   kokkos.def("initialize", _initialize, "Initialize Kokkos");
   kokkos.def("finalize", _finalize, "Finalize Kokkos");
 

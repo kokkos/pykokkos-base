@@ -70,7 +70,8 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(self):
-        pass
+        if not kokkos.is_finalized():
+            kokkos.finalize()
 
     def setUp(self):
         pass
