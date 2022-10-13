@@ -200,6 +200,7 @@ DISABLE_TYPE(Kokkos::Experimental::HBWSpace)
 #if !defined(KOKKOS_ENABLE_HIP)
 DISABLE_TYPE(Kokkos::Experimental::HIPSpace)
 DISABLE_TYPE(Kokkos::Experimental::HIPHostPinnedSpace)
+DISABLE_TYPE(Kokkos::Experimental::HIPManagedSpace)
 #endif
 
 #if !defined(KOKKOS_ENABLE_OPENMPTARGET)
@@ -221,6 +222,8 @@ MEMORY_SPACE(Kokkos::Experimental::HBWSpace, HBWSpace, "HBWSpace")
 MEMORY_SPACE(Kokkos::Experimental::HIPSpace, HIPSpace, "HIPSpace", "HIP")
 MEMORY_SPACE(Kokkos::Experimental::HIPHostPinnedSpace, HIPHostPinnedSpace,
              "HIPHostPinnedSpace")
+MEMORY_SPACE(Kokkos::Experimental::HIPManagedSpace, HIPManagedSpace,
+             "HIPManagedSpace")
 MEMORY_SPACE(Kokkos::Experimental::OpenMPTargetSpace, OpenMPTargetSpace,
              "OpenMPTargetSpace", "OpenMPTarget")
 MEMORY_SPACE(Kokkos::Experimental::SYCLSharedUSMSpace, SYCLSharedUSMSpace,
