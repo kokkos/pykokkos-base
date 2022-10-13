@@ -89,6 +89,7 @@ namespace Experimental {
 class HBWSpace;
 class HIPSpace;
 class HIPHostPinnedSpace;
+class HIPManagedSpace;
 class OpenMPTargetSpace;
 class SYCLSharedUSMSpace;
 class SYCLDeviceUSMSpace;
@@ -161,6 +162,7 @@ enum KokkosMemorySpace {
   HBWSpace,
   HIPSpace,
   HIPHostPinnedSpace,
+  HIPManagedSpace,
   OpenMPTargetSpace,
   SYCLSharedUSMSpace,
   SYCLDeviceUSMSpace,
