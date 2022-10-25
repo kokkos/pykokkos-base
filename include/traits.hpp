@@ -75,6 +75,8 @@ VIEW_DATA_DIMS(8, T ********)
 //  the first string identifier is the "canonical name" (i.e. what gets encoded)
 //  and the remaining string entries are used to generate aliases
 //
+typedef uint8_t bool_t;
+
 VIEW_DATA_TYPE(int8_t, Int8, "int8", "signed_char")
 VIEW_DATA_TYPE(int16_t, Int16, "int16", "short")
 VIEW_DATA_TYPE(int32_t, Int32, "int32", "int")
@@ -85,6 +87,8 @@ VIEW_DATA_TYPE(uint32_t, Uint32, "uint32", "unsigned", "unsigned_int")
 VIEW_DATA_TYPE(uint64_t, Uint64, "uint64", "unsigned_long")
 VIEW_DATA_TYPE(float, Float32, "float32", "float")
 VIEW_DATA_TYPE(double, Float64, "float64", "double")
+// TODO: real bool type instead of alias
+VIEW_DATA_TYPE(bool_t, Bool, "bool", "bool_")
 
 //----------------------------------------------------------------------------//
 // <data-type> <enum> <string identifiers>
