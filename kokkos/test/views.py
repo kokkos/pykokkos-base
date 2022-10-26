@@ -140,7 +140,10 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
             self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
             self.assertEqual(_data[0].create_mirror_view()[_idx], 1)
-            self.assertEqual(_data[1].create_mirror_view()[_idx], 2)
+            if _kwargs["dtype"] == kokkos.bool:
+                self.assertEqual(_data[1].create_mirror_view()[_idx], True)
+            else:
+                self.assertEqual(_data[1].create_mirror_view()[_idx], 2)
 
     def test_view_iadd(self):
         """view_iadd"""
@@ -169,8 +172,13 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
             self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
-            self.assertEqual(_data[0].create_mirror_view()[_idx], 4)
-            self.assertEqual(_data[1].create_mirror_view()[_idx], 5)
+            if _kwargs["dtype"] == kokkos.bool:
+                # positive values are simply True
+                self.assertEqual(_data[0].create_mirror_view()[_idx], True)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], True)
+            else:
+                self.assertEqual(_data[0].create_mirror_view()[_idx], 4)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], 5)
 
     def test_view_isub(self):
         """view_isub"""
@@ -199,8 +207,13 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
             self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
-            self.assertEqual(_data[0].create_mirror_view()[_idx], 7)
-            self.assertEqual(_data[1].create_mirror_view()[_idx], 17)
+            if _kwargs["dtype"] == kokkos.bool:
+                # positive values are simply True
+                self.assertEqual(_data[0].create_mirror_view()[_idx], True)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], True)
+            else:
+                self.assertEqual(_data[0].create_mirror_view()[_idx], 7)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], 17)
 
     def test_view_imul(self):
         """view_imul"""
@@ -229,8 +242,13 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
             self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
-            self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
-            self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
+            if _kwargs["dtype"] == kokkos.bool:
+                # positive values are simply True
+                self.assertEqual(_data[0].create_mirror_view()[_idx], True)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], True)
+            else:
+                self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
     #
     def test_view_create_mirror(self):
@@ -261,8 +279,12 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
             self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
-            self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
-            self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
+            if _kwargs["dtype"] == kokkos.bool:
+                self.assertEqual(_data[0].create_mirror_view()[_idx], True)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], True)
+            else:
+                self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
             _mirror_data = [
                 kokkos.create_mirror(_data[0], copy=True),
@@ -271,8 +293,12 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_mirror_data[0][_zeros], 0)
             self.assertEqual(_mirror_data[1][_zeros], 0)
-            self.assertEqual(_mirror_data[0][_idx], 3)
-            self.assertEqual(_mirror_data[1][_idx], 6)
+            if _kwargs["dtype"] == kokkos.bool:
+                self.assertEqual(_mirror_data[0][_idx], True)
+                self.assertEqual(_mirror_data[1][_idx], True)
+            else:
+                self.assertEqual(_mirror_data[0][_idx], 3)
+                self.assertEqual(_mirror_data[1][_idx], 6)
 
             _mirror_data = [
                 kokkos.create_mirror(_data[0], copy=False),
@@ -312,8 +338,13 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
             self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
-            self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
-            self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
+            if _kwargs["dtype"] == kokkos.bool:
+                # positive values are simply True
+                self.assertEqual(_data[0].create_mirror_view()[_idx], True)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], True)
+            else:
+                self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
             _mirror_data = [
                 kokkos.create_mirror_view(_data[0], copy=True),
@@ -322,8 +353,13 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_mirror_data[0][_zeros], 0)
             self.assertEqual(_mirror_data[1][_zeros], 0)
-            self.assertEqual(_mirror_data[0][_idx], 3)
-            self.assertEqual(_mirror_data[1][_idx], 6)
+            if _kwargs["dtype"] == kokkos.bool:
+                # positive values are simply True
+                self.assertEqual(_mirror_data[0][_idx], True)
+                self.assertEqual(_mirror_data[1][_idx], True)
+            else:
+                self.assertEqual(_mirror_data[0][_idx], 3)
+                self.assertEqual(_mirror_data[1][_idx], 6)
 
             _mirror_data = [
                 kokkos.create_mirror_view(_data[0], copy=False),
@@ -334,12 +370,18 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
             self.assertEqual(_mirror_data[1][_zeros], 0)
 
             if kokkos.get_host_accessible(_data[0].space):
-                self.assertEqual(_mirror_data[0][_idx], 3)
+                if _kwargs["dtype"] == kokkos.bool:
+                    self.assertEqual(_mirror_data[0][_idx], True)
+                else:
+                    self.assertEqual(_mirror_data[0][_idx], 3)
             else:
                 self.assertNotEqual(_mirror_data[0][_idx], 3)
 
             if kokkos.get_host_accessible(_data[1].space):
-                self.assertEqual(_mirror_data[1][_idx], 6)
+                if _kwargs["dtype"] == kokkos.bool:
+                    self.assertEqual(_mirror_data[1][_idx], True)
+                else:
+                    self.assertEqual(_mirror_data[1][_idx], 6)
             else:
                 self.assertNotEqual(_mirror_data[1][_idx], 6)
 
@@ -374,8 +416,13 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_data[0].create_mirror_view()[_zeros], 0)
             self.assertEqual(_data[1].create_mirror_view()[_zeros], 0)
-            self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
-            self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
+            if _kwargs["dtype"] == kokkos.bool:
+                # positive values are simply True
+                self.assertEqual(_data[0].create_mirror_view()[_idx], True)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], True)
+            else:
+                self.assertEqual(_data[0].create_mirror_view()[_idx], 3)
+                self.assertEqual(_data[1].create_mirror_view()[_idx], 6)
 
             _copied_data = conf.generate_variant(_shape, **_kwargs)
             kokkos.deep_copy(_copied_data[0], _data[0])
@@ -383,8 +430,13 @@ class PyKokkosBaseViewsTests(unittest.TestCase):
 
             self.assertEqual(_copied_data[0].create_mirror_view()[_zeros], 0)
             self.assertEqual(_copied_data[1].create_mirror_view()[_zeros], 0)
-            self.assertEqual(_copied_data[0].create_mirror_view()[_idx], 3)
-            self.assertEqual(_copied_data[1].create_mirror_view()[_idx], 6)
+            if _kwargs["dtype"] == kokkos.bool:
+                # positive values are simply True
+                self.assertEqual(_copied_data[0].create_mirror_view()[_idx], True)
+                self.assertEqual(_copied_data[1].create_mirror_view()[_idx], True)
+            else:
+                self.assertEqual(_copied_data[0].create_mirror_view()[_idx], 3)
+                self.assertEqual(_copied_data[1].create_mirror_view()[_idx], 6)
 
 
 # main runner
