@@ -42,20 +42,14 @@
 //@HEADER
 */
 
-#pragma once
+#include "execution_spaces.hpp"
 
 #include "common.hpp"
+#include "defines.hpp"
+#include "fwd.hpp"
+#include "traits.hpp"
 
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
-
-void generate_tools(py::module& kokkos);
-void generate_available(py::module& kokkos);
-void generate_enumeration(py::module& kokkos);
-void generate_view_variants(py::module& kokkos);
-void generate_atomic_variants(py::module& kokkos);
-void generate_backend_versions(py::module& kokkos);
-void generate_pool_variants(py::module& kokkos);
-void generate_execution_spaces(py::module& kokkos);
-void destroy_callbacks();
+void generate_execution_spaces(py::module &kokkos) {
+  generate_execution_spaces(kokkos,
+                            std::make_index_sequence<ExecutionSpacesEnd>{});
+}
