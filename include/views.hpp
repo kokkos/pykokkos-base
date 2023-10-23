@@ -414,6 +414,10 @@ void generate_view(py::module &_mod, const std::string &_name,
       "dynamic", [](ViewT &) { return Kokkos::is_dyn_rank_view<ViewT>::value; },
       "Whether the rank is dynamic");
 
+  _view.def_property_readonly(
+      "cpp_type", [=](ViewT &) { return _msg; },
+      "Underlying C++ type as string");
+
   // support []
   generate_view_access<Tp>(_view, std::index_sequence<Idx...>{});
 }

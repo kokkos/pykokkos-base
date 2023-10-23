@@ -56,7 +56,8 @@ SET(libpykokkos_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/enumeration.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/available.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/common.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/tools.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/src/tools.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/execution_spaces.cpp)
 
 SET(libpykokkos_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/libpykokkos.hpp
@@ -66,7 +67,8 @@ SET(libpykokkos_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/common.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/traits.hpp
     ${CMAKE_CURRENT_LIST_DIR}/include/views.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/include/fwd.hpp)
+    ${CMAKE_CURRENT_LIST_DIR}/include/fwd.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/include/execution_spaces.hpp)
 
 ADD_LIBRARY(libpykokkos-core OBJECT
     ${libpykokkos_SOURCES}
