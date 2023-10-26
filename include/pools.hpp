@@ -57,7 +57,11 @@ void generate_pool(py::module &_mod, const std::string &_name,
 
   // using PoolT = Kokkos::Random_XorShift64_Pool<Kokkos::Cuda>;
   // class decl
+#ifdef ENABLE_MULTI_GPU
+  py::class_<PoolT> _pool(_mod, _name.c_str(), py::module_local());
+#else
   py::class_<PoolT> _pool(_mod, _name.c_str());
+#endif
 
   // default initializer
   _pool.def(py::init([]() { return new PoolT{}; }));

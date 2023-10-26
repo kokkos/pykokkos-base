@@ -308,8 +308,11 @@ void generate_view(py::module &_mod, const std::string &_name,
               << "'..." << std::endl;
 
   // class decl
+#ifdef ENABLE_MULTI_GPU
+  py::class_<ViewT> _view(_mod, _name.c_str(), py::buffer_protocol(), py::module_local());
+#else
   py::class_<ViewT> _view(_mod, _name.c_str(), py::buffer_protocol());
-
+#endif
   // default initializer
   _view.def(py::init([]() { return new ViewT{}; }));
 

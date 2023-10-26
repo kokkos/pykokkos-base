@@ -129,8 +129,13 @@ void generate_enumeration(py::module &kokkos) {
   //                                execution spaces
   //
   //----------------------------------------------------------------------------//
+#ifdef ENABLE_MULTI_GPU
+  py::enum_<KokkosExecutionSpace> _device(kokkos, "device",
+                                          "Device execution spaces", py::module_local());
+#else
   py::enum_<KokkosExecutionSpace> _device(kokkos, "device",
                                           "Device execution spaces");
+#endif
   generate_enumeration<ExecutionSpaceSpecialization>(
       _device, std::make_index_sequence<ExecutionSpacesEnd>{});
 
@@ -164,7 +169,11 @@ void generate_enumeration(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   // an enumeration of the data types for views
+#ifdef ENABLE_MULTI_GPU
+  py::enum_<KokkosViewDataType> _dtype(kokkos, "dtype", "View data types", py::module_local());
+#else
   py::enum_<KokkosViewDataType> _dtype(kokkos, "dtype", "View data types");
+#endif
   generate_enumeration<ViewDataTypeSpecialization>(
       _dtype, std::make_index_sequence<ViewDataTypesEnd>{});
   _dtype.export_values();
@@ -191,8 +200,13 @@ void generate_enumeration(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   // an enumeration of the memory spaces for views
+#ifdef ENABLE_MULTI_GPU
+  py::enum_<KokkosMemorySpace> _memspace(kokkos, "memory_space",
+                                         "View memory spaces", py::module_local());
+#else
   py::enum_<KokkosMemorySpace> _memspace(kokkos, "memory_space",
                                          "View memory spaces");
+#endif
   generate_enumeration<MemorySpaceSpecialization>(
       _memspace, std::make_index_sequence<MemorySpacesEnd>{});
   _memspace.value(
@@ -227,8 +241,13 @@ void generate_enumeration(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   // an enumeration of the layout types for views
+#ifdef ENABLE_MULTI_GPU
+  py::enum_<KokkosMemoryLayoutType> _ltype(kokkos, "layout",
+                                           "View layout types", py::module_local());
+#else
   py::enum_<KokkosMemoryLayoutType> _ltype(kokkos, "layout",
                                            "View layout types");
+#endif
   generate_enumeration<MemoryLayoutSpecialization>(
       _ltype, std::make_index_sequence<MemoryLayoutEnd>{});
   _ltype.export_values();
@@ -255,8 +274,13 @@ void generate_enumeration(py::module &kokkos) {
   //
   //----------------------------------------------------------------------------//
   // an enumeration of the memory traits for views
+#ifdef ENABLE_MULTI_GPU
+  py::enum_<KokkosMemoryTrait> _memtrait(kokkos, "memory_trait",
+                                         "View memory traits", py::module_local());
+#else
   py::enum_<KokkosMemoryTrait> _memtrait(kokkos, "memory_trait",
                                          "View memory traits");
+#endif
   generate_enumeration<MemoryTraitSpecialization>(
       _memtrait, std::make_index_sequence<MemoryTraitEnd>{});
   _memtrait.export_values();

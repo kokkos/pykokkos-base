@@ -50,7 +50,9 @@
 
 namespace py = pybind11;
 
+#ifndef ENABLE_MULTI_GPU
 void generate_tools(py::module& kokkos);
+#endif
 void generate_available(py::module& kokkos);
 void generate_enumeration(py::module& kokkos);
 void generate_view_variants(py::module& kokkos);

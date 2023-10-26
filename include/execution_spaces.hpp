@@ -93,7 +93,11 @@ void generate_execution_space(py::module &_mod, const std::string &_name,
     std::cerr << "Registering " << _msg << " as python class '" << _name
               << "'..." << std::endl;
 
+#ifdef ENABLE_MULTI_GPU
+  py::class_<Sp> _space(_mod, _name.c_str(), py::module_local());
+#else
   py::class_<Sp> _space(_mod, _name.c_str());
+#endif
   _space.def(py::init([]() { return new Sp{}; }));
 
   // Add other constructors with arguments if they exist
