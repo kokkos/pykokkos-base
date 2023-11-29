@@ -46,6 +46,7 @@
 
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Random.hpp>
+#include <iostream>
 
 namespace Common {
 template <typename PoolT, typename Sp>
