@@ -1,4 +1,4 @@
 cmake>=3.16
-python>3.9,<3.12
+python>=3.9,<3.12
 scikit-build
 numpy
