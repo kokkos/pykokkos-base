@@ -59,7 +59,7 @@ add_arg_bool_option("werror", "ENABLE_WERROR")
 add_arg_bool_option("timing", "ENABLE_TIMING")
 parser.add_argument(
     "--cxx-standard",
-    default=14,
+    default=17,
     type=int,
     choices=[14, 17, 20],
     help="Set C++ language standard",

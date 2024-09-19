@@ -49,6 +49,7 @@
 #include "traits.hpp"
 
 #include <Kokkos_Core.hpp>
+#include <iostream>
 
 //----------------------------------------------------------------------------//
 //
