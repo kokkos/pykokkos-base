@@ -51,6 +51,7 @@
 #include <pybind11/pytypes.h>
 
 #include <cassert>
+#include <iostream>
 
 //----------------------------------------------------------------------------//
 
