@@ -51,6 +51,7 @@
 #include "fwd.hpp"
 #include "traits.hpp"
 
+#include <pybind11/numpy.h>
 #include <Kokkos_Core.hpp>
 #include <Kokkos_DynRankView.hpp>
 #include <iostream>
