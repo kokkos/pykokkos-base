@@ -42,21 +42,41 @@
 //@HEADER
 */
 
-#pragma once
-
 #include "common.hpp"
 
-#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <Kokkos_Core.hpp>
 
-namespace py = pybind11;
+//----------------------------------------------------------------------------//
+//
+//        The Kokkos::complex dtypes
+//
+//----------------------------------------------------------------------------//
 
-void generate_tools(py::module& kokkos);
-void generate_available(py::module& kokkos);
-void generate_enumeration(py::module& kokkos);
-void generate_view_variants(py::module& kokkos);
-void generate_atomic_variants(py::module& kokkos);
-void generate_backend_versions(py::module& kokkos);
-void generate_pool_variants(py::module& kokkos);
-void generate_execution_spaces(py::module& kokkos);
-void generate_complex_dtypes(py::module& kokkos);
-void destroy_callbacks();
+template <typename Tp>
+void generate_complex_dtype(py::module& kokkos, const std::string& _name) {
+  using ComplexTp = Kokkos::complex<Tp>;
+
+  py::class_<ComplexTp>(kokkos, _name.c_str())
+      .def(py::init<Tp>())      // Constructor for real part only
+      .def(py::init<Tp, Tp>())  // Constructor for real and imaginary parts
+      .def("imag_mutable", py::overload_cast<>(&ComplexTp::imag))
+      .def("imag_const", py::overload_cast<>(&ComplexTp::imag, py::const_))
+      .def("imag_set", py::overload_cast<Tp>(&ComplexTp::imag))
+      .def("real_mutable", py::overload_cast<>(&ComplexTp::real))
+      .def("real_const", py::overload_cast<>(&ComplexTp::real, py::const_))
+      .def("real_set", py::overload_cast<Tp>(&ComplexTp::real))
+      .def(py::self += py::self)
+      .def(py::self += Tp())
+      .def(py::self -= py::self)
+      .def(py::self -= Tp())
+      .def(py::self *= py::self)
+      .def(py::self *= Tp())
+      .def(py::self /= py::self)
+      .def(py::self /= Tp());
+}
+
+void generate_complex_dtypes(py::module& kokkos) {
+  generate_complex_dtype<float>(kokkos, "complex_float32");
+  generate_complex_dtype<double>(kokkos, "complex_float64");
+}

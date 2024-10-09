@@ -134,6 +134,8 @@ enum KokkosViewDataType {
   Uint64,
   Float32,
   Float64,
+  ComplexFloat32,
+  ComplexFloat64,
   ViewDataTypesEnd
 };
 
