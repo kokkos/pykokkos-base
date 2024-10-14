@@ -99,8 +99,10 @@ def read_dtype(_dtype):
             return lib.uint64
         elif _dtype == np.float32:
             return lib.float32
-        elif _dtype == np.float64:
-            return lib.float64
+        elif _dtype == np.complex64:
+            return lib.complex_float32_dtype
+        elif _dtype == np.complex128:
+            return lib.complex_float64_dtype
     except ImportError:
         pass
 
