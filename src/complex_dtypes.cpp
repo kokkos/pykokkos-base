@@ -54,40 +54,48 @@
 //
 //----------------------------------------------------------------------------//
 
+#if defined(KOKKOS_ENABLE_CUDA) || defined(KOKKOS_ENABLE_HIP)
+#  define MANAGED __managed__
+#else
+#  define MANAGED
+#endif
+
 namespace Kokkos {
 
 namespace {
-float re_float_offset;
-float im_float_offset;
-double re_double_offset;
-double im_double_offset;
+MANAGED float re_float_offset;
+MANAGED float im_float_offset;
+MANAGED double re_double_offset;
+MANAGED double im_double_offset;
 }  // namespace
 
 // Need to explicitly do both float and double since we cannot
 // partially specialize function templates
 template <>
-constexpr const float&& get<2, float>(const complex<float>&&) noexcept {
+KOKKOS_FUNCTION const float&& get<2, float>(const complex<float>&&) noexcept {
   static_assert(std::is_standard_layout_v<complex<float>>);
   re_float_offset = static_cast<float>(offsetof(complex<float>, re_));
   return std::move(re_float_offset);
 }
 
 template <>
-constexpr const float&& get<3, float>(const complex<float>&&) noexcept {
+KOKKOS_FUNCTION const float&& get<3, float>(const complex<float>&&) noexcept {
   static_assert(std::is_standard_layout_v<complex<float>>);
   im_float_offset = static_cast<float>(offsetof(complex<float>, im_));
   return std::move(im_float_offset);
 }
 
 template <>
-constexpr const double&& get<2, double>(const complex<double>&&) noexcept {
+KOKKOS_FUNCTION const double&& get<2, double>(
+    const complex<double>&&) noexcept {
   static_assert(std::is_standard_layout_v<complex<double>>);
   re_double_offset = static_cast<double>(offsetof(complex<double>, re_));
   return std::move(re_double_offset);
 }
 
 template <>
-constexpr const double&& get<3, double>(const complex<double>&&) noexcept {
+KOKKOS_FUNCTION const double&& get<3, double>(
+    const complex<double>&&) noexcept {
   static_assert(std::is_standard_layout_v<complex<double>>);
   im_double_offset = static_cast<double>(offsetof(complex<double>, im_));
   return std::move(im_double_offset);
