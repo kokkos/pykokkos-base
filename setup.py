@@ -16,6 +16,7 @@ cmake_args = [
     f"-DPYTHON_EXECUTABLE:FILEPATH={sys.executable}",
     f"-DPython3_EXECUTABLE:FILEPATH={sys.executable}",
     "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=ON",
+    "-G", "Unix Makefiles"
 ]
 
 parser = argparse.ArgumentParser(add_help=False)
