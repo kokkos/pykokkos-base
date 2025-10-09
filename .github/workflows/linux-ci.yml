@@ -30,7 +30,7 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
+        python -m pip install 'cmake==3.31.9'
 
     - name: Install Kokkos
       run:
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, 3.10, 3.11, 3.12, 3.12]
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
         kokkos-branch: ['master']
 
     steps:
@@ -97,7 +97,7 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
+        python -m pip install 'cmake==3.31.9'
 
     - name: Install Kokkos
       run:
@@ -142,7 +142,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, 3.10, 3.11, 3.12, 3.12]
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
         kokkos-branch: ['develop']
 
     steps:
@@ -158,7 +158,7 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.20.2'
+        python -m pip install 'cmake==3.31.9'
 
     - name: Install Kokkos
       run:
@@ -194,7 +194,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, 3.10, 3.11, 3.12, 3.12]
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
 
     steps:
     - uses: actions/checkout@v3
@@ -212,7 +212,7 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
+        python -m pip install 'cmake==3.31.9'
 
     - name: Generate Hierarchy
       run: |
