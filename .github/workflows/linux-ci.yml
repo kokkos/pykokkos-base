@@ -33,7 +33,6 @@ jobs:
         python -m pip install 'cmake==3.18.4'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != 'pypy-3.6' && matrix.python-version != 'pypy-3.7' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
@@ -101,7 +100,6 @@ jobs:
         python -m pip install 'cmake==3.18.4'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != '3.8' && matrix.python-version != '3.9' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
@@ -163,7 +161,6 @@ jobs:
         python -m pip install 'cmake==3.20.2'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != '3.7' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
