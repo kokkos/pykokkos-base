@@ -34,7 +34,7 @@ jobs:
         # flake8 options are defined in setup.cfg
         flake8 . --count --statistics
 
-formatting:
+   formatting:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
