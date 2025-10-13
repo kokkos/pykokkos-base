@@ -70,8 +70,10 @@ of time required to compile the bindings.
 
 ### Kokkos Installation
 
+If Kokkos is installed *externaly* to pykokkos-base, set the CMake option `ENABLE_INTERNAL_KOKKOS=OFF`
+and set the environment variable `Kokkos_ROOT=<Kokkos Install Directory>/lib64/cmake/Kokkos`. 
 If the `ENABLE_INTERNAL_KOKKOS` option is not specified the first time CMake is run, CMake will try to
-find an existing Kokkos installation. If no existing installation is found, it will build and install
+find an existing Kokkos installation. If an existing installation *is not* found, it will build and install
 Kokkos from a submodule. When Kokkos is added as a submodule, you can configure the submodule
 as you would normally configure Kokkos. However, due to some general awkwardness configuring cmake
 from `setup.py` (especially via `pip install`), CMake tries to "automatically" configure
