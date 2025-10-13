@@ -110,10 +110,10 @@ EXECUTE_PROCESS(
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
 # location where kokkos libraries are/will be installed
-IF(ENABLE_INTERNAL_KOKKOS OR NOT Kokkos_DIR)
+IF(ENABLE_INTERNAL_KOKKOS OR NOT Kokkos_ROOT)
     SET(_Kokkos_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-ELSEIF(Kokkos_DIR)
-    STRING(REGEX REPLACE "/cmake/.*" "" _Kokkos_LIBDIR "${Kokkos_DIR}")
+ELSEIF(Kokkos_ROOT)
+    STRING(REGEX REPLACE "/cmake/.*" "" _Kokkos_LIBDIR "${Kokkos_ROOT}")
 ENDIF()
 
 # absolute path to libpykokkos install
