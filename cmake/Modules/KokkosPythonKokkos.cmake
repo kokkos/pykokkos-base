@@ -44,8 +44,8 @@ IF(NOT _INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
     FIND_FILE(Kokkos_InterOp_Header
         NO_DEFAULT_PATH
         NAMES           Kokkos_InterOp.hpp KokkosExp_InterOp.hpp
-        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
-        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
+        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_ROOT}
+        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_ROOT}
         DOC             "Path to Kokkos InterOp header"
         PATH_SUFFIXES   include ../../../include)
 
@@ -60,8 +60,8 @@ ELSEIF(TARGET Kokkos::kokkoscore)
     FIND_FILE(Kokkos_InterOp_Header
         NO_DEFAULT_PATH
         NAMES           Kokkos_InterOp.hpp KokkosExp_InterOp.hpp
-        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
-        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
+        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_ROOT}
+        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_ROOT}
         DOC             "Path to Kokkos InterOp header"
         PATH_SUFFIXES   include ../../../include)
 
