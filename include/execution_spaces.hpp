@@ -140,4 +140,4 @@ void generate_execution_spaces(py::module &_mod,
                                std::index_sequence<SpaceIdx...>) {
   FOLD_EXPRESSION(Space::generate_execution_space<SpaceIdx>(_mod));
 }
-%
+
