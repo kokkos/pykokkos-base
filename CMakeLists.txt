@@ -17,6 +17,23 @@ ENDIF()
 
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
+# fetch latest stable pykokkos and pybind versions
+INCLUDE(FetchContent)
+# FETCHCONTENT_DECLARE(
+#   Kokkos
+#   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
+#   GIT_TAG develop
+# )
+# FetchContent_MakeAvailable(Kokkos)
+
+FETCHCONTENT_DECLARE(
+  pybind11
+  GIT_REPOSITORY https://github.com/pybind/pybind11.git
+  GIT_TAG v3.0
+)
+FetchContent_MakeAvailable(pybind11)
+
+
 ADD_OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
 # force to release if not specified
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
