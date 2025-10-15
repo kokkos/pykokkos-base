@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7']
+        python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
         kokkos-branch: ['master', 'develop']
 
     steps:
@@ -30,10 +30,9 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
+        python -m pip install 'cmake==3.31.6'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != 'pypy-3.6' && matrix.python-version != 'pypy-3.7' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
@@ -82,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7']
+        python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
         kokkos-branch: ['master']
 
     steps:
@@ -98,16 +97,16 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
+        python -m pip install 'cmake==3.31.6'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != '3.8' && matrix.python-version != '3.9' }}
+      if: ${{ matrix.python-version != '3.9' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_OPENMP=ON
-          -DCMAKE_CXX_STANDARD=17
+          -DCMAKE_CXX_STANDARD=20
           -DBUILD_SHARED_LIBS=ON
           /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
@@ -144,7 +143,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10", "3.11"]
+        python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
         kokkos-branch: ['develop']
 
     steps:
@@ -160,16 +159,15 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.20.2'
+        python -m pip install 'cmake==3.31.6'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != '3.7' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_THREADS=ON
-          -DCMAKE_CXX_STANDARD=17
+          -DCMAKE_CXX_STANDARD=20
           -DCMAKE_POSITION_INDEPENDENT_CODE=ON
           /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
@@ -179,7 +177,7 @@ jobs:
       run:
         python -m pip install -r requirements.txt &&
         python -m pip install pytest &&
-        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=ON -DENABLE_LAYOUTS=ON -DENABLE_VIEW_RANKS=2 -DCMAKE_CXX_STANDARD=17 -DKokkos_ENABLE_THREADS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
+        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=ON -DENABLE_LAYOUTS=ON -DENABLE_VIEW_RANKS=2 -DCMAKE_CXX_STANDARD=20 -DKokkos_ENABLE_THREADS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
           python -m pip install -v --user --no-deps -e .
 
     - name: Import Test
@@ -197,7 +195,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9]
+        python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
 
     steps:
     - uses: actions/checkout@v3
@@ -215,7 +213,7 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
+        python -m pip install 'cmake==3.31.6'
 
     - name: Generate Hierarchy
       run: |
@@ -226,7 +224,7 @@ jobs:
 
     - name: Generate CMakeLists.txt
       run: |
-        echo -e "cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)\nproject(pykokkos-base-as-subproject LANGUAGES CXX)\nadd_subdirectory(kokkos)\nadd_subdirectory(pybind11)\nadd_subdirectory(pykokkos-base)" > ${{github.workspace}}/CMakeLists.txt
+        echo -e "cmake_minimum_required(VERSION 3.31.0 FATAL_ERROR)\nproject(pykokkos-base-as-subproject LANGUAGES CXX)\nadd_subdirectory(kokkos)\nadd_subdirectory(pybind11)\nadd_subdirectory(pykokkos-base)" > ${{github.workspace}}/CMakeLists.txt
         cat ${{github.workspace}}/CMakeLists.txt
 
     - name: Configure CMake
