@@ -19,12 +19,12 @@ INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
 # fetch latest stable pykokkos and pybind versions
 INCLUDE(FetchContent)
-# FETCHCONTENT_DECLARE(
-#   Kokkos
-#   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-#   GIT_TAG develop
-# )
-# FetchContent_MakeAvailable(Kokkos)
+ FETCHCONTENT_DECLARE(
+   Kokkos
+   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
+   GIT_TAG develop
+ )
+ FetchContent_MakeAvailable(Kokkos)
 
 FETCHCONTENT_DECLARE(
   pybind11
