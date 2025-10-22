@@ -23,7 +23,7 @@ INCLUDE(FetchContent)
  FETCHCONTENT_DECLARE(
    Kokkos
    GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-   GIT_TAG develop
+   GIT_TAG master
  )
  FetchContent_MakeAvailable(Kokkos)
 
