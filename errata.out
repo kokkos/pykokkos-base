@@ -1,0 +1,421 @@
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(465): error: expected a ">"
+                           typename ExecutionSpace::memory_space>;
+                                                  ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(468): error: class "Kokkos::ViewTraits<void, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>" has no member "array_layout"
+        std::conditional_t<!std::is_void_v<typename prop::array_layout>,
+                                                          ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(469): error: class "Kokkos::ViewTraits<void, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>" has no member "array_layout"
+                           typename prop::array_layout,
+                                          ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(470): error: a class or namespace qualified name is required
+                           typename ExecutionSpace::array_layout>;
+                                    ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(470): error: expected a ">"
+                           typename ExecutionSpace::array_layout>;
+                                                  ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(473): error: class "Kokkos::ViewTraits<void, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>" has no member "host_mirror_space"
+        !std::is_void_v<typename prop::host_mirror_space>,
+                                       ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(474): error: class "Kokkos::ViewTraits<void, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>" has no member "host_mirror_space"
+        typename prop::host_mirror_space,
+                       ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_HostSpace.hpp(138): error: a class or namespace qualified name is required
+          typename S::execution_space::memory_space,
+                   ^
+          detected during:
+            instantiation of class "Kokkos::Impl::HostMirror<S> [with S=<error-type>]" at line 475 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_HostSpace.hpp(138): error: too few arguments for class template "Kokkos::Impl::MemorySpaceAccess"
+          typename S::execution_space::memory_space,
+                    ^
+          detected during:
+            instantiation of class "Kokkos::Impl::HostMirror<S> [with S=<error-type>]" at line 475 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_HostSpace.hpp(138): error: expected a "}"
+          typename S::execution_space::memory_space,
+                    ^
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_HostSpace.hpp(136): note #3196-D: to match this "{"
+    enum {
+         ^
+          detected during:
+            instantiation of class "Kokkos::Impl::HostMirror<S> [with S=<error-type>]" at line 475 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_HostSpace.hpp(147): error: a class or namespace qualified name is required
+                                          typename S::memory_space>::accessible
+                                                   ^
+          detected during:
+            instantiation of class "Kokkos::Impl::HostMirror<S> [with S=<error-type>]" at line 475 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_HostSpace.hpp(147): error: expected a ">"
+                                          typename S::memory_space>::accessible
+                                                    ^
+          detected during:
+            instantiation of class "Kokkos::Impl::HostMirror<S> [with S=<error-type>]" at line 475 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_HostSpace.hpp(155): error: a class or namespace qualified name is required
+                                          typename S::memory_space>,
+                                                   ^
+          detected during:
+            instantiation of class "Kokkos::Impl::HostMirror<S> [with S=<error-type>]" at line 475 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_HostSpace.hpp(155): error: expected a ">"
+                                          typename S::memory_space>,
+                                                    ^
+          detected during:
+            instantiation of class "Kokkos::Impl::HostMirror<S> [with S=<error-type>]" at line 475 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(478): error: class "Kokkos::ViewTraits<void, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>" has no member "memory_traits"
+        std::conditional_t<!std::is_void_v<typename prop::memory_traits>,
+                                                          ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(479): error: class "Kokkos::ViewTraits<void, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>" has no member "memory_traits"
+                           typename prop::memory_traits,
+                                          ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(482): error: class "Kokkos::ViewTraits<void, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>" has no member "hooks_policy"
+    using HooksPolicy = typename prop::hooks_policy;
+                                       ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(521): error: class "Kokkos::ViewTraits<void, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>" has no member "specialize"
+        typename prop::specialize,
+                       ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(537): error: a class or namespace qualified name is required
+    using size_type = typename MemorySpace::size_type;
+                               ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(537): error: expected a ";"
+    using size_type = typename MemorySpace::size_type;
+                                          ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=void, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 458
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(465): error: a class or namespace qualified name is required
+                           typename ExecutionSpace::memory_space>;
+                                    ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(465): error: expected a ">"
+                           typename ExecutionSpace::memory_space>;
+                                                  ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(470): error: a class or namespace qualified name is required
+                           typename ExecutionSpace::array_layout>;
+                                    ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(470): error: expected a ">"
+                           typename ExecutionSpace::array_layout>;
+                                                  ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(537): error: a class or namespace qualified name is required
+    using size_type = typename MemorySpace::size_type;
+                               ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(537): error: expected a ";"
+    using size_type = typename MemorySpace::size_type;
+                                          ^
+          detected during:
+            instantiation of class "Kokkos::ViewTraits<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 257
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_ViewTraits.hpp(168): error: static assertion failed
+    static_assert(is_device_v<DeviceType>);
+    ^
+          detected during:
+            instantiation of class "Kokkos::Impl::ViewArguments<ValueType, ArrayLayout, DeviceType, MemoryTraits> [with ValueType=int64_t, ArrayLayout=<error-type>, DeviceType=Kokkos::Device<<error-type>, <error-type>>, MemoryTraits=<error-type>]" at line 258
+            processing of template argument list for "Kokkos::Impl::MDSpanViewTraits" based on template argument <Kokkos::ViewTraits<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>> at line 97 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::Impl::BasicViewFromTraits<Properties...> [with Properties=<int64_t *, Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/experimental/__p0009_bits/mdspan.hpp(82): error: a class or namespace qualified name is required
+    using mapping_type = typename layout_type::template mapping<extents_type>;
+                                  ^
+          detected during:
+            instantiation of class "Kokkos::mdspan<ElementType, Extents, LayoutPolicy, AccessorPolicy> [with ElementType=int64_t, Extents=Kokkos::extents<std::size_t, 18446744073709551615UL>, LayoutPolicy=void, AccessorPolicy=Kokkos::Impl::SpaceAwareAccessor<<error-type>, Kokkos::default_accessor<int64_t>>]" at line 139 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_BasicView.hpp
+            instantiation of class "Kokkos::Impl::BV::BasicView<ElementType, Extents, LayoutPolicy, AccessorPolicy> [with ElementType=int64_t, Extents=Kokkos::extents<std::size_t, 18446744073709551615UL>, LayoutPolicy=void, AccessorPolicy=Kokkos::Impl::SpaceAwareAccessor<<error-type>, Kokkos::default_accessor<int64_t>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/experimental/__p0009_bits/mdspan.hpp(82): error: expected an identifier
+    using mapping_type = typename layout_type::template mapping<extents_type>;
+                                               ^
+          detected during:
+            instantiation of class "Kokkos::mdspan<ElementType, Extents, LayoutPolicy, AccessorPolicy> [with ElementType=int64_t, Extents=Kokkos::extents<std::size_t, 18446744073709551615UL>, LayoutPolicy=void, AccessorPolicy=Kokkos::Impl::SpaceAwareAccessor<<error-type>, Kokkos::default_accessor<int64_t>>]" at line 139 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_BasicView.hpp
+            instantiation of class "Kokkos::Impl::BV::BasicView<ElementType, Extents, LayoutPolicy, AccessorPolicy> [with ElementType=int64_t, Extents=Kokkos::extents<std::size_t, 18446744073709551615UL>, LayoutPolicy=void, AccessorPolicy=Kokkos::Impl::SpaceAwareAccessor<<error-type>, Kokkos::default_accessor<int64_t>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/experimental/__p0009_bits/mdspan.hpp(82): error: expected a ";"
+    using mapping_type = typename layout_type::template mapping<extents_type>;
+                                             ^
+          detected during:
+            instantiation of class "Kokkos::mdspan<ElementType, Extents, LayoutPolicy, AccessorPolicy> [with ElementType=int64_t, Extents=Kokkos::extents<std::size_t, 18446744073709551615UL>, LayoutPolicy=void, AccessorPolicy=Kokkos::Impl::SpaceAwareAccessor<<error-type>, Kokkos::default_accessor<int64_t>>]" at line 139 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_BasicView.hpp
+            instantiation of class "Kokkos::Impl::BV::BasicView<ElementType, Extents, LayoutPolicy, AccessorPolicy> [with ElementType=int64_t, Extents=Kokkos::extents<std::size_t, 18446744073709551615UL>, LayoutPolicy=void, AccessorPolicy=Kokkos::Impl::SpaceAwareAccessor<<error-type>, Kokkos::default_accessor<int64_t>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_BasicView.hpp(153): error: a class or namespace qualified name is required
+    using execution_space = typename memory_space::execution_space;
+                                     ^
+          detected during:
+            instantiation of class "Kokkos::Impl::BV::BasicView<ElementType, Extents, LayoutPolicy, AccessorPolicy> [with ElementType=int64_t, Extents=Kokkos::extents<std::size_t, 18446744073709551615UL>, LayoutPolicy=void, AccessorPolicy=Kokkos::Impl::SpaceAwareAccessor<<error-type>, Kokkos::default_accessor<int64_t>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/View/Kokkos_BasicView.hpp(153): error: expected a ";"
+    using execution_space = typename memory_space::execution_space;
+                                                 ^
+          detected during:
+            instantiation of class "Kokkos::Impl::BV::BasicView<ElementType, Extents, LayoutPolicy, AccessorPolicy> [with ElementType=int64_t, Extents=Kokkos::extents<std::size_t, 18446744073709551615UL>, LayoutPolicy=void, AccessorPolicy=Kokkos::Impl::SpaceAwareAccessor<<error-type>, Kokkos::default_accessor<int64_t>>]" at line 147 of /home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp
+            instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(188): error: a class or namespace qualified name is required
+    using size_type = typename memory_space::size_type;
+                               ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(188): error: expected a ";"
+    using size_type = typename memory_space::size_type;
+                                           ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(254): error: name followed by "::" must be a class or namespace name
+                    typename traits::host_mirror_space::memory_space>,
+                                     ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(258): error: name followed by "::" must be a class or namespace name
+                    typename traits::host_mirror_space::memory_space> > >;
+                                     ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(1258): error: name followed by "::" must be a class or namespace name
+        const typename traits::execution_space::scratch_memory_space& arg_space,
+                               ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(1274): error: name followed by "::" must be a class or namespace name
+        const typename traits::execution_space::scratch_memory_space& arg_space,
+                               ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(1303): error: name followed by "::" must be a class or namespace name
+        const typename traits::execution_space::scratch_memory_space& arg_space,
+                               ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(1314): error: name followed by "::" must be a class or namespace name
+        const typename traits::execution_space::scratch_memory_space& arg_space,
+                               ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/include/kokkos/Kokkos_View.hpp(1335): error: name followed by "::" must be a class or namespace name
+        const typename traits::execution_space::scratch_memory_space& arg_space,
+                               ^
+          detected during instantiation of class "Kokkos::View<DataType, Properties...> [with DataType=int64_t *, Properties=<Kokkos::LayoutLeft, Kokkos::CudaSpace, <error-type>>]" at line 12 of ./bindings.cpp
+
+./bindings.cpp(13): error: namespace "Kokkos::Experimental" has no member "DefaultViewHooks"
+  void wrapper_work(pybind11::kwargs kwargs) {run_work(kwargs["a"].cast<Kokkos::View<int64_t*,Kokkos::LayoutLeft,Kokkos::CudaSpace,Kokkos::Experimental::DefaultViewHooks>>(),kwargs["pk_exec_space_instance"].cast<Kokkos::Cuda>(),kwargs["pk_kernel_name"].cast<std::string>(),kwargs["pk_threads_begin"].cast<int>(),kwargs["pk_threads_end"].cast<int>(),kwargs["pk_randpool_seed"].cast<int>(),kwargs["pk_randpool_num_states"].cast<int>());;}
+                                                                                                                                                         ^
+
+55 errors detected in the compilation of "./bindings.cpp".
+nvlink fatal   : Could not open input file './bindings.cpp.o'
+
+C++ compilation in pk_cpp/home/sifi/test/test_work/types_105ac78422453ce329fef0644be3e4ae/Cuda failed
+OpenMP : Serial
+28ExecutionSpaceSpecializationILm0EE
+OpenMP : Threads
+28ExecutionSpaceSpecializationILm1EE
+OpenMP : OpenMP
+28ExecutionSpaceSpecializationILm2EE
+0
+Cuda : Serial
+28ExecutionSpaceSpecializationILm0EE
+Cuda : Threads
+28ExecutionSpaceSpecializationILm1EE
+Cuda : OpenMP
+28ExecutionSpaceSpecializationILm2EE
+Cuda : Cuda
+28ExecutionSpaceSpecializationILm3EE
+1
+HIP : Serial
+28ExecutionSpaceSpecializationILm0EE
+HIP : Threads
+28ExecutionSpaceSpecializationILm1EE
+HIP : OpenMP
+28ExecutionSpaceSpecializationILm2EE
+HIP : Cuda
+28ExecutionSpaceSpecializationILm3EE
+HIP : HPX
+28ExecutionSpaceSpecializationILm4EE
+HIP : HIP
+28ExecutionSpaceSpecializationILm5EE
+0
+OpenMP : Serial
+28ExecutionSpaceSpecializationILm0EE
+OpenMP : Threads
+28ExecutionSpaceSpecializationILm1EE
+OpenMP : OpenMP
+28ExecutionSpaceSpecializationILm2EE
+0
+Threads : Serial
+28ExecutionSpaceSpecializationILm0EE
+Threads : Threads
+28ExecutionSpaceSpecializationILm1EE
+0
+Serial : Serial
+28ExecutionSpaceSpecializationILm0EE
+1
+Cuda : Serial
+28ExecutionSpaceSpecializationILm0EE
+Cuda : Threads
+28ExecutionSpaceSpecializationILm1EE
+Cuda : OpenMP
+28ExecutionSpaceSpecializationILm2EE
+Cuda : Cuda
+28ExecutionSpaceSpecializationILm3EE
+1
