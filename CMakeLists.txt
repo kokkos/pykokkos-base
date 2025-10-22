@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 INCLUDE(KokkosPythonSetup)
 
@@ -19,12 +20,12 @@ INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
 # fetch latest stable pykokkos and pybind versions
 INCLUDE(FetchContent)
-# FETCHCONTENT_DECLARE(
-#   Kokkos
-#   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-#   GIT_TAG develop
-# )
-# FetchContent_MakeAvailable(Kokkos)
+ FETCHCONTENT_DECLARE(
+   Kokkos
+   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
+   GIT_TAG develop
+ )
+ FetchContent_MakeAvailable(Kokkos)
 
 FETCHCONTENT_DECLARE(
   pybind11

@@ -222,7 +222,7 @@ auto get_unmanaged_init() {
 }
 
 template <typename ViewT, size_t Idx, typename Tp, typename Vp>
-auto get_init(Vp &_view, enable_if_t<ViewT::traits::is_managed, int> = 0) {
+auto get_init(Vp &_view, enable_if_t<!ViewT::traits::memory_traits::is_unmanaged, int> = 0) {
   // define managed init
   _view.def(py::init(get_init<ViewT, Idx>()));
   // define unmanaged init
@@ -230,7 +230,7 @@ auto get_init(Vp &_view, enable_if_t<ViewT::traits::is_managed, int> = 0) {
 }
 
 template <typename ViewT, size_t Idx, typename Tp, typename Vp>
-auto get_init(Vp &_view, enable_if_t<!ViewT::traits::is_managed, int> = 0) {
+auto get_init(Vp &_view, enable_if_t<ViewT::traits::memory_traits::is_unmanaged, int> = 0) {
   // define unmanaged init
   _view.def(py::init(get_unmanaged_init<ViewT, Idx, Tp>()));
 }
@@ -330,7 +330,8 @@ void generate_view(py::module &_mod, const std::string &_name,
     );
   });
 
-  using mirror_type = typename ViewT::HostMirror;
+  // modern Kokkos uses 'host_mirror_type' (older 'HostMirror' is deprecated)
+  using mirror_type = typename ViewT::host_mirror_type;
   using mirror_cast = kokkos_python_view_type_t<mirror_type>;
 
   // if (!std::is_same<mirror_type, mirror_cast>::value) {

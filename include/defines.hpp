@@ -210,5 +210,5 @@
 #define GET_STRIDE(IDX_NUM)                                             \
   template <size_t Idx, typename Tp, enable_if_t<(Idx == IDX_NUM)> = 0> \
   constexpr auto get_stride(Tp& m) {                                    \
-    return m.stride_##IDX_NUM();                                        \
+    return m.stride(IDX_NUM);                                           \
   }
