@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
+        python-version: ["3.10", 3.11, 3.12, 3.13]
         kokkos-branch: ['master', 'develop']
 
     steps:
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
+        python-version: ["3.10", 3.11, 3.12, 3.13]
         kokkos-branch: ['master']
 
     steps:
@@ -101,7 +101,6 @@ jobs:
         python -m pip install 'cmake==3.31.6'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != '3.9' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         git reset --hard 15dc143e5f39949eece972a798e175c4b463d4b8 &&
@@ -145,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
+        python-version: ["3.10", 3.11, 3.12, 3.13]
         kokkos-branch: ['develop']
 
     steps:
@@ -198,7 +197,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, "3.10", 3.11, 3.12, 3.13]
+        python-version: ["3.10", 3.11, 3.12, 3.13]
 
     steps:
     - uses: actions/checkout@v3
