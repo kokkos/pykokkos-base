@@ -50,8 +50,8 @@
 
 namespace Common {
 template <typename PoolT, typename Sp>
-void generate_pool(py::module& _mod, const std::string& _name,
-                   const std::string& _msg) {
+void generate_pool(py::module &_mod, const std::string &_name,
+                   const std::string &_msg) {
   if (debug_output())
     std::cerr << "Registering " << _msg << " as python class '" << _name
               << "'..." << std::endl;
