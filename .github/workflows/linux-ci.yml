@@ -30,12 +30,11 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.31.6'
+        python -m pip install 'cmake==3.22.0'
 
     - name: Install Kokkos
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
-        git reset --hard 15dc143e5f39949eece972a798e175c4b463d4b8 &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_OPENMP=OFF
@@ -98,12 +97,11 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.31.6'
+        python -m pip install 'cmake==3.22.0'
 
     - name: Install Kokkos
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
-        git reset --hard 15dc143e5f39949eece972a798e175c4b463d4b8 &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_OPENMP=ON
@@ -160,12 +158,11 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.31.6'
+        python -m pip install 'cmake==3.22.0'
 
     - name: Install Kokkos
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
-        git reset --hard 15dc143e5f39949eece972a798e175c4b463d4b8 &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_THREADS=ON
@@ -215,7 +212,7 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.31.6'
+        python -m pip install 'cmake==3.22.0'
 
     - name: Generate Hierarchy
       run: |
@@ -226,7 +223,7 @@ jobs:
 
     - name: Generate CMakeLists.txt
       run: |
-        echo -e "cmake_minimum_required(VERSION 3.31.0 FATAL_ERROR)\nproject(pykokkos-base-as-subproject LANGUAGES CXX)\nadd_subdirectory(kokkos)\nadd_subdirectory(pybind11)\nadd_subdirectory(pykokkos-base)" > ${{github.workspace}}/CMakeLists.txt
+        echo -e "cmake_minimum_required(VERSION 3.22.0 FATAL_ERROR)\nproject(pykokkos-base-as-subproject LANGUAGES CXX)\nadd_subdirectory(kokkos)\nadd_subdirectory(pybind11)\nadd_subdirectory(pykokkos-base)" > ${{github.workspace}}/CMakeLists.txt
         cat ${{github.workspace}}/CMakeLists.txt
 
     - name: Configure CMake
