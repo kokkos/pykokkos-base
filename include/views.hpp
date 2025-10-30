@@ -330,7 +330,6 @@ void generate_view(py::module &_mod, const std::string &_name,
     );
   });
 
-  // modern Kokkos uses 'host_mirror_type' (older 'HostMirror' is deprecated)
   using mirror_type = typename ViewT::host_mirror_type;
   using mirror_cast = kokkos_python_view_type_t<mirror_type>;
 

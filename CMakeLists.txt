@@ -27,7 +27,7 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 ENDIF()
 
-# fetch latest stable pykokkos and pybind versions
+# fetch latest stable kokkos and pybind11 versions
 INCLUDE(FetchContent)
 FETCHCONTENT_DECLARE(
   Kokkos
