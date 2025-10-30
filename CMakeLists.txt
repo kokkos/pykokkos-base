@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 
 INCLUDE(KokkosPythonSetup)
 
@@ -18,22 +18,8 @@ ENDIF()
 
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
-# fetch latest stable pykokkos and pybind versions
-INCLUDE(FetchContent)
- FETCHCONTENT_DECLARE(
-   Kokkos
-   GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-   GIT_TAG master
- )
- FetchContent_MakeAvailable(Kokkos)
-
-FETCHCONTENT_DECLARE(
-  pybind11
-  GIT_REPOSITORY https://github.com/pybind/pybind11.git
-  GIT_TAG v3.0
-)
-FetchContent_MakeAvailable(pybind11)
-
+# ensure always PIC
+SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ADD_OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
 # force to release if not specified
@@ -41,8 +27,21 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 ENDIF()
 
-# ensure always PIC
-SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# fetch latest stable pykokkos and pybind versions
+INCLUDE(FetchContent)
+FETCHCONTENT_DECLARE(
+  Kokkos
+  URL https://github.com/kokkos/kokkos/archive/refs/heads/release-candidate-4.7.00.zip
+  URL_HASH SHA256=4707b00ffee962101d98820a2874384bf1dedeae7694cbfbd258ccf9c8dc1c34
+)
+FetchContent_MakeAvailable(Kokkos)
+
+FETCHCONTENT_DECLARE(
+  pybind11
+  URL https://github.com/pybind/pybind11/archive/refs/heads/v3.0.zip
+  URL_HASH SHA256=1816ea10bf7de362fb7864b131cc90bed6fc393feaf7e27b0ed5a03987bedd10
+)
+FETCHCONTENT_MAKEAVAILABLE(pybind11)
 
 INCLUDE(KokkosPythonKokkos)         # find external Kokkos or add submodule
 INCLUDE(KokkosPythonFormat)         # format target
