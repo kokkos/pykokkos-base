@@ -83,7 +83,7 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run:
-        export PYTHONPATH=${PWD}/build/_deps/pybind11-src/build/tests:${PYTHONPATH} &&
+        export PYTHONPATH=${PWD}/_deps/pybind11-src/build/tests:${PYTHONPATH} &&
         export PYTHONPATH=${PWD}:/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         ls &&
         echo $PYTHONPATH &&
@@ -179,7 +179,7 @@ jobs:
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_THREADS=ON
-          -DCMAKE_CXX_STANDARD=17
+          -DCMAKE_CXX_STANDARD=20
           -DCMAKE_POSITION_INDEPENDENT_CODE=ON
           /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
