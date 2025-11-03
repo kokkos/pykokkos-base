@@ -69,6 +69,17 @@ jobs:
         export PYTHONPATH=/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         DEBUG_OUTPUT=ON python -c "import kokkos; print(kokkos.__file__)"
 
+    - name: Build and test pybind11
+      working-directory: ${{github.workspace}}/build/_deps/pybind11-src/
+      run:
+        mkdir -p build &&
+        pushd build &&
+        cmake .. -DPYTHON_EXECUTABLE=$(which python) &&
+        cmake --build . --target pytest --parallel 2 &&
+        export PYTHONPATH=${PWD}/tests:${PYTHONPATH} &&
+        popd &&
+        pytest ./tests/
+
     - name: Test
       working-directory: ${{github.workspace}}/build
       run:
