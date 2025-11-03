@@ -85,6 +85,7 @@ jobs:
       run:
         export PYTHONPATH=${PWD}:/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         ls &&
+        echo $PYTHONPATH &&
         pytest . &&
         python ./ex-numpy.py
 
