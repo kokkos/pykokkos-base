@@ -22,13 +22,6 @@ PYKOKKOS_TARGET_FLAG(
     FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations -Wno-attributes -fvisibility=default /bigobj
     LANGUAGES   CXX)
 
-IF(NOT Kokkos_InterOp_Header)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/Templates/KokkosExp_InterOp.hpp
-        ${PROJECT_BINARY_DIR}/include/KokkosExp_InterOp.hpp COPYONLY)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/Templates/KokkosExp_InterOp.hpp
-        ${PROJECT_BINARY_DIR}/examples/KokkosExp_InterOp.hpp COPYONLY)
-ENDIF()
-
 TRY_COMPILE(ENABLE_DEMANGLE
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/cmake/Templates/demangle.cpp
