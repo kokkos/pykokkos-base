@@ -83,6 +83,7 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build
       run:
+        export PYTHONPATH=${PWD}/build/_deps/pybind11-src/build/tests:${PYTHONPATH} &&
         export PYTHONPATH=${PWD}:/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         ls &&
         echo $PYTHONPATH &&
