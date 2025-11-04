@@ -136,7 +136,7 @@ jobs:
       run:
         cd ./*/cmake-build &&
         ls &&
-        pytest . &&
+        pytest . --ignore=_deps/ &&
         python ./ex-numpy.py
 
   pip-build:
