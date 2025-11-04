@@ -1,3 +1,0 @@
-nvlink fatal   : Could not open input file '/home/sifi/.conda/envs/pyk/lib/python3.11/site-packages/pykokkos_base-0.0.7-py3.11-linux-x86_64.egg/lib/libkokkoscontainers.so'
-
-C++ compilation in pk_cpp/home/sifi/test/test_work/types_105ac78422453ce329fef0644be3e4ae/Cuda failed
