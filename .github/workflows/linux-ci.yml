@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", 3.11, 3.12, 3.13]
-        kokkos-branch: ['master', 'develop']
+        kokkos-branch: ['release-candidate-4.7.01']
 
     steps:
     - uses: actions/checkout@v2
@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", 3.11, 3.12, 3.13]
-        kokkos-branch: ['master']
+        kokkos-branch: ['release-candidate-4.7.01']
 
     steps:
     - uses: actions/checkout@v2
@@ -144,7 +144,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", 3.11, 3.12, 3.13]
-        kokkos-branch: ['develop']
+        kokkos-branch: ['release-candidate-4.7.01']
 
     steps:
     - uses: actions/checkout@v2
