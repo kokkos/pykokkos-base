@@ -86,7 +86,6 @@ jobs:
         export PYTHONPATH=${PWD}/_deps/pybind11-src/build/tests:${PYTHONPATH} &&
         export PYTHONPATH=${PWD}:/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         ls &&
-        echo $PYTHONPATH &&
         pytest . &&
         python ./ex-numpy.py
 
@@ -115,12 +114,7 @@ jobs:
     - name: Install Kokkos
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
-        cmake -B /tmp/kokkos-build
-          -DKokkos_ENABLE_SERIAL=ON
-          -DKokkos_ENABLE_OPENMP=ON
-          -DCMAKE_CXX_STANDARD=17
-          -DBUILD_SHARED_LIBS=ON
-          /tmp/kokkos-source &&
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
         sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
@@ -128,13 +122,7 @@ jobs:
       run:
         python -m pip install -r requirements.txt &&
         python -m pip install pytest &&
-        python setup.py install
-          --enable-layouts
-          --enable-view-ranks=4
-          --disable-memory-traits
-          --enable-werror
-          -- -DENABLE_EXAMPLES=ON
-          -- -j1
+        python setup.py install --enable-layouts --enable-view-ranks=4 --disable-memory-traits --enable-werror -- -DENABLE_EXAMPLES=ON -- -j1
 
     - name: Import Test
       run:
