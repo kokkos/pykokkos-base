@@ -4,7 +4,6 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules ${CMAKE_MODULE_PAT
 
 
 INCLUDE(KokkosPythonSetup)
-INCLUDE(FetchContent)
 
 PROJECT(
     pykokkos-base
@@ -29,31 +28,20 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
 ENDIF()
 
 # fetch latest stable kokkos and pybind11 versions
-FIND_PACKAGE(Kokkos CONFIG)
-if(Kokkos_FOUND)
-    MESSAGE(STATUS "Found Kokkos: ${Kokkos_DIR} (version \"${Kokkos_VERSION}\")")
-else()
-    MESSAGE(STATUS "Fetching Kokkos")
-    FETCHCONTENT_DECLARE(
-      Kokkos
-      URL https://github.com/kokkos/kokkos/archive/refs/heads/release-candidate-4.7.01.zip
-      URL_HASH SHA256=e256f111716259ef0cec0339ddf44d716b1f495e5514ca0806fcf80635f5b4cc
-    )
-    FETCHCONTENT_MAKEAVAILABLE(Kokkos)
-endif()
+INCLUDE(FetchContent)
+FETCHCONTENT_DECLARE(
+  Kokkos
+  URL https://github.com/kokkos/kokkos/archive/refs/heads/release-candidate-4.7.00.zip
+  URL_HASH SHA256=4707b00ffee962101d98820a2874384bf1dedeae7694cbfbd258ccf9c8dc1c34
+)
+FetchContent_MakeAvailable(Kokkos)
 
-FIND_PACKAGE(pybind11 CONFIG)
-if (pybind11_FOUND)
-    MESSAGE(STATUS "Found pybind11: ${pybind11_DIR} (version \"${pybind11_VERSION}\")")
-else()
-    MESSAGE(STATUS "Fetching pybind11")
-    FETCHCONTENT_DECLARE(
-      pybind11
-      URL https://github.com/pybind/pybind11/archive/refs/heads/v3.0.zip
-      URL_HASH SHA256=1816ea10bf7de362fb7864b131cc90bed6fc393feaf7e27b0ed5a03987bedd10
-    )
-    FETCHCONTENT_MAKEAVAILABLE(pybind11)
-endif()
+FETCHCONTENT_DECLARE(
+  pybind11
+  URL https://github.com/pybind/pybind11/archive/refs/heads/v3.0.zip
+  URL_HASH SHA256=1816ea10bf7de362fb7864b131cc90bed6fc393feaf7e27b0ed5a03987bedd10
+)
+FETCHCONTENT_MAKEAVAILABLE(pybind11)
 
 INCLUDE(KokkosPythonKokkos)         # find external Kokkos or add submodule
 INCLUDE(KokkosPythonFormat)         # format target
