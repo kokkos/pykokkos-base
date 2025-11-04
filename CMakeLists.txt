@@ -31,8 +31,8 @@ ENDIF()
 INCLUDE(FetchContent)
 FETCHCONTENT_DECLARE(
   Kokkos
-  URL https://github.com/kokkos/kokkos/archive/refs/heads/release-candidate-4.7.00.zip
-  URL_HASH SHA256=4707b00ffee962101d98820a2874384bf1dedeae7694cbfbd258ccf9c8dc1c34
+  URL https://github.com/kokkos/kokkos/archive/refs/heads/release-candidate-4.7.01.zip
+  URL_HASH SHA256=e256f111716259ef0cec0339ddf44d716b1f495e5514ca0806fcf80635f5b4cc
 )
 FetchContent_MakeAvailable(Kokkos)
 
