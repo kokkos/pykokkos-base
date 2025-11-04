@@ -129,7 +129,7 @@ jobs:
         mkdir -p scratch &&
         cd scratch &&
         DEBUG_OUTPUT=ON python -c "import kokkos; print(kokkos.__file__)" &&
-        pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))
+        python -m kokkos.test
 
     - name: Test
       working-directory: ${{github.workspace}}/_skbuild
@@ -189,7 +189,7 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/scratch
       run:
-        pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))
+        python -m kokkos.test
 
   subproject:
     runs-on: ubuntu-latest
