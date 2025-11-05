@@ -219,6 +219,9 @@ jobs:
       run: |
         cp -r ${{github.workspace}}/pykokkos-base/external/kokkos ${{github.workspace}}/kokkos
         cp -r ${{github.workspace}}/pykokkos-base/external/pybind11 ${{github.workspace}}/pybind11
+        # Remove .git files/dirs from copied submodules to avoid git errors
+        rm -rf ${{github.workspace}}/kokkos/.git
+        rm -rf ${{github.workspace}}/pybind11/.git
         ls
         ls *
 
@@ -243,6 +246,7 @@ jobs:
           -DBUILD_SHARED_LIBS=ON
           -DPYTHON_EXECUTABLE=$(which python)
           -DPython3_EXECUTABLE=$(which python)
+          -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           ${{github.workspace}}
 
     - name: Build
