@@ -28,25 +28,6 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 ENDIF()
 
-# fetch latest stable kokkos and pybind11 versions
-# Check if Kokkos target already exists (e.g., when used as a subproject)
-if(NOT TARGET Kokkos::kokkos)
-    FIND_PACKAGE(Kokkos CONFIG)
-    if(Kokkos_FOUND)
-        MESSAGE(STATUS "Found Kokkos: ${Kokkos_DIR} (version \"${Kokkos_VERSION}\")")
-    else()
-        MESSAGE(STATUS "Fetching Kokkos")
-        FETCHCONTENT_DECLARE(
-          Kokkos
-          URL https://github.com/kokkos/kokkos/archive/refs/heads/release-candidate-4.7.01.zip
-          URL_HASH SHA256=e256f111716259ef0cec0339ddf44d716b1f495e5514ca0806fcf80635f5b4cc
-        )
-        FETCHCONTENT_MAKEAVAILABLE(Kokkos)
-    endif()
-else()
-    MESSAGE(STATUS "Using existing Kokkos target")
-endif()
-
 # Check if pybind11 target already exists (e.g., when used as a subproject)
 if(NOT TARGET pybind11::module)
     FIND_PACKAGE(pybind11 CONFIG)
