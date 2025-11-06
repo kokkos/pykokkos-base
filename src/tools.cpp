@@ -42,12 +42,12 @@
 //@HEADER
 */
 
+#include <Kokkos_Core.hpp>
+
 #include "common.hpp"
 #include "defines.hpp"
 #include "fwd.hpp"
 #include "traits.hpp"
-
-#include <Kokkos_Core.hpp>
 
 //----------------------------------------------------------------------------//
 //
@@ -131,10 +131,10 @@ struct internal_callbacks {
   internal_callbacks() = default;
   ~internal_callbacks() {}
 
-  internal_callbacks(const internal_callbacks&) = delete;
+  internal_callbacks(const internal_callbacks&)            = delete;
   internal_callbacks& operator=(const internal_callbacks&) = delete;
 
-  internal_callbacks(internal_callbacks&&) = default;
+  internal_callbacks(internal_callbacks&&)            = default;
   internal_callbacks& operator=(internal_callbacks&&) = default;
 
   initFunction init;
