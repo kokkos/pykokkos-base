@@ -53,19 +53,23 @@
 
 namespace Common {
 template <typename Sp, size_t SpaceIdx>
-void generate_execution_space_init(py::class_<Sp> &,
+void generate_execution_space_init(
+    [[maybe_unused]] py::class_<Sp> &,
     enable_if_t<SpaceIdx == Serial_Backend, int> = 0) {}
 
 template <typename Sp, size_t SpaceIdx>
-void generate_execution_space_init(py::class_<Sp> &,
+void generate_execution_space_init(
+    [[maybe_unused]] py::class_<Sp> &,
     enable_if_t<SpaceIdx == Threads_Backend, int> = 0) {}
 
 template <typename Sp, size_t SpaceIdx>
-void generate_execution_space_init(py::class_<Sp> &,
+void generate_execution_space_init(
+    [[maybe_unused]] py::class_<Sp> &,
     enable_if_t<SpaceIdx == OpenMP_Backend, int> = 0) {}
 
 template <typename Sp, size_t SpaceIdx>
-void generate_execution_space_init(py::class_<Sp> &_space,
+void generate_execution_space_init(
+    [[maybe_unused]] py::class_<Sp> &_space,
     enable_if_t<SpaceIdx == Cuda_Backend, int> = 0) {
 #if defined(KOKKOS_ENABLE_CUDA) && defined(__CUDACC__)
   _space.def(py::init([](uint64_t stream_ptr, bool manage_stream) {
@@ -76,7 +80,8 @@ void generate_execution_space_init(py::class_<Sp> &_space,
 }
 
 template <typename Sp, size_t SpaceIdx>
-void generate_execution_space_init(py::class_<Sp> &_space,
+void generate_execution_space_init(
+    [[maybe_unused]] py::class_<Sp> &_space,
     enable_if_t<SpaceIdx == HIP_Backend, int> = 0) {
 #if defined(KOKKOS_ENABLE_HIP) && defined(__HIPCC__)
   _space.def(py::init([](uint64_t stream_ptr, bool manage_stream) {

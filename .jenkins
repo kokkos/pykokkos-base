@@ -26,7 +26,7 @@ pipeline {
                         OMP_PLACES = 'threads'
                         OMP_PROC_BIND = 'spread'
                         LC_ALL = 'C'
-                        PYTHONPATH = '/usr/local/lib/python3.8/site-packages'
+                        PYTHONPATH = '/usr/local/lib/python3.10/site-packages'
                     }
                     steps {
                         sh 'echo "/opt/rocm/llvm/lib" > /etc/ld.so.conf.d/llvm.conf && ldconfig'
@@ -83,7 +83,7 @@ pipeline {
                         OMP_NUM_THREADS = 8
                         OMP_PLACES = 'threads'
                         OMP_PROC_BIND = 'spread'
-                        PYTHONPATH = '/usr/local/lib/python3.8/site-packages'
+                        PYTHONPATH = '/usr/local/lib/python3.10/site-packages'
                     }
                     steps {
                         sh 'ccache --zero-stats'
@@ -144,7 +144,7 @@ pipeline {
                         OMP_NUM_THREADS = 8
                         OMP_PLACES = 'threads'
                         OMP_PROC_BIND = 'spread'
-                        PYTHONPATH = '/usr/local/lib/python3.8/site-packages'
+                        PYTHONPATH = '/usr/local/lib/python3.10/site-packages'
                     }
                     steps {
                         sh 'ccache --zero-stats'
@@ -204,7 +204,7 @@ pipeline {
                         OMP_NUM_THREADS = 8
                         OMP_PLACES = 'threads'
                         OMP_PROC_BIND = 'spread'
-                        PYTHONPATH = '/usr/local/lib/python3.8/site-packages'
+                        PYTHONPATH = '/usr/local/lib/python3.10/site-packages'
                     }
                     steps {
                         sh 'echo "/opt/rocm/llvm/lib" > /etc/ld.so.conf.d/llvm.conf && ldconfig'

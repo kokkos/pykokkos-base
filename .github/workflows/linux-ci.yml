@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7']
-        kokkos-branch: ['master', 'develop']
+        python-version: ["3.10", 3.11, 3.12, 3.13]
+        kokkos-branch: ['release-candidate-4.7.01']
 
     steps:
     - uses: actions/checkout@v2
@@ -30,10 +30,9 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
+        python -m pip install 'cmake==3.22.0'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != 'pypy-3.6' && matrix.python-version != 'pypy-3.7' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
@@ -75,15 +74,15 @@ jobs:
       run:
         export PYTHONPATH=${PWD}:/usr/local/lib/python${{ matrix.python-version }}/site-packages:${PYTHONPATH} &&
         ls &&
-        pytest . &&
+        pytest . --ignore=_deps/ &&
         python ./ex-numpy.py
 
   python-build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, 'pypy-3.6', 'pypy-3.7']
-        kokkos-branch: ['master']
+        python-version: ["3.10", 3.11, 3.12, 3.13]
+        kokkos-branch: ['release-candidate-4.7.01']
 
     steps:
     - uses: actions/checkout@v2
@@ -98,18 +97,12 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
+        python -m pip install 'cmake==3.22.0'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != '3.8' && matrix.python-version != '3.9' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
-        cmake -B /tmp/kokkos-build
-          -DKokkos_ENABLE_SERIAL=ON
-          -DKokkos_ENABLE_OPENMP=ON
-          -DCMAKE_CXX_STANDARD=17
-          -DBUILD_SHARED_LIBS=ON
-          /tmp/kokkos-source &&
+        cmake -B /tmp/kokkos-build -DKokkos_ENABLE_SERIAL=ON -DKokkos_ENABLE_OPENMP=ON -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
         sudo cmake --build /tmp/kokkos-build --target install --parallel 2
 
@@ -117,35 +110,29 @@ jobs:
       run:
         python -m pip install -r requirements.txt &&
         python -m pip install pytest &&
-        python setup.py install
-          --enable-layouts
-          --enable-view-ranks=4
-          --disable-memory-traits
-          --enable-werror
-          -- -DENABLE_EXAMPLES=ON
-          -- -j1
+        python setup.py install --enable-layouts --enable-view-ranks=4 --disable-memory-traits --enable-werror -- -DENABLE_EXAMPLES=ON -- -j1
 
     - name: Import Test
       run:
         mkdir -p scratch &&
         cd scratch &&
         DEBUG_OUTPUT=ON python -c "import kokkos; print(kokkos.__file__)" &&
-        pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))
+        python -m kokkos.test
 
     - name: Test
       working-directory: ${{github.workspace}}/_skbuild
       run:
         cd ./*/cmake-build &&
         ls &&
-        pytest . &&
+        pytest . --ignore=_deps/ &&
         python ./ex-numpy.py
 
   pip-build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10", "3.11"]
-        kokkos-branch: ['develop']
+        python-version: ["3.10", 3.11, 3.12, 3.13]
+        kokkos-branch: ['release-candidate-4.7.01']
 
     steps:
     - uses: actions/checkout@v2
@@ -160,16 +147,15 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.20.2'
+        python -m pip install 'cmake==3.22.0'
 
     - name: Install Kokkos
-      if: ${{ matrix.python-version != '3.7' }}
       run:
         git clone -b ${{ matrix.kokkos-branch }} https://github.com/kokkos/kokkos.git /tmp/kokkos-source &&
         cmake -B /tmp/kokkos-build
           -DKokkos_ENABLE_SERIAL=ON
           -DKokkos_ENABLE_THREADS=ON
-          -DCMAKE_CXX_STANDARD=17
+          -DCMAKE_CXX_STANDARD=20
           -DCMAKE_POSITION_INDEPENDENT_CODE=ON
           /tmp/kokkos-source &&
         cmake --build /tmp/kokkos-build --target all --parallel 2 &&
@@ -179,8 +165,8 @@ jobs:
       run:
         python -m pip install -r requirements.txt &&
         python -m pip install pytest &&
-        PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=ON -DENABLE_LAYOUTS=ON -DENABLE_VIEW_RANKS=2 -DCMAKE_CXX_STANDARD=17 -DKokkos_ENABLE_THREADS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
-          python -m pip install -v --user --no-deps -e .
+        CMAKE_BUILD_PARALLEL_LEVEL=2 PYKOKKOS_BASE_SETUP_ARGS="-DENABLE_WERROR=ON -DENABLE_MEMORY_TRAITS=ON -DENABLE_LAYOUTS=ON -DENABLE_VIEW_RANKS=2 -DCMAKE_CXX_STANDARD=17 -DKokkos_ENABLE_THREADS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
+          python -m pip install -v --user --no-deps .
 
     - name: Import Test
       run:
@@ -191,19 +177,18 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/scratch
       run:
-        pytest $(dirname $(python -c "import kokkos; print(kokkos.__file__)" 2> /dev/null))
+        python -m kokkos.test
 
   subproject:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9]
+        python-version: ["3.10", 3.11, 3.12, 3.13]
 
     steps:
     - uses: actions/checkout@v3
       with:
         path: ${{github.workspace}}/pykokkos-base
-        submodules: true
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -215,18 +200,11 @@ jobs:
         sudo apt-get update &&
         sudo apt-get install -y build-essential gcc g++ ninja-build &&
         python -m pip install --upgrade pip &&
-        python -m pip install 'cmake==3.18.4'
-
-    - name: Generate Hierarchy
-      run: |
-        cp -r ${{github.workspace}}/pykokkos-base/external/kokkos ${{github.workspace}}/kokkos
-        cp -r ${{github.workspace}}/pykokkos-base/external/pybind11 ${{github.workspace}}/pybind11
-        ls
-        ls *
+        python -m pip install 'cmake==3.22.0'
 
     - name: Generate CMakeLists.txt
       run: |
-        echo -e "cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)\nproject(pykokkos-base-as-subproject LANGUAGES CXX)\nadd_subdirectory(kokkos)\nadd_subdirectory(pybind11)\nadd_subdirectory(pykokkos-base)" > ${{github.workspace}}/CMakeLists.txt
+        echo -e "cmake_minimum_required(VERSION 3.22.0 FATAL_ERROR)\nproject(pykokkos-base-as-subproject LANGUAGES CXX)\nadd_subdirectory(pykokkos-base)" > ${{github.workspace}}/CMakeLists.txt
         cat ${{github.workspace}}/CMakeLists.txt
 
     - name: Configure CMake
@@ -240,8 +218,8 @@ jobs:
           -DENABLE_VIEW_RANKS=1
           -DENABLE_EXAMPLES=ON
           -DENABLE_WERROR=ON
-          -DKokkos_ENABLE_SERIAL=ON
-          -DKokkos_ENABLE_OPENMP=ON
+          -DENABLE_SERIAL=ON
+          -DENABLE_OPENMP=ON
           -DBUILD_SHARED_LIBS=ON
           -DPYTHON_EXECUTABLE=$(which python)
           -DPython3_EXECUTABLE=$(which python)

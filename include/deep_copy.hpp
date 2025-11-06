@@ -241,7 +241,7 @@ struct deep_copy_compatible {
 
   template <typename Tp, typename Up>
   static constexpr bool is_managed() {
-    return Tp::traits::is_managed && Up::traits::is_managed;
+    return !Tp::traits::memory_traits::is_unmanaged && !Up::traits::memory_traits::is_unmanaged;
   }
 
   template <typename Tp, bool TpA = Tp::traits::memory_traits::is_atomic>

@@ -65,11 +65,8 @@ void generate_pool(py::module &_mod, const std::string &_name,
 
   _pool.def(py::init([](uint64_t seed) { return new PoolT{seed}; }));
 
-  _pool.def(
-      "init",
-      [](PoolT &_p, uint64_t _seed, int _num_states) {
-        _p.init(_seed, _num_states);
-      },
-      "Initialize the random pool");
+  _pool.def(py::init([](uint64_t seed, uint64_t num_states) {
+    return new PoolT{seed, num_states};
+  }));
 }
 }  // namespace Common
