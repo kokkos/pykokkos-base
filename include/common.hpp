@@ -116,7 +116,7 @@ inline std::string demangle() {
 //----------------------------------------------------------------------------//
 
 template <typename... Args>
-std::string join(const std::string &delim, Args &&... args) {
+std::string join(const std::string &delim, Args &&...args) {
   auto _construct = [&](auto &&_arg) {
     std::ostringstream _ss;
     _ss << std::forward<decltype(_arg)>(_arg);

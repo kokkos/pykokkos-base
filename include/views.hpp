@@ -44,16 +44,16 @@
 
 #pragma once
 
+#include <Kokkos_Core.hpp>
+#include <Kokkos_DynRankView.hpp>
+#include <iostream>
+
 #include "common.hpp"
 #include "concepts.hpp"
 #include "deep_copy.hpp"
 #include "defines.hpp"
 #include "fwd.hpp"
 #include "traits.hpp"
-
-#include <Kokkos_Core.hpp>
-#include <Kokkos_DynRankView.hpp>
-#include <iostream>
 
 //----------------------------------------------------------------------------//
 
@@ -222,7 +222,9 @@ auto get_unmanaged_init() {
 }
 
 template <typename ViewT, size_t Idx, typename Tp, typename Vp>
-auto get_init(Vp &_view, enable_if_t<!ViewT::traits::memory_traits::is_unmanaged, int> = 0) {
+auto get_init(
+    Vp &_view,
+    enable_if_t<!ViewT::traits::memory_traits::is_unmanaged, int> = 0) {
   // define managed init
   _view.def(py::init(get_init<ViewT, Idx>()));
   // define unmanaged init
@@ -230,7 +232,9 @@ auto get_init(Vp &_view, enable_if_t<!ViewT::traits::memory_traits::is_unmanaged
 }
 
 template <typename ViewT, size_t Idx, typename Tp, typename Vp>
-auto get_init(Vp &_view, enable_if_t<ViewT::traits::memory_traits::is_unmanaged, int> = 0) {
+auto get_init(
+    Vp &_view,
+    enable_if_t<ViewT::traits::memory_traits::is_unmanaged, int> = 0) {
   // define unmanaged init
   _view.def(py::init(get_unmanaged_init<ViewT, Idx, Tp>()));
 }

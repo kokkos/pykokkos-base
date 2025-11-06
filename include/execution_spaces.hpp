@@ -44,12 +44,12 @@
 
 #pragma once
 
+#include <Kokkos_Core.hpp>
+
 #include "common.hpp"
 #include "concepts.hpp"
 #include "pools.hpp"
 #include "traits.hpp"
-
-#include <Kokkos_Core.hpp>
 
 namespace Common {
 template <typename Sp, size_t SpaceIdx>

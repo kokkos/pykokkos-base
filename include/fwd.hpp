@@ -44,13 +44,12 @@
 
 #pragma once
 
-#include "common.hpp"
-#include "defines.hpp"
-
 #include <Kokkos_Core.hpp>
-
 #include <set>
 #include <string>
+
+#include "common.hpp"
+#include "defines.hpp"
 
 //----------------------------------------------------------------------------//
 //
