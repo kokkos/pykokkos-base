@@ -189,7 +189,6 @@ jobs:
     - uses: actions/checkout@v3
       with:
         path: ${{github.workspace}}/pykokkos-base
-        submodules: true
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -203,19 +202,9 @@ jobs:
         python -m pip install --upgrade pip &&
         python -m pip install 'cmake==3.22.0'
 
-    - name: Generate Hierarchy
-      run: |
-        cp -r ${{github.workspace}}/pykokkos-base/external/kokkos ${{github.workspace}}/kokkos
-        cp -r ${{github.workspace}}/pykokkos-base/external/pybind11 ${{github.workspace}}/pybind11
-        # Remove .git files/dirs from copied submodules to avoid git errors
-        rm -rf ${{github.workspace}}/kokkos/.git
-        rm -rf ${{github.workspace}}/pybind11/.git
-        ls
-        ls *
-
     - name: Generate CMakeLists.txt
       run: |
-        echo -e "cmake_minimum_required(VERSION 3.22.0 FATAL_ERROR)\nproject(pykokkos-base-as-subproject LANGUAGES CXX)\nadd_subdirectory(kokkos)\nadd_subdirectory(pybind11)\nadd_subdirectory(pykokkos-base)" > ${{github.workspace}}/CMakeLists.txt
+        echo -e "cmake_minimum_required(VERSION 3.22.0 FATAL_ERROR)\nproject(pykokkos-base-as-subproject LANGUAGES CXX)\nadd_subdirectory(pykokkos-base)" > ${{github.workspace}}/CMakeLists.txt
         cat ${{github.workspace}}/CMakeLists.txt
 
     - name: Configure CMake
@@ -229,12 +218,11 @@ jobs:
           -DENABLE_VIEW_RANKS=1
           -DENABLE_EXAMPLES=ON
           -DENABLE_WERROR=ON
-          -DKokkos_ENABLE_SERIAL=ON
-          -DKokkos_ENABLE_OPENMP=ON
+          -DENABLE_SERIAL=ON
+          -DENABLE_OPENMP=ON
           -DBUILD_SHARED_LIBS=ON
           -DPYTHON_EXECUTABLE=$(which python)
           -DPython3_EXECUTABLE=$(which python)
-          -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           ${{github.workspace}}
 
     - name: Build
