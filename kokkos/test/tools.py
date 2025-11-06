@@ -69,14 +69,10 @@ def print_help(arg0):
 
 
 def parse_args(argc, argv):
-    global data
-
     data["parse_args"] = (argc, argv)
 
 
 def initialize(seq, ver, deviceCount, deviceInfo):
-    global data
-
     if "initialize" not in data:
         data["initialize"] = 1
     else:
@@ -84,8 +80,6 @@ def initialize(seq, ver, deviceCount, deviceInfo):
 
 
 def finalize():
-    global data
-
     if "finalize" not in data:
         data["finalize"] = 1
     else:
@@ -93,8 +87,6 @@ def finalize():
 
 
 def begin_parallel(name, devid):
-    global data
-    global temp
     global count
 
     count += 1
@@ -105,15 +97,11 @@ def begin_parallel(name, devid):
 
 
 def end_parallel(kernid):
-    global data
-    global temp
-
     name = temp[kernid]
     data[f"end_{name}"] = kernid
 
 
 def push_region(name):
-    global data
     global regions
 
     data[name] = [True, False]
@@ -121,27 +109,18 @@ def push_region(name):
 
 
 def pop_region():
-    global data
-    global regions
-
     data[regions[-1]][1] = True
 
 
 def alloc_data(handle, label, ptr, size):
-    global data
-
     data[f"alloc_{label}"] = (size, handle.name)
 
 
 def dealloc_data(handle, label, ptr, size):
-    global data
-
     data[f"dealloc_{label}"] = (size, handle.name)
 
 
 def create_prof(name):
-    global data
-    global temp
     global count
 
     count += 1
@@ -152,48 +131,31 @@ def create_prof(name):
 
 
 def start_prof(secid):
-    global data
-    global temp
-
     name = temp[secid]
     data[f"start_{name}"] = secid
 
 
 def stop_prof(secid):
-    global data
-    global temp
-
     name = temp[secid]
     data[f"stop_{name}"] = secid
 
 
 def destroy_prof(secid):
-    global data
-    global temp
-
     name = temp[secid]
     data[f"destroy_{name}"] = secid
 
 
 def prof_event(name):
-    global data
-
     data[f"{name}"] = True
 
 
 def begin_deep_copy(dst_handle, dst_name, dst_ptr, src_handle, src_name, src_ptr, size):
-    global data
-    global temp
-
     data[f"begin_{dst_name}/{dst_handle.name}/dst"] = [size, True, False]
     data[f"begin_{src_name}/{src_handle.name}/src"] = [size, True, False]
     temp["deep_copy"] = (dst_handle, dst_name, src_handle, src_name, size)
 
 
 def end_deep_copy():
-    global data
-    global temp
-
     (dst_handle, dst_name, src_handle, src_name, size) = temp["deep_copy"]
     del temp["deep_copy"]
 
@@ -263,8 +225,6 @@ class PyKokkosBaseToolsTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(self):
-        global data
-
         print("")
         for key, item in data.items():
             print("{:30} : {}".format(key, item))
