@@ -44,13 +44,13 @@
 
 #pragma once
 
+#include <Kokkos_Core.hpp>
+#include <Kokkos_DynRankView.hpp>
+
 #include "common.hpp"
 #include "concepts.hpp"
 #include "fwd.hpp"
 #include "traits.hpp"
-
-#include <Kokkos_Core.hpp>
-#include <Kokkos_DynRankView.hpp>
 
 //----------------------------------------------------------------------------//
 
@@ -128,8 +128,8 @@ struct concrete_view_type_list<std::index_sequence<DataIdx...>> {
 
 template <>
 struct concrete_view_type_list<> {
-  using type = concat_t<type_list<typename concrete_view_type_list<decltype(
-      std::make_index_sequence<ViewDataTypesEnd>())>::type>>;
+  using type = concat_t<type_list<typename concrete_view_type_list<
+      decltype(std::make_index_sequence<ViewDataTypesEnd>())>::type>>;
 };
 
 //----------------------------------------------------------------------------//
@@ -194,8 +194,8 @@ struct dynamic_view_type_list<std::index_sequence<DataIdx...>> {
 
 template <>
 struct dynamic_view_type_list<> {
-  using type = concat_t<type_list<typename dynamic_view_type_list<decltype(
-      std::make_index_sequence<ViewDataTypesEnd>())>::type>>;
+  using type = concat_t<type_list<typename dynamic_view_type_list<
+      decltype(std::make_index_sequence<ViewDataTypesEnd>())>::type>>;
 };
 
 //----------------------------------------------------------------------------//
@@ -241,7 +241,8 @@ struct deep_copy_compatible {
 
   template <typename Tp, typename Up>
   static constexpr bool is_managed() {
-    return Tp::traits::is_managed && Up::traits::is_managed;
+    return !Tp::traits::memory_traits::is_unmanaged &&
+           !Up::traits::memory_traits::is_unmanaged;
   }
 
   template <typename Tp, bool TpA = Tp::traits::memory_traits::is_atomic>

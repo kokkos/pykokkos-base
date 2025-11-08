@@ -42,16 +42,16 @@
 //@HEADER
 */
 
-#include "common.hpp"
-#include "defines.hpp"
-#include "fwd.hpp"
-#include "traits.hpp"
-
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 
 #include <cassert>
 #include <iostream>
+
+#include "common.hpp"
+#include "defines.hpp"
+#include "fwd.hpp"
+#include "traits.hpp"
 
 //----------------------------------------------------------------------------//
 

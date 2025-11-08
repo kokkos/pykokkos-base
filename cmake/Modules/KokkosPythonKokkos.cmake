@@ -44,8 +44,8 @@ IF(NOT _INTERNAL_KOKKOS AND NOT TARGET Kokkos::kokkoscore)
     FIND_FILE(Kokkos_InterOp_Header
         NO_DEFAULT_PATH
         NAMES           Kokkos_InterOp.hpp KokkosExp_InterOp.hpp
-        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
-        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
+        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_ROOT}
+        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_ROOT}
         DOC             "Path to Kokkos InterOp header"
         PATH_SUFFIXES   include ../../../include)
 
@@ -60,8 +60,8 @@ ELSEIF(TARGET Kokkos::kokkoscore)
     FIND_FILE(Kokkos_InterOp_Header
         NO_DEFAULT_PATH
         NAMES           Kokkos_InterOp.hpp KokkosExp_InterOp.hpp
-        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
-        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_DIR}
+        PATHS           ${Kokkos_INCLUDE_DIR} ${Kokkos_ROOT}
+        HINTS           ${Kokkos_INCLUDE_DIR} ${Kokkos_ROOT}
         DOC             "Path to Kokkos InterOp header"
         PATH_SUFFIXES   include ../../../include)
 
@@ -156,7 +156,22 @@ IF(_INTERNAL_KOKKOS)
         ADD_OPTION(Kokkos_ENABLE_CUDA_LAMBDA "Build Kokkos submodule with CUDA lambda support" ON)
     ENDIF()
 
-    ADD_SUBDIRECTORY(external)
-
-    SET(Kokkos_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/external/kokkos/core/src)
+    # Check if we should use submodule or FetchContent
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/external/kokkos/CMakeLists.txt)
+        # Use git submodule
+        ADD_SUBDIRECTORY(external)
+        SET(Kokkos_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/external/kokkos/core/src)
+    ELSE()
+        # Use FetchContent to download Kokkos
+        INCLUDE(FetchContent)
+        MESSAGE(STATUS "Fetching Kokkos via FetchContent")
+        FETCHCONTENT_DECLARE(
+          Kokkos
+          URL https://github.com/kokkos/kokkos/archive/refs/heads/release-candidate-4.7.01.zip
+          URL_HASH SHA256=e256f111716259ef0cec0339ddf44d716b1f495e5514ca0806fcf80635f5b4cc
+        )
+        FETCHCONTENT_MAKEAVAILABLE(Kokkos)
+        FETCHCONTENT_GETPROPERTIES(Kokkos SOURCE_DIR Kokkos_SOURCE_DIR)
+        SET(Kokkos_INCLUDE_DIR ${Kokkos_SOURCE_DIR}/core/src)
+    ENDIF()
 ENDIF()

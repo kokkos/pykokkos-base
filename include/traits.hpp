@@ -44,12 +44,12 @@
 
 #pragma once
 
+#include <Kokkos_Core.hpp>
+
 #include "common.hpp"
 #include "concepts.hpp"
 #include "defines.hpp"
 #include "fwd.hpp"
-
-#include <Kokkos_Core.hpp>
 
 //----------------------------------------------------------------------------//
 

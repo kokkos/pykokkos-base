@@ -1,7 +1,7 @@
 
-#include "Kokkos_Core.hpp"
-
 #include <cstdint>
+
+#include "Kokkos_Core.hpp"
 
 using view_type = Kokkos::View<double**, Kokkos::DefaultExecutionSpace>;
 

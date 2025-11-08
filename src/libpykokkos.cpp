@@ -43,13 +43,14 @@
 */
 
 #include "libpykokkos.hpp"
+
+#include <Kokkos_Core.hpp>
+#include <iostream>
+
 #include "common.hpp"
 #include "defines.hpp"
 #include "fwd.hpp"
 #include "traits.hpp"
-
-#include <Kokkos_Core.hpp>
-#include <iostream>
 
 //----------------------------------------------------------------------------//
 //

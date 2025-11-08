@@ -44,10 +44,10 @@
 
 #pragma once
 
+#include <KokkosExp_InterOp.hpp>
+
 #include "common.hpp"
 #include "fwd.hpp"
-
-#include <KokkosExp_InterOp.hpp>
 
 //----------------------------------------------------------------------------//
 

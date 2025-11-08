@@ -67,6 +67,10 @@ namespace py = pybind11;
 //----------------------------------------------------------------------------//
 
 PYBIND11_MODULE(ex_generate, ex) {
+  // Ensure the core Kokkos bindings are loaded so the view types are
+  // registered before we expose functions that return them.
+  (void)py::module::import("kokkos");
+
   ///
   /// This is a python binding to the user-defined generate_view function
   /// declared in user.hpp which returns a Kokkos::View. This function is called

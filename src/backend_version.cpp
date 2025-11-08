@@ -42,12 +42,12 @@
 //@HEADER
 */
 
+#include <Kokkos_Core_fwd.hpp>
+
 #include "common.hpp"
 #include "defines.hpp"
 #include "fwd.hpp"
 #include "traits.hpp"
-
-#include <Kokkos_Core_fwd.hpp>
 
 #if defined(KOKKOS_ENABLE_OPENMP)
 #  include <omp.h>

@@ -2,7 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
+
 INCLUDE(KokkosPythonSetup)
+INCLUDE(FetchContent)
 
 PROJECT(
     pykokkos-base
@@ -17,14 +19,32 @@ ENDIF()
 
 INCLUDE(KokkosPythonUtilities)  # miscellaneous macros and functions
 
+# ensure always PIC
+SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 ADD_OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
 # force to release if not specified
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
     SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 ENDIF()
 
-# ensure always PIC
-SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Check if pybind11 target already exists (e.g., when used as a subproject)
+if(NOT TARGET pybind11::module)
+    FIND_PACKAGE(pybind11 CONFIG)
+    if (pybind11_FOUND)
+        MESSAGE(STATUS "Found pybind11: ${pybind11_DIR} (version \"${pybind11_VERSION}\")")
+    else()
+        MESSAGE(STATUS "Fetching pybind11")
+        FETCHCONTENT_DECLARE(
+          pybind11
+          URL https://github.com/pybind/pybind11/archive/refs/heads/v3.0.zip
+          URL_HASH SHA256=1816ea10bf7de362fb7864b131cc90bed6fc393feaf7e27b0ed5a03987bedd10
+        )
+        FETCHCONTENT_MAKEAVAILABLE(pybind11)
+    endif()
+else()
+    MESSAGE(STATUS "Using existing pybind11 target")
+endif()
 
 INCLUDE(KokkosPythonKokkos)         # find external Kokkos or add submodule
 INCLUDE(KokkosPythonFormat)         # format target
@@ -111,10 +131,10 @@ EXECUTE_PROCESS(
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
 # location where kokkos libraries are/will be installed
-IF(ENABLE_INTERNAL_KOKKOS OR NOT Kokkos_DIR)
+IF(ENABLE_INTERNAL_KOKKOS OR NOT Kokkos_ROOT)
     SET(_Kokkos_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-ELSEIF(Kokkos_DIR)
-    STRING(REGEX REPLACE "/cmake/.*" "" _Kokkos_LIBDIR "${Kokkos_DIR}")
+ELSEIF(Kokkos_ROOT)
+    STRING(REGEX REPLACE "/cmake/.*" "" _Kokkos_LIBDIR "${Kokkos_ROOT}")
 ENDIF()
 
 # absolute path to libpykokkos install

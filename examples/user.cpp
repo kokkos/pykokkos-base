@@ -1,10 +1,10 @@
 
 #include "user.hpp"
 
-#include "Kokkos_Core.hpp"
-
 #include <cstdint>
 #include <iostream>
+
+#include "Kokkos_Core.hpp"
 
 struct InitView {
   explicit InitView(view_type _v) : m_view(_v) {}
