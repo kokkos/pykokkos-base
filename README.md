@@ -1,4 +1,6 @@
 # pykokkos-base
+[![linux-ci](https://github.com/kokkos/pykokkos-base/actions/workflows/linux-ci.yml/badge.svg)](https://github.com/kokkos/pykokkos-base/actions/workflows/linux-ci.yml)
+[![python-package](https://github.com/kokkos/pykokkos-base/actions/workflows/python-package.yml/badge.svg)](https://github.com/kokkos/pykokkos-base/actions/workflows/python-package.yml)
 
 > Additional Documentation can be found in [Wiki](https://github.com/kokkos/pykokkos-base/wiki)
 
