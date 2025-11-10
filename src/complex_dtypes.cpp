@@ -189,7 +189,20 @@ void generate_complex_dtype(py::module& kokkos, const std::string& _name) {
       .def(py::self / py::self)
       .def(py::self / Tp())
       .def(py::self /= py::self)
-      .def(py::self /= Tp());
+      .def(py::self /= Tp())
+      .def(py::self == py::self)
+      .def(py::self != py::self)
+      .def("__eq__", [](const ComplexTp& self, Tp value) {
+        return self.real() == value && self.imag() == Tp(0);
+      })
+      .def("__ne__", [](const ComplexTp& self, Tp value) {
+        return self.real() != value || self.imag() != Tp(0);
+      });
+  
+  // Enable implicit conversion from Python numeric types to complex
+  py::implicitly_convertible<Tp, ComplexTp>();
+  py::implicitly_convertible<int, ComplexTp>();
+  py::implicitly_convertible<double, ComplexTp>();
 }
 
 void generate_complex_dtypes(py::module& kokkos) {
