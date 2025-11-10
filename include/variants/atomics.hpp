@@ -58,13 +58,14 @@ namespace SpaceDim {
 
 // Helper to convert values to string, with specialization for complex types
 template <typename T>
-std::string value_to_string(const T& val) {
+std::string value_to_string(const T &val) {
   return std::to_string(val);
 }
 
 template <typename T>
-std::string value_to_string(const Kokkos::complex<T>& val) {
-  return "(" + std::to_string(val.real()) + "+" + std::to_string(val.imag()) + "i)";
+std::string value_to_string(const Kokkos::complex<T> &val) {
+  return "(" + std::to_string(val.real()) + "+" + std::to_string(val.imag()) +
+         "i)";
 }
 
 // Helper to detect if a type is complex
@@ -125,25 +126,43 @@ void generate_atomic_variant(py::module &_mod) {
       "String repr");
 
   _atomic.def(
-      "__eq__", [](atomic_type &_obj, value_type _v) { return (static_cast<value_type>(_obj) == _v); },
+      "__eq__",
+      [](atomic_type &_obj, value_type _v) {
+        return (static_cast<value_type>(_obj) == _v);
+      },
       py::is_operator());
   _atomic.def(
-      "__ne__", [](atomic_type &_obj, value_type _v) { return (static_cast<value_type>(_obj) != _v); },
+      "__ne__",
+      [](atomic_type &_obj, value_type _v) {
+        return (static_cast<value_type>(_obj) != _v);
+      },
       py::is_operator());
-  
+
   // Only bind ordering operators for non-complex types
   if constexpr (!is_complex<value_type>::value) {
     _atomic.def(
-        "__lt__", [](atomic_type &_obj, value_type _v) { return (static_cast<value_type>(_obj) < _v); },
+        "__lt__",
+        [](atomic_type &_obj, value_type _v) {
+          return (static_cast<value_type>(_obj) < _v);
+        },
         py::is_operator());
     _atomic.def(
-        "__gt__", [](atomic_type &_obj, value_type _v) { return (static_cast<value_type>(_obj) > _v); },
+        "__gt__",
+        [](atomic_type &_obj, value_type _v) {
+          return (static_cast<value_type>(_obj) > _v);
+        },
         py::is_operator());
     _atomic.def(
-        "__le__", [](atomic_type &_obj, value_type _v) { return (static_cast<value_type>(_obj) <= _v); },
+        "__le__",
+        [](atomic_type &_obj, value_type _v) {
+          return (static_cast<value_type>(_obj) <= _v);
+        },
         py::is_operator());
     _atomic.def(
-        "__ge__", [](atomic_type &_obj, value_type _v) { return (static_cast<value_type>(_obj) >= _v); },
+        "__ge__",
+        [](atomic_type &_obj, value_type _v) {
+          return (static_cast<value_type>(_obj) >= _v);
+        },
         py::is_operator());
   }
 

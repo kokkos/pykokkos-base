@@ -44,9 +44,10 @@
 
 #pragma once
 
+#include <pybind11/numpy.h>
+
 #include <Kokkos_Core.hpp>
 #include <Kokkos_DynRankView.hpp>
-#include <pybind11/numpy.h>
 #include <iostream>
 
 #include "common.hpp"
