@@ -65,13 +65,15 @@ def convert_dtype(_dtype, _module=None):
         import numpy as np
 
         _module = np
-    
+
     # Handle complex dtypes mapping
     if _true_dtype == "complex_float32_dtype":
         _true_dtype = "complex64"
-    elif _true_dtype == "complex_float64_dtype" or _true_dtype == "complex_double_dtype":
+    elif (
+        _true_dtype == "complex_float64_dtype" or _true_dtype == "complex_double_dtype"
+    ):
         _true_dtype = "complex128"
-    
+
     return getattr(_module, _true_dtype)
 
 
