@@ -56,6 +56,17 @@
 namespace Space {
 namespace SpaceDim {
 
+// Helper to convert values to string, with specialization for complex types
+template <typename T>
+std::string value_to_string(const T& val) {
+  return std::to_string(val);
+}
+
+template <typename T>
+std::string value_to_string(const Kokkos::complex<T>& val) {
+  return "(" + std::to_string(val.real()) + "+" + std::to_string(val.imag()) + "i)";
+}
+
 // this function creates bindings for the atomic type returned to python from
 // views with MemoryTrait<Kokkos::Atomic | ...>
 template <size_t DataIdx, size_t SpaceIdx, size_t DimIdx, size_t LayoutIdx>
@@ -102,7 +113,7 @@ void generate_atomic_variant(py::module &_mod) {
   _atomic.def(
       "__str__",
       [](atomic_type &_obj) {
-        return std::to_string(static_cast<value_type>(_obj));
+        return value_to_string(static_cast<value_type>(_obj));
       },
       "String repr");
 
