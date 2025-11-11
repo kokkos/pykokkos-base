@@ -58,4 +58,5 @@ void generate_atomic_variants(py::module& kokkos);
 void generate_backend_versions(py::module& kokkos);
 void generate_pool_variants(py::module& kokkos);
 void generate_execution_spaces(py::module& kokkos);
+void generate_complex_dtypes(py::module& kokkos);
 void destroy_callbacks();
