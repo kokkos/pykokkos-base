@@ -2,7 +2,7 @@
 //@HEADER
 // ************************************************************************
 //
-//                        Kokkos v. 3.0
+//                        Kokkos v. 4.7.1
 //       Copyright (2020) National Technology & Engineering
 //               Solutions of Sandia, LLC (NTESS).
 //
