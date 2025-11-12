@@ -5,5 +5,3 @@ IndentPPDirectives: AfterHash
 AlignConsecutiveAssignments: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: true
-InsertNewlineAtEOF: true
-LineEnding: LF

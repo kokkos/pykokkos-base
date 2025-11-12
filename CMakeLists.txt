@@ -64,8 +64,7 @@ SET(libpykokkos_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/available.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/common.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/tools.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/execution_spaces.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/complex_dtypes.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/src/execution_spaces.cpp)
 
 SET(libpykokkos_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/include/libpykokkos.hpp
