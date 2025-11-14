@@ -44,6 +44,8 @@
 
 #pragma once
 
+#include <pybind11/numpy.h>
+
 #include <Kokkos_Core.hpp>
 #include <Kokkos_DynRankView.hpp>
 #include <iostream>
@@ -65,6 +67,21 @@ RetT get_extents(Tp &m, std::index_sequence<Idx...>) {
 
 template <typename Up, size_t Idx, typename Tp>
 constexpr auto get_stride(Tp &m);
+
+template <typename Tp>
+inline std::string get_format() {
+  return py::format_descriptor<Tp>::format();
+}
+
+template <>
+inline std::string get_format<Kokkos::complex<float>>() {
+  return py::format_descriptor<std::complex<float>>::format();
+}
+
+template <>
+inline std::string get_format<Kokkos::complex<double>>() {
+  return py::format_descriptor<std::complex<double>>::format();
+}
 
 template <typename Up, typename Tp, size_t... Idx,
           typename RetT = std::array<size_t, sizeof...(Idx)>>
@@ -325,12 +342,13 @@ void generate_view(py::module &_mod, const std::string &_name,
   _view.def_buffer([_ndim](ViewT &m) -> py::buffer_info {
     auto _extents = get_extents(m, std::make_index_sequence<DimIdx + 1>{});
     auto _strides = get_stride<Tp>(m, std::make_index_sequence<DimIdx + 1>{});
+    auto _format  = get_format<Tp>();
     return py::buffer_info(m.data(),    // Pointer to buffer
                            sizeof(Tp),  // Size of one scalar
-                           py::format_descriptor<Tp>::format(),  // Descriptor
-                           _ndim,     // Number of dimensions
-                           _extents,  // Buffer dimensions
-                           _strides   // Strides (in bytes) for each index
+                           _format,     // Descriptor
+                           _ndim,       // Number of dimensions
+                           _extents,    // Buffer dimensions
+                           _strides     // Strides (in bytes) for each index
     );
   });
 

@@ -85,6 +85,10 @@ VIEW_DATA_TYPE(uint32_t, Uint32, "uint32", "unsigned", "unsigned_int")
 VIEW_DATA_TYPE(uint64_t, Uint64, "uint64", "unsigned_long")
 VIEW_DATA_TYPE(float, Float32, "float32", "float")
 VIEW_DATA_TYPE(double, Float64, "float64", "double")
+VIEW_DATA_TYPE(Kokkos::complex<float>, ComplexFloat32, "complex_float32_dtype",
+               "complex_float_dtype")
+VIEW_DATA_TYPE(Kokkos::complex<double>, ComplexFloat64, "complex_float64_dtype",
+               "complex_double_dtype")
 
 //----------------------------------------------------------------------------//
 // <data-type> <enum> <string identifiers>
