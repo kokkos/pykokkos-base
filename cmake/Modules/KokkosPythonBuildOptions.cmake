@@ -15,11 +15,20 @@ TARGET_INCLUDE_DIRECTORIES(libpykokkos-build-options INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>)
 
+if(WIN32)
+  PYKOKKOS_TARGET_FLAG(
+      libpykokkos-build-options
+      CHECK_FLAGS
+      MODE        INTERFACE
+      FLAGS       /bigobj
+      LANGUAGES   CXX)
+endif()
+
 PYKOKKOS_TARGET_FLAG(
     libpykokkos-build-options
     CHECK_FLAGS
     MODE        INTERFACE
-    FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations -Wno-attributes -fvisibility=default /bigobj
+    FLAGS       -W -Wall -Wextra -Wno-deprecated-declarations -Wno-attributes -fvisibility=default
     LANGUAGES   CXX)
 
 IF(NOT Kokkos_InterOp_Header)
