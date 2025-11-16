@@ -117,4 +117,5 @@ PYBIND11_MODULE(libpykokkos, kokkos) {
   generate_backend_versions(kokkos);
   generate_pool_variants(kokkos);
   generate_execution_spaces(kokkos);
+  generate_complex_dtypes(kokkos);
 }
