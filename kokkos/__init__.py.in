@@ -166,6 +166,7 @@ try:
         "unsigned_long",
         "float",
         "double",
+        "bool",
         "Serial",  # devices
         "Threads",
         "OpenMP",

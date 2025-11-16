@@ -85,6 +85,7 @@ VIEW_DATA_TYPE(uint32_t, Uint32, "uint32", "unsigned", "unsigned_int")
 VIEW_DATA_TYPE(uint64_t, Uint64, "uint64", "unsigned_long")
 VIEW_DATA_TYPE(float, Float32, "float32", "float")
 VIEW_DATA_TYPE(double, Float64, "float64", "double")
+VIEW_DATA_TYPE(bool, Bool, "bool", "bool_")
 
 //----------------------------------------------------------------------------//
 // <data-type> <enum> <string identifiers>

@@ -101,6 +101,8 @@ def read_dtype(_dtype):
             return lib.float32
         elif _dtype == np.float64:
             return lib.float64
+        elif _dtype == np.bool_:
+            return lib.bool
     except ImportError:
         pass
 

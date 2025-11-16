@@ -26,7 +26,7 @@ TARGET_LINK_LIBRARIES(libpykokkos-variants PUBLIC
 
 SET(_types              concrete dynamic)
 SET(_variants           layout memory_trait)
-SET(_data_types         Int8 Int16 Int32 Int64 Uint8 Uint16 Uint32 Uint64 Float32 Float64)
+SET(_data_types         Int8 Int16 Int32 Int64 Uint8 Uint16 Uint32 Uint64 Float32 Float64 Bool)
 
 SET(layout_enums        Right)
 SET(memory_trait_enums  Managed)
