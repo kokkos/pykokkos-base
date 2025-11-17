@@ -13,7 +13,7 @@ jobs:
   cmake-build:
     strategy:
       matrix:
-        python-version: ["3.10", 3.11, 3.12, 3.13]
+        python-version: [3.11, 3.12, 3.13]
         kokkos-branch: ['release-candidate-4.7.01']
         os: [ubuntu-latest, ubuntu-22.04]
 
@@ -81,7 +81,7 @@ jobs:
   python-build:
     strategy:
       matrix:
-        python-version: ["3.10", 3.11, 3.12, 3.13]
+        python-version: [3.11, 3.12, 3.13]
         kokkos-branch: ['release-candidate-4.7.01']
         os: [ubuntu-latest, ubuntu-22.04]
 
@@ -132,7 +132,7 @@ jobs:
   pip-build:
     strategy:
       matrix:
-        python-version: ["3.10", 3.11, 3.12, 3.13]
+        python-version: [3.11, 3.12, 3.13]
         kokkos-branch: ['release-candidate-4.7.01']
         os: [ubuntu-latest, ubuntu-22.04]
 
@@ -185,7 +185,7 @@ jobs:
   subproject:
     strategy:
       matrix:
-        python-version: ["3.10", 3.11, 3.12, 3.13]
+        python-version: [3.11, 3.12, 3.13]
         os: [ubuntu-latest, ubuntu-22.04]
 
     runs-on: ${{matrix.os}}
