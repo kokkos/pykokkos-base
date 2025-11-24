@@ -127,18 +127,23 @@ python setup.py install -- -DENABLE_LAYOUTS=ON -DENABLE_MEMORY_TRAITS=OFF
 ### Configuring Options via `pip`
 
 Pip does not handle build options well. Thus, it is recommended to use the `PYKOKKOS_BASE_SETUP_ARGS`
-environment variable noted above. However, using the `--install-option` for pip is possible but
-each "space" must have it's own `--install-option`, e.g. all of the following are equivalent:
-All three lines below are equivalent:
+environment variable noted above. 
 
-```console
-pip install pykokkos-base --install-option=--enable-layouts --install-option=--disable-memory-traits
-pip install pykokkos-base --install-option=-- --install-option=-DENABLE_LAYOUTS=ON --install-option=-DENABLE_MEMORY_TRAITS=OFF
-pip install pykokkos-base --install-option={--enable-layouts,--disable-memory-traits}
-pip install pykokkos-base --install-option={--,-DENABLE_LAYOUTS=ON,-DENABLE_MEMORY_TRAITS=OFF}
+We suggest using the following line to install pykokkos-base:
+
+```
+PYKOKKOS_BASE_SETUP_ARGS="-DKokkos_ENABLE_THREADS=OFF \
+    -DKokkos_ENABLE_OPENMP=ON \
+    -DENABLE_CUDA=ON \
+    -DENABLE_LAYOUTS=ON \
+    -DENABLE_MEMORY_TRAITS=OFF \
+    -DENABLE_VIEW_RANKS=3" \
+    pip install ./ --verbose
 ```
 
-> `pip install pykokkos-base` will build against the latest release in the PyPi repository.
+`--verbose` is optional, but it shows installation progress in real time.
+
+> `pip install ./` will build against the latest release in the PyPi repository.
 > In order to pip install from this repository, use `pip install --user -e .`
 
 ## Differences vs. Kokkos C++
