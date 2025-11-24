@@ -159,7 +159,9 @@ SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
 # configure the rpath: <RELATIVE>:<CWD>:<FULL>
 IF(APPLE)
     SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
-        MACOSX_RPATH "@loader_path/${LIB_RELPATH}:@loader_path:${_Kokkos_LIBDIR}:${CMAKE_INSTALL_RPATH}")
+        INSTALL_RPATH "@loader_path;@loader_path/kokkos;${_Kokkos_LIBDIR}"
+        MACOSX_RPATH ON
+    )
 ELSEIF(UNIX)
     SET_TARGET_PROPERTIES(libpykokkos PROPERTIES
         INSTALL_RPATH "\$ORIGIN/${LIB_RELPATH}:\$ORIGIN:${_Kokkos_LIBDIR}:${CMAKE_INSTALL_RPATH}")
