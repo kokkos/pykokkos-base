@@ -112,7 +112,13 @@ jobs:
       run:
         python -m pip install -r requirements.txt &&
         python -m pip install pytest &&
-        python setup.py install --enable-layouts --enable-view-ranks=4 --disable-memory-traits --enable-werror -- -DENABLE_EXAMPLES=ON -- -j1
+        PYKOKKOS_BASE_SETUP_ARGS="-DKokkos_ENABLE_THREADS=OFF \
+         -DKokkos_ENABLE_OPENMP=ON \
+         -DENABLE_CUDA=ON \
+         -DENABLE_LAYOUTS=ON \
+         -DENABLE_MEMORY_TRAITS=OFF \
+         -DENABLE_VIEW_RANKS=3" \
+         python -m pip install ./ 2>&1 --verbose
 
     - name: Import Test
       run:
