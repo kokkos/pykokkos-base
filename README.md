@@ -70,6 +70,12 @@ views of data type `T*`, `T**`, `T***`, and `T****` can be returned to python bu
 `T*****` and higher cannot. Increasing this value up to 7 can dramatically increase the length
 of time required to compile the bindings.
 
+Installation command with specific arguments looks like this:
+
+```
+PYKOKKOS_BASE_SETUP_ARGS="-DKokkos_ENABLE_THREADS=OFF -DKokkos_ENABLE_OPENMP=ON -DENABLE_CUDA=ON -DENABLE_LAYOUTS=ON -DENABLE_MEMORY_TRAITS=OFF -DENABLE_VIEW_RANKS=3" pip install ./ --verbose
+```
+
 ### Kokkos Installation
 
 If the `ENABLE_INTERNAL_KOKKOS` option is not specified the first time CMake is run, CMake will try to
@@ -81,12 +87,6 @@ reasonable default CMake settings for the Kokkos submodule.
 
 Here are the steps when Kokkos is added as a submodule:
 
-- Does `external/kokkos/CMakeLists.txt` exists?
-    - **YES**: assumes the submodule is already checked out
-        - > _If compute node does not have internet access, checkout submodule before installing!_
-    - **NO**: does `.gitmodules` exist?
-        - **YES**: `git submodule update --init external/kokkos`
-        - **NO**: `git clone -b master https://github.com/kokkos/kokkos.git external/kokkos`
 - Set `BUILD_SHARED_LIBS=ON`
 - Set `Kokkos_ENABLE_SERIAL=ON`
 - `find_package(OpenMP)`
@@ -116,7 +116,7 @@ There are three ways to configure the options:
 2. Setting the `PYKOKKOS_BASE_SETUP_ARGS` environment variable to the CMake options
 3. Passing in the CMake options after a `--`
 
-All three lines below are equivalent:
+All three lines below are equivalent (deprecated format):
 
 ```console
 python setup.py install --enable-layouts --disable-memory-traits
@@ -127,18 +127,23 @@ python setup.py install -- -DENABLE_LAYOUTS=ON -DENABLE_MEMORY_TRAITS=OFF
 ### Configuring Options via `pip`
 
 Pip does not handle build options well. Thus, it is recommended to use the `PYKOKKOS_BASE_SETUP_ARGS`
-environment variable noted above. However, using the `--install-option` for pip is possible but
-each "space" must have it's own `--install-option`, e.g. all of the following are equivalent:
-All three lines below are equivalent:
+environment variable noted above. 
 
-```console
-pip install pykokkos-base --install-option=--enable-layouts --install-option=--disable-memory-traits
-pip install pykokkos-base --install-option=-- --install-option=-DENABLE_LAYOUTS=ON --install-option=-DENABLE_MEMORY_TRAITS=OFF
-pip install pykokkos-base --install-option={--enable-layouts,--disable-memory-traits}
-pip install pykokkos-base --install-option={--,-DENABLE_LAYOUTS=ON,-DENABLE_MEMORY_TRAITS=OFF}
+We suggest using the following line to install pykokkos-base:
+
+```
+PYKOKKOS_BASE_SETUP_ARGS="-DKokkos_ENABLE_THREADS=OFF \
+    -DKokkos_ENABLE_OPENMP=ON \
+    -DENABLE_CUDA=ON \
+    -DENABLE_LAYOUTS=ON \
+    -DENABLE_MEMORY_TRAITS=OFF \
+    -DENABLE_VIEW_RANKS=3" \
+    pip install ./ --verbose
 ```
 
-> `pip install pykokkos-base` will build against the latest release in the PyPi repository.
+`--verbose` is optional, but it shows installation progress in real time.
+
+> `pip install ./` will build against the latest release in the PyPi repository.
 > In order to pip install from this repository, use `pip install --user -e .`
 
 ## Differences vs. Kokkos C++
