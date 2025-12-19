@@ -1,4 +1,8 @@
 # pykokkos-base
+
+> **NOTE**: *This repository has been merged into [pykokkos](https://github.com/kokkos/pykokkos). This repository is no longer supported or updated. The code is provided as-is, and no new features, issues, or pull requests will be accepted. We recommend you fork it if you wish to continue development yourself.*
+
+
 [![linux-ci](https://github.com/kokkos/pykokkos-base/actions/workflows/linux-ci.yml/badge.svg)](https://github.com/kokkos/pykokkos-base/actions/workflows/linux-ci.yml)
 [![python-package](https://github.com/kokkos/pykokkos-base/actions/workflows/python-package.yml/badge.svg)](https://github.com/kokkos/pykokkos-base/actions/workflows/python-package.yml)
 
